@@ -12,6 +12,8 @@
 #define STANZE_N 9
 #define ARMI_N 6
 #define SOSPETTI_N 6
+#define GIOCATORI_MAX 6
+#define GIOCATORI_MIN 3
 
 typedef enum {ARMA, SOSPETTO, STANZA} tipoCarta;
 extern const char stanze[STANZE_N][STANDARD_STRLEN];

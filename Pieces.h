@@ -26,7 +26,13 @@ typedef struct player{
 } Giocatore;
 
 typedef struct board{
-
-};
+    int numGiocatori;
+    int numeroTurni;
+    int turnoCorrente;
+    Giocatore** giocatori; //Allochiamo i giocatori, e li puntiamo in una lista di lunghezza decisa a runtime.
+    Mazzo carteScoperte;
+    Mazzo soluzione;
+    int layout[STANZE_N][STANZE_N];
+} Tabellone;
 
 #endif //CLUEDO_PIECES_H
