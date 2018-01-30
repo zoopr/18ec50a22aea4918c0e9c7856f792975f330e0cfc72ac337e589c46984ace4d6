@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
 #include "BoardManager.h"
 #include "Pieces.h"
 #include "Standards.h"
@@ -10,6 +12,8 @@ int main() {
     char buffer[256];
     _Bool next_phase, AI_mode = false;
     Tabellone* tavolo;
+
+    srand(time(NULL));
 
 
 

@@ -12,10 +12,14 @@
 typedef struct card{
     tipoCarta tipo;
     char desc[STANDARD_STRLEN];
+    struct card* next;
+    struct card* prev;
 } Carta;
 
 typedef struct deck{ //usato sia per i mazzi sul tavolo che per le mani dei giocatori.
+    int numCarte;
     Carta* cima;
+    Carta* coda;
 } Mazzo;
 
 typedef struct player{
@@ -29,10 +33,14 @@ typedef struct board{
     int numGiocatori;
     int numeroTurni;
     int turnoCorrente;
-    Giocatore** giocatori; //Allochiamo i giocatori, e li puntiamo in una lista di lunghezza decisa a runtime.
+    Giocatore* giocatori; //Allochiamo i giocatori in una lista di lunghezza decisa a runtime.
     Mazzo carteScoperte;
     Mazzo soluzione;
     int layout[STANZE_N][STANZE_N];
 } Tabellone;
+
+Mazzo* buildDeck(tipoCarta tipo, int numCarte, const char values[][STANDARD_STRLEN]);
+Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2);
+Mazzo* shuffleDeck(Mazzo* mazzo);
 
 #endif //CLUEDO_PIECES_H

@@ -7,9 +7,10 @@
 
 #include "Pieces.h"
 
-Giocatore* playerInit();
+Giocatore* playerInit(int* num);
 Tabellone* FreshStart();
 Tabellone* LoadBoard(char* filename);
+
 void MainGame(Tabellone* tavolo);
 
 #endif //CLUEDO_BOARDMANAGER_H
