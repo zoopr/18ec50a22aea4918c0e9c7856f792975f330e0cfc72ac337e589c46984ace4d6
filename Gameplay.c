@@ -4,12 +4,26 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "Gameplay.h"
 
 #define D_SIDES 6 //giusto in caso si voglia giocare con dadi diversi.
 
 void leggiTaccuino(char* filename){
-    //todo
+    FILE* tac;
+    char buf[STANDARD_STRLEN + 4], *sbuffer;
+    strcpy(buf, filename);
+    strcat(buf, ".tac");
+
+    tac = fopen(buf, "r");
+    if(!tac){
+        exit(-2);
+    }
+    sbuffer = (char*)malloc(SBUF*sizeof(char)); //la misura non conta molto, getline espande il buffer con realloc se necessario.
+    while(!feof(tac)){
+        getline(&sbuffer, (size_t*)&SBUF, tac);
+        printf("%s\n", sbuffer);
+    }
 
 }
 

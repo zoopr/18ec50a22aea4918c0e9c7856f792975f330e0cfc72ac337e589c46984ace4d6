@@ -103,9 +103,19 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
         carta = tavolo->carteScoperte.cima;
         for (j=0; j<tavolo->carteScoperte.numCarte; j++){
             fprintf(tac, "%s : %s\n", tipi[carta->tipo], carta->desc);
+            if (carta->next)
+                carta = carta->next;
         }
-        fprintf(tac,"" );
-        fclose(tac); // ci permette di usare "a+" correttamente lungo i turni dopo.
+        fprintf(tac, "Le carte nella tua mano sono %d\n", tavolo->giocatori[i].mano.numCarte );
+        carta = tavolo->giocatori[i].mano.cima;
+        for (j=0; j<tavolo->giocatori[i].mano.numCarte; j++){
+            fprintf(tac, "%s : %s\n", tipi[carta->tipo], carta->desc);
+            if (carta->next)
+                carta = carta->next;
+        }
+        fprintf(tac, "Le carte scoperte degli avversari sono:\n"); //per ora rimane vuoto. si popolerà nella ricerca dopo le ipotesi.
+
+        fclose(tac); // possiamo usare a+ ai turni successivi.
     }
 
     return tavolo;
@@ -193,6 +203,7 @@ Tabellone* LoadBoard(char* filename){
         }
         fclose(save);
         //non ci preoccupiamo dei taccuini. La tag "a" crea i file se non esistenti.
+        //...anche se taccuini di terze parti formattati in altri modi possono essere disorientanti.
         return table;
     }
 
