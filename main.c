@@ -46,7 +46,8 @@ int main() {
                 printf("Inserire il nome del file di salvataggio da caricare\n");
                 scanf("%255s", buffer);
                 tavolo = LoadBoard(buffer);
-                next_phase = true;
+                if (tavolo)
+                    next_phase = true;
                 break;
             default:
                 printf("Opzione non disponibile.\n\n");

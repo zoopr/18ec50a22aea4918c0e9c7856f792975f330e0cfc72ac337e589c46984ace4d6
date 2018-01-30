@@ -26,16 +26,23 @@ Mazzo* buildDeck(tipoCarta tipo, int numCarte, const char values[][STANDARD_STRL
     mazzo->numCarte = numCarte;
 
     lista = newElem = (Carta*)malloc(sizeof(Carta));
+    if (!newElem) {
+        exit(-1);
+    }
 
     for (i=0; i<numCarte; i++){
         *newElem = vettore[i];
-        if(i<numCarte-1)
-           newElem = newElem->next = (Carta*)malloc(sizeof(Carta));
+        if(i<numCarte-1) {
+            newElem = newElem->next = (Carta *) malloc(sizeof(Carta));
+            if (!newElem) {
+                exit(-1);
+            }
+        }
         else
            newElem->next = NULL;
     }
     mazzo->cima = lista;
-    mazzo->coda = newElem;
+
 
     mazzo = shuffleDeck(mazzo, mazzo->numCarte); //mescoliamo il mazzo prima di presentarlo all'esterno.
     return mazzo;
@@ -44,10 +51,13 @@ Mazzo* buildDeck(tipoCarta tipo, int numCarte, const char values[][STANDARD_STRL
 Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2){
     //possiamo semplicemente aggiungerli in coda l'uno all'altro.
     //l'importante è AGGIORNARE IL NUMERO DI CARTE.
+    Carta* scroll = m1->cima;
+    while(scroll->next)
+        scroll = scroll->next;
 
-    m1->coda->next = m2->cima;
+    scroll->next = m2->cima;
     m1->numCarte = m1->numCarte + m2->numCarte;
-    m1->coda = m2->coda;
+
     free(m2); //abbiamo unito i due mazzi ed estratto tutte le informazioni dal secondo contenitore di lista
     return m1;
 }
@@ -91,7 +101,7 @@ Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte){
     }
     free(mazzo->cima);
     mazzo->cima = lista;
-    mazzo->coda = newElem;
+
 
 
     return mazzo;

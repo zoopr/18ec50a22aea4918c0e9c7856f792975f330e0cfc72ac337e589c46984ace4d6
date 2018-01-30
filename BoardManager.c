@@ -36,10 +36,6 @@ Giocatore* playerInit(int* num) {
     return listaGiocatori;
 }
 
-
-
-
-
 Tabellone* FreshStart(){ //Inizializza il tavolo
     int numGiocatori, i, cartePerGiocatore;
     Mazzo *mainDeck, *second, *third;
@@ -66,7 +62,7 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     mainDeck->cima = mainDeck->cima->next;
     tavolo->soluzione.cima->next = second->cima;
     second->cima = second->cima->next;
-    tavolo->soluzione.cima->next->next = tavolo->soluzione.coda = third->cima;
+    tavolo->soluzione.cima->next->next = third->cima;
     third->cima = third->cima->next;
     tavolo->soluzione.cima->next->next->next = NULL;
 
@@ -89,6 +85,7 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     cartePerGiocatore = mainDeck->numCarte / numGiocatori;
     for (i = 0; i<numGiocatori; i++){
         tavolo->giocatori[i].mano.cima = DealCards(mainDeck, cartePerGiocatore);
+        tavolo->giocatori[i].mano.numCarte = cartePerGiocatore;
     }
     if(!mainDeck->numCarte)
         printf("Carte distribuite correttamente. Tavolo pronto.\n");
@@ -99,7 +96,81 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
 
 
 Tabellone* LoadBoard(char* filename){
-    return NULL; //TODO
+    int i, j;
+    Giocatore ultimoG, *codaG;
+    Carta *ultimaC, *codaC;
+
+    FILE* save = fopen(filename, "r+");
+    if (!save){
+        printf("Errore nel caricamento del file\n"
+        "Verificare il nome e la posizione del file di salvataggio.\n");
+        return NULL;
+    }
+    else {
+        Tabellone *table = (Tabellone *) malloc(sizeof(Tabellone)); //seguendo il formato byte a byte delle specifiche.
+        if (!table)
+            exit(-1);
+        fread(table, 3, sizeof(int), save);
+        table->giocatori = (Giocatore *) calloc(table->numGiocatori, sizeof(Giocatore));
+        for (i = 0; i < table->numGiocatori; i++) {
+            ultimoG = table->giocatori[i];
+            fread(&ultimoG, 1, STANDARD_STRLEN * sizeof(char) + 2 * sizeof(int), save);
+            fread(&ultimoG.mano.numCarte, 1, sizeof(int), save);
+            for (j = 0; j < ultimoG.mano.numCarte; j++) {
+                ultimaC = (Carta *) malloc(sizeof(Carta));
+                if (!ultimaC)
+                    exit(-1);
+                fread(ultimaC, 1, sizeof(tipoCarta) + STANDARD_STRLEN * sizeof(char), save);
+                if (!ultimoG.mano.cima) {
+                    ultimoG.mano.cima = ultimaC;
+                    ultimaC->next = NULL;
+                } else {
+                    codaC = ultimoG.mano.cima;
+                    while (codaC->next)
+                        codaC = codaC->next;
+                    codaC->next = ultimaC;
+                }
+
+            }
+
+        }
+        fread(&table->carteScoperte.numCarte, 1, sizeof(int), save);
+        for (i = 0; i < table->carteScoperte.numCarte; i++) {
+            ultimaC = (Carta *) malloc(sizeof(Carta));
+            if (!ultimaC)
+                exit(-1);
+            fread(ultimaC, 1, sizeof(tipoCarta) + STANDARD_STRLEN * sizeof(char), save);
+            if (!table->carteScoperte.cima) {
+                table->carteScoperte.cima = ultimaC;
+                ultimaC->next = NULL;
+            } else {
+                codaC = table->carteScoperte.cima;
+                while (codaC->next)
+                    codaC = codaC->next;
+                codaC->next = ultimaC;
+            }
+
+        }
+        table->soluzione.numCarte = 3;
+        table->soluzione.cima = 0;
+        for (i = 0; i < table->soluzione.numCarte; i++) {
+            ultimaC = (Carta *) malloc(sizeof(Carta));
+            if (!ultimaC)
+                exit(-1);
+            fread(ultimaC, 1, sizeof(tipoCarta) + STANDARD_STRLEN * sizeof(char), save);
+            if (!table->soluzione.cima) {
+                table->soluzione.cima = ultimaC;
+                ultimaC->next = NULL;
+            } else {
+                codaC = table->soluzione.cima;
+                while (codaC->next)
+                    codaC = codaC->next;
+                codaC->next = ultimaC;
+            }
+
+        }
+    }
+
 }
 
 void MainGame(Tabellone* tavolo){

@@ -18,7 +18,6 @@ typedef struct card{
 typedef struct deck{ //usato sia per i mazzi sul tavolo che per le mani dei giocatori.
     int numCarte;
     Carta* cima;
-    Carta* coda;
 } Mazzo;
 
 typedef struct player{
@@ -29,9 +28,9 @@ typedef struct player{
 } Giocatore;
 
 typedef struct board{
-    int numGiocatori;
-    int numeroTurni;
     int turnoCorrente;
+    int numeroTurni;
+    int numGiocatori;
     Giocatore* giocatori; //Allochiamo i giocatori in una lista di lunghezza decisa a runtime.
     Mazzo carteScoperte;
     Mazzo soluzione;
