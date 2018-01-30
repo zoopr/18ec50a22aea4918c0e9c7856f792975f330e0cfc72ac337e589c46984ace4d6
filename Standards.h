@@ -17,6 +17,8 @@
 
 typedef enum {ARMA, SOSPETTO, STANZA} tipoCarta;
 
+static const char tipi[3][STANDARD_STRLEN] = {"Arma", "Sospetto", "Stanza"};
+
 static const char stanze[STANZE_N][STANDARD_STRLEN] = {"Laboratorio T", "Laboratorio M", "Bagno", "Aula Costa", "Giardino",
                                                        "Entrata", "Parcheggio", "Simaz", "Batcaverna"};
 static const char armi [ARMI_N][STANDARD_STRLEN] = {"Cavo di rete", "Sparacoriandoli", "Calcinaccio", "Tastiera USB",

@@ -39,8 +39,9 @@ Giocatore* playerInit(int* num) {
 }
 
 Tabellone* FreshStart(){ //Inizializza il tavolo
-    int numGiocatori, i, cartePerGiocatore;
+    int numGiocatori, cartePerGiocatore, i, j;
     Mazzo *mainDeck, *second, *third;
+    Carta* carta;
     FILE* tac;
     char buffer[STANDARD_STRLEN + 4];
 
@@ -94,11 +95,16 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     if(!mainDeck->numCarte)
         printf("Carte distribuite correttamente. Tavolo pronto.\n");
 
-    for (i=0; i<numGiocatori; i++){
+    for (i=0; i<numGiocatori; i++){ //inizializzazione taccuini
         strcpy(buffer, tavolo->giocatori[i].nome);
         strcat(buffer, ".tac");
         tac = fopen(buffer, "w"); //la tag w ci assicura che se esiste viene azzerato.
-        //todo scrivere mano
+        fprintf(tac, "Le carte sul tavolo sono %d\n", tavolo->carteScoperte.numCarte);
+        carta = tavolo->carteScoperte.cima;
+        for (j=0; j<tavolo->carteScoperte.numCarte; j++){
+            fprintf(tac, "%s : %s\n", tipi[carta->tipo], carta->desc);
+        }
+        fprintf(tac,"" );
         fclose(tac); // ci permette di usare "a+" correttamente lungo i turni dopo.
     }
 
@@ -109,7 +115,7 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
 
 Tabellone* LoadBoard(char* filename){
     int i, j;
-    Giocatore ultimoG, *codaG;
+    Giocatore *ultimoG;
     Carta *ultimaC, *codaC;
 
     FILE* save = fopen(filename, "r+");
@@ -123,24 +129,27 @@ Tabellone* LoadBoard(char* filename){
         if (!table)
             exit(-1);
         fread(table, 3, sizeof(int), save);
-        table->giocatori = (Giocatore *) calloc(table->numGiocatori, sizeof(Giocatore));
+        table->giocatori = (Giocatore*) calloc(table->numGiocatori, sizeof(Giocatore));
+        if (!table->giocatori)
+            exit(-1);
         for (i = 0; i < table->numGiocatori; i++) {
-            ultimoG = table->giocatori[i];
-            fread(&ultimoG, 1, STANDARD_STRLEN * sizeof(char) + 2 * sizeof(int), save);
-            fread(&ultimoG.mano.numCarte, 1, sizeof(int), save);
-            for (j = 0; j < ultimoG.mano.numCarte; j++) {
+            ultimoG = &table->giocatori[i];
+            fread(ultimoG, 1, STANDARD_STRLEN * sizeof(char) + 2 * sizeof(int), save);
+            fread(&ultimoG->mano.numCarte, 1, sizeof(int), save);
+            for (j = 0; j < ultimoG->mano.numCarte; j++) {
                 ultimaC = (Carta *) malloc(sizeof(Carta));
                 if (!ultimaC)
                     exit(-1);
-                fread(ultimaC, 1, sizeof(tipoCarta) + STANDARD_STRLEN * sizeof(char), save);
-                if (!ultimoG.mano.cima) {
-                    ultimoG.mano.cima = ultimaC;
+                fread(&ultimaC->tipo, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), save);
+                if (!ultimoG->mano.cima) {
+                    ultimoG->mano.cima = ultimaC;
                     ultimaC->next = NULL;
-                } else {
-                    codaC = ultimoG.mano.cima;
+                } else { //aggiungiamo in coda dalla second carta in poi.
+                    codaC = ultimoG->mano.cima;
                     while (codaC->next)
                         codaC = codaC->next;
                     codaC->next = ultimaC;
+                    ultimaC->next = NULL;
                 }
 
             }
@@ -163,8 +172,8 @@ Tabellone* LoadBoard(char* filename){
             }
 
         }
-        table->soluzione.numCarte = 3;
-        table->soluzione.cima = 0;
+        table->soluzione.numCarte = 3; //le carte segrete sono hardcoded per essere 3.
+        table->soluzione.cima = NULL;
         for (i = 0; i < table->soluzione.numCarte; i++) {
             ultimaC = (Carta *) malloc(sizeof(Carta));
             if (!ultimaC)
@@ -178,6 +187,7 @@ Tabellone* LoadBoard(char* filename){
                 while (codaC->next)
                     codaC = codaC->next;
                 codaC->next = ultimaC;
+                ultimaC->next = NULL;
             }
 
         }
@@ -196,8 +206,10 @@ void MainGame(Tabellone* tavolo){
     while(!winner){
         tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
         tavolo->numeroTurni +=1;
+
         printf("Vuoi salvare lo stato attuale della partita? S/N\n");
-        if(tolower(getchar()) != 's'){
+        scanf("%23s", buf);
+        if(tolower(buf[0]) == 's'){
             printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
             scanf("%23s", buf);
             saveState(buf, tavolo);
@@ -262,7 +274,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
                     scanf("%d", &dice[1]);
                 }
                 giocatore->stanza = dice[1];
-                printf("Giocatore spostato in %s\n", stanze[dice[1]]);
+                printf("Giocatore %s spostato in %s\n", giocatore->nome, stanze[dice[1]]);
             }else {
                 printf("Giocatore obbligato a rimanere in %s\n", stanze[giocatore->stanza]);
             }
@@ -275,7 +287,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
         }
         scanf("%d", &dice[0]);
         while(dice[0] >= ARMI_N || dice[0] < 0 ){
-            printf("Valore non ammesso.\n");
+            printf("Valore non ammesso. Inserire un numero adeguato.\n");
             scanf("%d", &dice[0]);
         }
 
@@ -285,7 +297,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
         }
         scanf("%d", &dice[1]);
         while(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
-            printf("Valore non ammesso.\n");
+            printf("Valore non ammesso. Inserire un numero adeguato.\n");
             scanf("%d", &dice[1]);
         }
         giocatore->ipotesiEsatta = checkSolution(stanze[giocatore->stanza], armi[dice[0]], sospetti[dice[1]]);
