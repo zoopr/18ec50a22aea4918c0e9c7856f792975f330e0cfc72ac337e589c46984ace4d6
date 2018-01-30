@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "BoardManager.h"
+#include "Gameplay.h"
 
 Giocatore* playerInit(int* num) {
     int i;
@@ -39,6 +40,7 @@ Giocatore* playerInit(int* num) {
 Tabellone* FreshStart(){ //Inizializza il tavolo
     int numGiocatori, i, cartePerGiocatore;
     Mazzo *mainDeck, *second, *third;
+    FILE* tac;
     char buffer[STANDARD_STRLEN + 4];
 
     Tabellone* tavolo = (Tabellone*)malloc(sizeof(Tabellone));
@@ -94,8 +96,9 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     for (i=0; i<numGiocatori; i++){
         strcpy(buffer, tavolo->giocatori[i].nome);
         strcat(buffer, ".tac");
-        fopen(buffer, "w"); //la tag w ci assicura che se esiste viene azzerato.
-        fclose(buffer); // ci permette di usare "a+" correttamente lungo i turni dopo.
+        tac = fopen(buffer, "w"); //la tag w ci assicura che se esiste viene azzerato.
+        //todo scrivere mano
+        fclose(tac); // ci permette di usare "a+" correttamente lungo i turni dopo.
     }
 
     return tavolo;
@@ -192,7 +195,8 @@ void MainGame(Tabellone* tavolo){
         tavolo->numeroTurni +=1;
         winner = Turn(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
     }
-    printf("  ___ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _ ___(_) ___  _ __ (_) |\n"
+    printf(        "                                 _         _           _             _ _ \n"
+                   "  ___ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _ ___(_) ___  _ __ (_) |\n"
                    " / __/ _ \\| '_ \\ / _` | '__/ _` | __| | | | |/ _` |_  / |/ _ \\| '_ \\| | |\n"
                    "| (_| (_) | | | | (_| | | | (_| | |_| |_| | | (_| |/ /| | (_) | | | | |_|\n"
                    " \\___\\___/|_| |_|\\__, |_|  \\__,_|\\__|\\__,_|_|\\__,_/___|_|\\___/|_| |_|_(_)\n"
@@ -204,5 +208,85 @@ void MainGame(Tabellone* tavolo){
 }
 
 _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
+    int dice[2];
+    _Bool reachable[STANZE_N];
+    leggiTaccuino(giocatore->nome);
+    if (giocatore->ipotesiEsatta){
+        printf("Hai già compiuto l'ipotesi esatta.\n"
+               "Premi un pulsante per procedere con il lancio dei dadi.\n");
+        while(getchar()); //ripulisce il buffer se viene dato in input più di un invio.
+        rollDice(dice);
+        if (dice[0] == dice[1]){
+            printf("Dadi doppi.\n");
+            return 1;
+        }
+        else{
+            printf("Dadi spaiati. Turno finito.\n");
+            return 0;
+        }
+    }
+    else{
+        printf("Posizione attuale: %s\n", stanze[giocatore->stanza]);
+        printf("Vuoi procedere direttamente con l'ipotesi o lanciare i dadi?\n");
+        do{
+            printf("1 - Lancio dadi\n"
+                           "2 - Ipotesi diretta\n ");
+            scanf("%d", &dice[0]); //La variabile non è stata ancora usata in questo scopo.
+        }while(dice[0] !=1 && dice[0] !=2);
+        if (dice[0] == 1){
+            rollDice(dice);
+            dice[0] = dice[0] + dice[1]; //non abbiamo bisogno di conservare il valore dei singoli dadi.
+            validPaths(tavolo->layout[giocatore->stanza], dice[0], reachable);
+            printf("Movimenti validi:\n");
+            for(dice[0] = 0, dice[1] = 0; dice[0] < STANZE_N; dice[0]++){
+                if(reachable[dice[0]]){
+                    printf("%d - %s\n", dice[0], stanze[dice[0]]);
+                    dice[1]++;
+                }
+            }
+            //Decisione spostamento se disponibile
+            if(dice[1] > 1){
+                printf("\nIn quale stanza desideri muoverti?\n");
+                scanf("%d", &dice[1]);
+                while(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
+                    printf("Posizione non raggiungibile. Inserire stanza ammessa.\n");
+                    scanf("%d", &dice[1]);
+                }
+                giocatore->stanza = dice[1];
+                printf("Giocatore spostato in %s\n", stanze[dice[1]]);
+            }else {
+                printf("Giocatore obbligato a rimanere in %s\n", stanze[giocatore->stanza]);
+            }
+        }
+        //Formulazione ipotesi
+        printf("L'ipotesi è obbligata a svolgersi nella tua stanza attuale(%s).\n", stanze[giocatore->stanza]);
+        printf("Con quale arma si è compiuto il delitto?\n");
+        for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
+            printf("%d - %s\n", dice[0], armi[dice[0]]);
+        }
+        scanf("%d", &dice[0]);
+        while(dice[0] >= ARMI_N || dice[0] < 0 ){
+            printf("Valore non ammesso.\n");
+            scanf("%d", &dice[0]);
+        }
 
+        printf("Quale sospetto ha compiuto il delitto?\n");
+        for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
+            printf("%d - %s\n", dice[1], sospetti[dice[1]]);
+        }
+        scanf("%d", &dice[1]);
+        while(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
+            printf("Valore non ammesso.\n");
+            scanf("%d", &dice[1]);
+        }
+        giocatore->ipotesiEsatta = checkSolution(stanze[giocatore->stanza], armi[dice[0]], sospetti[dice[1]]);
+        if(giocatore->ipotesiEsatta){
+            printf("Ipotesi esatta!\n"
+                           "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
+        }
+        printf("Turno finito.");
+
+
+
+    }
 }
