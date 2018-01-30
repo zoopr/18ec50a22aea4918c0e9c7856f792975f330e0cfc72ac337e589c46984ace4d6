@@ -39,6 +39,7 @@ Giocatore* playerInit(int* num) {
 Tabellone* FreshStart(){ //Inizializza il tavolo
     int numGiocatori, i, cartePerGiocatore;
     Mazzo *mainDeck, *second, *third;
+    char buffer[STANDARD_STRLEN + 4];
 
     Tabellone* tavolo = (Tabellone*)malloc(sizeof(Tabellone));
     if(!tavolo){
@@ -89,6 +90,13 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     }
     if(!mainDeck->numCarte)
         printf("Carte distribuite correttamente. Tavolo pronto.\n");
+
+    for (i=0; i<numGiocatori; i++){
+        strcpy(buffer, tavolo->giocatori[i].nome);
+        strcat(buffer, ".tac");
+        fopen(buffer, "w"); //la tag w ci assicura che se esiste viene azzerato.
+        fclose(buffer); // ci permette di usare "a+" correttamente lungo i turni dopo.
+    }
 
     return tavolo;
 
@@ -169,10 +177,32 @@ Tabellone* LoadBoard(char* filename){
             }
 
         }
+        fclose(save);
+        //non ci preoccupiamo dei taccuini. La tag "a" crea i file se non esistenti.
+        return table;
     }
+
 
 }
 
 void MainGame(Tabellone* tavolo){
-    //TODO
+    _Bool winner = 0;
+    while(!winner){
+        tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
+        tavolo->numeroTurni +=1;
+        winner = Turn(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
+    }
+    printf("  ___ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _ ___(_) ___  _ __ (_) |\n"
+                   " / __/ _ \\| '_ \\ / _` | '__/ _` | __| | | | |/ _` |_  / |/ _ \\| '_ \\| | |\n"
+                   "| (_| (_) | | | | (_| | | | (_| | |_| |_| | | (_| |/ /| | (_) | | | | |_|\n"
+                   " \\___\\___/|_| |_|\\__, |_|  \\__,_|\\__|\\__,_|_|\\__,_/___|_|\\___/|_| |_|_(_)\n"
+                   "                 |___/                                                   \n"
+            "\n%s ha vinto!\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
+    //todo record stats
+    printf("Premere un pulsante per terminare\n");
+    getchar();
+}
+
+_Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
+
 }
