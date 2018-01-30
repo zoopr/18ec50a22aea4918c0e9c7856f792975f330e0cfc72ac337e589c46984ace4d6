@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "BoardManager.h"
 #include "Gameplay.h"
 
@@ -190,9 +191,17 @@ Tabellone* LoadBoard(char* filename){
 
 void MainGame(Tabellone* tavolo){
     _Bool winner = 0;
+    char buf[STANDARD_STRLEN];
+
     while(!winner){
         tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
         tavolo->numeroTurni +=1;
+        printf("Vuoi salvare lo stato attuale della partita? S/N\n");
+        if(tolower(getchar()) != 's'){
+            printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
+            scanf("%23s", buf);
+            saveState(buf, tavolo);
+        }
         winner = Turn(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
     }
     printf(        "                                 _         _           _             _ _ \n"

@@ -13,9 +13,6 @@ void leggiTaccuino(char* filename){
 
 }
 
-void scriviTaccuino(char* filename){
-    //todo
-}
 
 void rollDice(int dice[2]){
     dice[0] = rand()%D_SIDES+1;
@@ -36,4 +33,40 @@ void validPaths(int layout[STANZE_N], int val, _Bool out[STANZE_N]){
 
 _Bool checkSolution(const char* stanza,const char* arma,const char* sospetto){
 //TODO
+}
+
+void saveState(char filename[STANDARD_STRLEN], Tabellone* board){
+    FILE* save = fopen(filename, "w"); //qualunque cosa ci sia la sovrascrive.
+    if (!save)
+        exit(-2);
+    int i, j;
+    Carta* carta;
+
+    fwrite(board, 3, sizeof(int), save); //scrive turnoCorrente, numeroTurni, numeroGiocatori.
+
+    for (i=0; i< board->numGiocatori; i++){
+        fwrite(&board->giocatori[i], 1, 24*sizeof(char) + 2*sizeof(int), save); //scrive la prima parte dei dati giocatore
+        fwrite(&board->giocatori[i].mano.numCarte, 1, sizeof(int), save); // copia il numero di carte
+        carta = board->giocatori[i].mano.cima;
+        for (j=0; j<board->giocatori[i].mano.numCarte; j++){
+            fwrite(carta, 1, sizeof(tipoCarta) + 24*sizeof(char), save); //salva la prima parte della carta.
+            if (carta->next) //scorre fino all'ultima.
+                carta = carta->next;
+        }
+
+    }
+    fwrite( &board->carteScoperte.numCarte, 1, sizeof(int), save);
+    carta = board->carteScoperte.cima; //sezione identica al salvataggio consecutivo delle carte giocatore.
+    for (j=0; j<board->carteScoperte.numCarte; j++){
+        fwrite(carta, 1, sizeof(tipoCarta) + 24*sizeof(char), save); //salva la prima parte della carta.
+        if (carta->next) //scorre fino all'ultima.
+            carta = carta->next;
+    }
+    carta = board->soluzione.cima; //ovviamente l'ultimo blocco di carte non ha un int esplicito di lunghezza.
+    for (j=0; j<board->soluzione.numCarte; j++){
+        fwrite(carta, 1, sizeof(tipoCarta) + 24*sizeof(char), save); //salva la prima parte della carta.
+        if (carta->next) //scorre fino all'ultima.
+            carta = carta->next;
+    }
+    fclose(save);
 }
