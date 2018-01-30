@@ -13,7 +13,6 @@ typedef struct card{
     tipoCarta tipo;
     char desc[STANDARD_STRLEN];
     struct card* next;
-    struct card* prev;
 } Carta;
 
 typedef struct deck{ //usato sia per i mazzi sul tavolo che per le mani dei giocatori.
@@ -41,6 +40,7 @@ typedef struct board{
 
 Mazzo* buildDeck(tipoCarta tipo, int numCarte, const char values[][STANDARD_STRLEN]);
 Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2);
-Mazzo* shuffleDeck(Mazzo* mazzo);
+Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte);
+Carta* DealCards(Mazzo* mazzo, int numCarte);
 
 #endif //CLUEDO_PIECES_H

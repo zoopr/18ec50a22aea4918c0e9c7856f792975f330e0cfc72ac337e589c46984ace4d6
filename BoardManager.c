@@ -41,7 +41,7 @@ Giocatore* playerInit(int* num) {
 
 
 Tabellone* FreshStart(){ //Inizializza il tavolo
-    int numGiocatori;
+    int numGiocatori, i, cartePerGiocatore;
     Mazzo *mainDeck, *second, *third;
 
     Tabellone* tavolo = (Tabellone*)malloc(sizeof(Tabellone));
@@ -64,25 +64,34 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     //peschiamo dalla cima del mazzo.
     tavolo->soluzione.cima = mainDeck->cima;
     mainDeck->cima = mainDeck->cima->next;
-    mainDeck->cima->prev = NULL;
     tavolo->soluzione.cima->next = second->cima;
-    tavolo->soluzione.cima->next->prev = tavolo->soluzione.cima; //
-    second->cima = second->cima->next; //aggiorniamo la seconda lista
-    second->cima->prev = NULL;
+    second->cima = second->cima->next;
     tavolo->soluzione.cima->next->next = tavolo->soluzione.coda = third->cima;
     third->cima = third->cima->next;
-    third->cima->prev = NULL;
-    tavolo->soluzione.cima->next->next->prev = tavolo->soluzione.cima->next;
     tavolo->soluzione.cima->next->next->next = NULL;
+
+    mainDeck->numCarte--;
+    second->numCarte--;
+    third->numCarte--;
 
     tavolo->soluzione.numCarte = 3;
     printf("Omicidio eseguito.\n");
 
 
     mainDeck = mergeDecks(mainDeck, mergeDecks(second, third)); //uniamo i tre mazzi in fila
-    mainDeck = shuffleDeck(mainDeck); //mescoliamo un'altra volta.
+    second = third = NULL; //per sicurezza visto che abbiamo liberato i mazzi contenitore.
+    mainDeck = shuffleDeck(mainDeck, mainDeck->numCarte); //mescoliamo un'altra volta.
     printf("Uniti i mazzi.\n");
-    //todo distribuire le carte restanti
+
+    tavolo->carteScoperte.cima = DealCards(mainDeck, mainDeck->numCarte%numGiocatori);
+    tavolo->carteScoperte.numCarte = mainDeck->numCarte%numGiocatori;
+
+    cartePerGiocatore = mainDeck->numCarte / numGiocatori;
+    for (i = 0; i<numGiocatori; i++){
+        tavolo->giocatori[i].mano.cima = DealCards(mainDeck, cartePerGiocatore);
+    }
+    if(!mainDeck->numCarte)
+        printf("Carte distribuite correttamente. Tavolo pronto.\n");
 
     return tavolo;
 

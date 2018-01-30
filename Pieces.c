@@ -4,27 +4,19 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "Pieces.h"
 
 Mazzo* buildDeck(tipoCarta tipo, int numCarte, const char values[][STANDARD_STRLEN]){
     int i;
-
-    Carta* lista = (Carta*)calloc(numCarte, sizeof(Carta)); //Ora sono consecutive, ma la loro posizione in memoria
-                                                            // rimane statica nel dealing e shuffling.
-    if(!lista){
-        exit(-1);
-    }
+    Carta vettore[numCarte];
+    Carta *lista, *newElem;
+    
     for (i=0; i<numCarte; i++){
-        lista[i].tipo = tipo;
-        strcpy(lista[i].desc, values[i]);
+        vettore[i].tipo = tipo;
+        strcpy(vettore[i].desc, values[i]);
         //A questo punto abbiamo un vettore di carte dello stesso tipo.
-        //Costruiamo una lista (per ora) consecutiva
-        if(i>0){ //allacciamo tutte tranne l'ultima.
-            lista[i-1].next = &lista[i]; //l'ultima è già inizializzata a 0 via calloc.
-        }
-        if (i<numCarte-1){ //idem per la prima.
-            lista[i+1].prev = &lista[i];
-        }
+
     }
 
     Mazzo* mazzo = (Mazzo*)malloc(sizeof(Mazzo));
@@ -32,26 +24,93 @@ Mazzo* buildDeck(tipoCarta tipo, int numCarte, const char values[][STANDARD_STRL
         exit(-1);
     }
     mazzo->numCarte = numCarte;
+
+    lista = newElem = (Carta*)malloc(sizeof(Carta));
+
+    for (i=0; i<numCarte; i++){
+        *newElem = vettore[i];
+        if(i<numCarte-1)
+           newElem = newElem->next = (Carta*)malloc(sizeof(Carta));
+        else
+           newElem->next = NULL;
+    }
     mazzo->cima = lista;
-    mazzo->coda = &lista[numCarte-1];
-    return shuffleDeck(mazzo); //mescoliamo il mazzo prima di presentarlo all'esterno.
+    mazzo->coda = newElem;
+
+    mazzo = shuffleDeck(mazzo, mazzo->numCarte); //mescoliamo il mazzo prima di presentarlo all'esterno.
+    return mazzo;
 }
 
 Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2){
-    //possiamo semplicemente aggiungerli in coda l'uno all'altro. abbiamo una funzione di shuffling se vogliamo.
-    //l'importante è AGGIORNARE IL NUMERO DI CARTE
+    //possiamo semplicemente aggiungerli in coda l'uno all'altro.
+    //l'importante è AGGIORNARE IL NUMERO DI CARTE.
 
     m1->coda->next = m2->cima;
     m1->numCarte = m1->numCarte + m2->numCarte;
-    free(m2); //abbiamo unito i due mazzi ed estratto tutte le informazioni dal secondo contenitore di lista.
+    m1->coda = m2->coda;
+    free(m2); //abbiamo unito i due mazzi ed estratto tutte le informazioni dal secondo contenitore di lista
     return m1;
 }
 
-Mazzo* shuffleDeck(Mazzo* mazzo){
+Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte){
+    int i, j, k;
+    Carta* copy;
+    Carta *lista, *newElem;
+    Carta rebuild[18];
+    _Bool called[18];
 
-    //todo
+    for (i=0; i<numCarte; i++){
+        called[i] =0;
+    }
+
+    //costruisci un vettore statico random.
+    for (i=0; i<numCarte; i++){
+        j = rand()%numCarte;
+        if(!called[j]){
+            called[j] = 1;
+            for(k=0, copy = mazzo->cima; k<j; k++){
+                copy = copy->next;
+            }
+            
+            rebuild[i].tipo = copy->tipo;
+            strcpy(rebuild[i].desc, copy->desc);
+        }
+        else{
+            i--;
+        }
+    }
+    //costruisce una lista random dal vettore.
+    lista = newElem = (Carta*)malloc(sizeof(Carta));
+
+    for (i=0; i<numCarte; i++){
+        *newElem = rebuild[i];
+        if(i<numCarte-1)
+            newElem = newElem->next = (Carta*)malloc(sizeof(Carta));
+        else
+            newElem->next = NULL;
+    }
+    free(mazzo->cima);
+    mazzo->cima = lista;
+    mazzo->coda = newElem;
+
+
     return mazzo;
 
 }
 
+Carta* DealCards(Mazzo* mazzo, int numCarte){ //ritorna numCarte carte, aggiorna il mazzo per cominciare da quel punto.
+    Carta *segnaposto, *testa;
+    segnaposto = testa =  mazzo->cima;
+    int i;
+    if(numCarte>0){
+        for(i=0; i<numCarte-1; i++){
+            segnaposto = segnaposto->next;
+        }
+
+        mazzo->cima = segnaposto->next;
+        segnaposto->next = NULL;
+    }
+    mazzo->numCarte -= numCarte;
+    return testa;
+}
 
