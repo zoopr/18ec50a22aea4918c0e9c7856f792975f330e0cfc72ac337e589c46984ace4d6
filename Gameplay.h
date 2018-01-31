@@ -13,7 +13,7 @@
 void leggiTaccuino(char* filename);
 void rollDice(int dice[2]);
 void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]);
-int checkSolution(const char*stanza,const char* arma,const char* sospetto, Tabellone* tavolo);
+int checkSolution(const char*stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[3][STANZE_N]);
 int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* card);
 void saveState(char* filename, Tabellone* board);
 void scriviTaccuino(char* filename, char* message);

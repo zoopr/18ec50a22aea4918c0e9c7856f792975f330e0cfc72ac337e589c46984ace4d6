@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include "BoardManager.h"
 #include "Gameplay.h"
+#include "AI.h"
 
 Giocatore* playerInit(int* num) {
     int i;
@@ -219,7 +220,7 @@ Tabellone* LoadBoard(char* filename){
 
 }
 
-void MainGame(Tabellone* tavolo){
+void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*)){
     _Bool winner = 0;
     char buf[SBUF];
 
@@ -234,7 +235,7 @@ void MainGame(Tabellone* tavolo){
             scanf("%23s", buf);
             saveState(buf, tavolo);
         }
-        winner = Turn(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
+        winner = turnType(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
     }
     strcpy(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);
     strcat(buf, " ha vinto.\n");
@@ -262,7 +263,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     _Bool reachable[STANZE_N];
     char buf[3][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
 
-    strcpy(buf[0], "TURNO ");
+    strcpy(buf[0], "\nTURNO ");
     strcat(buf[0],  dtoc(tavolo->numeroTurni, buf[1]));
     strcat(buf[0], " - Giocatore: ");
     strcat(buf[0], giocatore->nome);
@@ -274,6 +275,8 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     if (giocatore->ipotesiEsatta){
         printf("Hai già compiuto l'ipotesi esatta.\n"
                "Procedi direttamente al lancio dei dadi.\n");
+        strcpy(buf[0], "IL giocatore sta cercando di fare dadi doppi.\n");
+        logger(buf[0]);
         rollDice(dice);
         if (dice[0] == dice[1]){
             printf("Dadi doppi.\n");
@@ -343,10 +346,118 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             printf("Valore non ammesso. Inserire un numero adeguato.\n");
             scanf("%d", &dice[1]);
         }
-        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo);
+        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 0, NULL);
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
+        }
+        printf("Turno finito.\n");
+
+
+
+    }
+}
+
+_Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più aderente possibile alla partita tradizionale, ma con feature che è meglio separare accuratamente.
+    int dice[2];
+    _Bool reachable[STANZE_N];
+    char buf[3][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
+    float interest[3][STANZE_N]; //parte della logica decisionale AI
+
+    strcpy(buf[0], "\nTURNO ");
+    strcat(buf[0],  dtoc(tavolo->numeroTurni, buf[1]));
+    strcat(buf[0], " - Giocatore: ");
+    strcat(buf[0], giocatore->nome);
+    strcat(buf[0], "\n");
+    printf(buf[0]);
+    logger(buf[0]);
+
+    printTableStatus(tavolo); //stampa la posizione di ogni carta distribuita.
+    readInterest(tavolo, interest); //se è il primo turno, chiama initInterest e genera l'analisi di mazzo e tavolo.
+                                    //Altrimenti carica la matrice esistente nell'interesse del giocatore corrente.
+    if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
+        printf("Hai già compiuto l'ipotesi esatta.\n"
+                       "Procedi direttamente al lancio dei dadi.\n");
+        strcpy(buf[0], "Il giocatore sta cercando di fare dadi doppi.\n");
+        logger(buf[0]);
+        rollDice(dice);
+        if (dice[0] == dice[1]){
+            printf("Dadi doppi.\n");
+            return 1;
+        }
+        else{
+            printf("Dadi spaiati. Turno finito.\n");
+            return 0;
+        }
+    }
+    else{
+        printf("Posizione attuale: %s\n", stanze(giocatore->stanza, buf[0]));
+        printf("Procedere al lancio dei dadi.\n");
+        //La scelta ottimale per l'AI (ma anche per i giocatori umani) è sempre di valutare le opzioni di spostamento ed eventualmente stare fermi.
+        rollDice(dice);
+        dice[0] = dice[0] + dice[1]; //non abbiamo bisogno di conservare il valore dei singoli dadi.
+        validPaths(tavolo->layout[giocatore->stanza], dice[0], reachable);
+        printf("Movimenti validi:\n");
+        for(dice[0] = 0, dice[1] = 0; dice[0] < STANZE_N; dice[0]++){
+            if(reachable[dice[0]]){
+                printf("%d - %s\n", dice[0], stanze(dice[0], buf[0]));
+                dice[1]++;
+            }
+        }
+        //Decisione spostamento se disponibile
+        if(dice[1] > 1){
+            printf("\nIn quale stanza desideri muoverti?\n");
+            dice[1] = movementStrategy(interest[0], reachable);
+            while(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
+                printf("Posizione non raggiungibile. Inserire stanza ammessa.\n");
+                scanf("%d", &dice[1]); //L'AI non sbaglia, specie con l'accesso diretto alla mask reachable. se atterriamo qua c'è da fare debugging.
+            }
+            giocatore->stanza = dice[1];
+            strcpy(buf[0], "Giocatore spostato in ");
+            strcat (buf[0], stanze(dice[1],buf[1]));
+            strcat(buf[0], "\n");
+            printf(buf[0]);
+            logger(buf[0]);
+
+        }else {
+            printf("Giocatore obbligato a rimanere in %s\n", stanze(giocatore->stanza, buf[0]));
+        }
+
+        //Formulazione ipotesi
+        printf("L'ipotesi è obbligata a svolgersi nella tua stanza attuale(%s).\n", stanze(giocatore->stanza, buf[0]));
+        printf("Con quale arma si è compiuto il delitto?\n");
+        for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
+            printf("%d - %s\n", dice[0], armi(dice[0], buf[0]));
+        }
+        dice[0] = suspectStrategy(interest[1]);
+        while(dice[0] >= ARMI_N || dice[0] < 0 ){
+            printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[0]);
+            scanf("%d", &dice[0]); //come nelle stanze. questa opzione è qua per il debugging e per il testing di feature diverse.
+        }
+
+        printf("Quale sospetto ha compiuto il delitto?\n");
+        for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
+            printf("%d - %s\n", dice[1], sospetti(dice[1], buf[0]));
+        }
+        dice[1] = suspectStrategy(interest[2]);
+        while(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
+            printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[1]);
+            scanf("%d", &dice[1]);
+        }
+        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 1, interest);
+        if(giocatore->ipotesiEsatta){
+            printf("Ipotesi esatta!\n"
+                           "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
+        }else{
+            /*
+             * C'è una possibilità statistica non indifferente che le carte parte di una soluzione sbagliata ma non
+             * trovate nella mano di nessuno possano non essere state chiamate perchè tra le carte segrete.
+             * Questa sezione aggiusta un bias per le carte chiamate più volte e mai contestate.
+             * La carta trovata è stata in precedenza azzerata.
+             */
+            interest[0][giocatore->stanza]*=1.5;
+            interest[1][dice[0]]*=1.5;
+            interest[2][dice[1]]*=1.5;
         }
         printf("Turno finito.\n");
 

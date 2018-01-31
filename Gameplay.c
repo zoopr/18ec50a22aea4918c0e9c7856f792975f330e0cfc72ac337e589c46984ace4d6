@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "Gameplay.h"
+#include "AI.h"
 
 #define D_SIDES 6 //giusto in caso si voglia giocare con dadi diversi.
 
@@ -75,12 +76,13 @@ void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
     }
 }
 
-int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo){
+int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[3][STANZE_N]){
     Carta* matching;
     Carta foundData[3];
-    int i, j;
+    int i, j, coords[2];
     int found = 0;
     char message[SBUF] ="L'ipotesi del giocatore è:\t";
+
 
     strncat(message, stanza, strlen(stanza));
     strcat(message, "\t");
@@ -90,11 +92,11 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     strcat(message, "\n");
     logger(message);
 
-    //controlla il tavolo
+    //controlla il tavolo. Matematicamente impossibile da soddisfare con la flag AI. possibile ottimizzazione.
     matching = tavolo->carteScoperte.cima;
     for ( i=0; i<tavolo->carteScoperte.numCarte; i++){
         if(checkCard(stanza, arma, sospetto, matching) != -1){ //non è importante far decidere quale mostrare qua.
-            strcpy(message, "Carta trovata sul tavolo!\n");
+            strcpy(message, "Carta trovata sul tavolo.\n");
             printf(message);
             logger(message);
             tipi(matching->tipo, message);
@@ -127,8 +129,12 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             for (j=0; j<found; j++){
                 printf("%d: %s - %s\n", j, tipi(foundData[j].tipo, message), foundData[j].desc); //usiamo message come buffer temporaneo per la stringa di ritorno.
             }
-            scanf("%d", &j);
-            while(j<0 || j>=found){
+            if (AI){
+                j = 0; //L'AI non tiene traccia di quali carte ha già mostrato al momento. possibile todo
+            }else{
+                scanf("%d", &j);
+            }
+            while(j<0 || j>=found){ //Con la flag AI non dovrebbe mai entrare in questo branch.
                 printf("Numero invalido. Reinserire.\n");
                 scanf("%d", &j);
             }
@@ -143,6 +149,10 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             logger(message);
             printf(message);
 
+            if(AI){
+                generateCoordinates(&foundData[0], coords);
+                interestFile[coords[0]][coords[1]] = 0.0f;
+            }
             tipi(foundData[0].tipo, message);
             strcat(message, " - ");
             strcat(message, foundData[0].desc);
@@ -154,7 +164,9 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
 
         }
     }
-
+    strcpy(message, "Ipotesi esatta.\n");
+    //l'AI perde completamente il controllo del game flow da qui in poi.
+    logger(message);
     return 1;//è tra le carte segrete.
 
 }
@@ -239,7 +251,7 @@ void statInit(Tabellone* tavolo){ //carica o eventualmente crea il file di stati
         fclose(tac);
     }else{
         for(i=0; i<3*STANZE_N; i++){
-            tavolo->stats[i/9][i%9] = 0;
+            tavolo->stats[i/STANZE_N][i%STANZE_N] = 0;
         }
         statSave(tavolo); //Salviamo una versione azzerata se non troviamo le statistiche sul disco.
     }
@@ -298,7 +310,7 @@ void statShow(){
     }
     else{
         fread(statsArr, 3, 9*sizeof(int), stats);
-        printf("Statistiche del crimine: \n");
+        printf("\nStatistiche del crimine:\n\n");
         printf("STANZE\n");
         for(i=0;i<STANZE_N; i++){
             printf("%s - %d volte\n", stanze(i, buf), statsArr[0][i]);

@@ -11,7 +11,8 @@ Giocatore* playerInit(int* num);
 Tabellone* FreshStart();
 Tabellone* LoadBoard(char* filename);
 
-void MainGame(Tabellone* tavolo);
+void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*));
 _Bool Turn(Tabellone* tavolo, Giocatore* giocatore);
+_Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore);
 
 #endif //CLUEDO_BOARDMANAGER_H
