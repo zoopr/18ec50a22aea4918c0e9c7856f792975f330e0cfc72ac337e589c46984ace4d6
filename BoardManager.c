@@ -72,7 +72,6 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     mainDeck->numCarte--;
     second->numCarte--;
     third->numCarte--;
-
     tavolo->soluzione.numCarte = 3;
     printf("Omicidio eseguito. RIP Djanni.\n");
 

@@ -96,7 +96,14 @@ Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte){
         else
             newElem->next = NULL;
     }
-    free(mazzo->cima);
+    //libera la lista vecchia.
+    copy = mazzo->cima;
+    while(copy){
+        mazzo->cima = copy->next;
+        free(copy);
+        copy = mazzo->cima;
+    }
+
     mazzo->cima = lista;
 
 

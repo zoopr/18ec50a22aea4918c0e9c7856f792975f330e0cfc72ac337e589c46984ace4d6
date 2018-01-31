@@ -150,7 +150,6 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             logger(message);
             printf("La carta mostrata è %s\n", message);
             scriviTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome, message);// La carta è comunicata esclusivamente al taccuino del giocatore.
-            // Senza fare il parsing del taccuino non c'è un buon modo per risolverlo. E il taccuino non ha un formato restrittivo.
             return 0;
 
         }
