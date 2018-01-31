@@ -77,10 +77,10 @@ void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
 
 int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo){
     Carta* matching;
-    int found = 0;
     Carta foundData[3];
-    char message[SBUF] ="L'ipotesi del giocatore è:\t";
     int i, j;
+    int found = 0;
+    char message[SBUF] ="L'ipotesi del giocatore è:\t";
 
     strncat(message, stanza, strlen(stanza));
     strcat(message, "\t");
@@ -94,7 +94,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     matching = tavolo->carteScoperte.cima;
     for ( i=0; i<tavolo->carteScoperte.numCarte; i++){
         if(checkCard(stanza, arma, sospetto, matching)){ //non è importante far decidere quale mostrare qua.
-            strcpy(message, "Carta trovata sul tavolo!");
+            strcpy(message, "Carta trovata sul tavolo!\n");
             printf(message);
             logger(message);
             tipi(matching->tipo, message);
