@@ -55,13 +55,11 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     tavolo->numGiocatori = numGiocatori;
     tavolo->turnoCorrente = rand()%numGiocatori;
 
-
     //Funzioni di shuffling e dealing del mazzo.
     mainDeck = buildDeck(STANZA, STANZE_N, stanze);
     second = buildDeck(ARMA, ARMI_N, armi);
     third = buildDeck(SOSPETTO, SOSPETTI_N, sospetti);
 
-    printf("Mazzi inizializzati.\n");
     //peschiamo dalla cima del mazzo.
     tavolo->soluzione.cima = mainDeck->cima;
     mainDeck->cima = mainDeck->cima->next;
@@ -76,11 +74,11 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     third->numCarte--;
 
     tavolo->soluzione.numCarte = 3;
-    printf("Omicidio eseguito.\n");
+    printf("Omicidio eseguito. RIP Djanni.\n");
 
 
     mainDeck = mergeDecks(mainDeck, mergeDecks(second, third)); //uniamo i tre mazzi in fila
-    second = third = NULL; //per sicurezza visto che abbiamo liberato i mazzi contenitore.
+    second = third = NULL; //per sicurezza visto che abbiamo liberato i mazzi contenitore in mergeDecks().
     mainDeck = shuffleDeck(mainDeck, mainDeck->numCarte); //mescoliamo un'altra volta.
 
     tavolo->carteScoperte.numCarte = mainDeck->numCarte%numGiocatori;

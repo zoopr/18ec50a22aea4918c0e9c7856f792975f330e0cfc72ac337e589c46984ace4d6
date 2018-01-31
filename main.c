@@ -3,17 +3,15 @@
 #include <stdlib.h>
 #include <time.h>
 #include "BoardManager.h"
-#include "Pieces.h"
-#include "Standards.h"
 
 int main() {
 
     int option;
-    char buffer[256];
+    char buffer[SBUF];
     _Bool next_phase, AI_mode = false;
     Tabellone* tavolo;
 
-    srand(time(NULL));
+    srand(time(NULL)); //inizializziamo il seed per tutte le operazioni di partita.
 
 
 
@@ -32,10 +30,13 @@ int main() {
                    "                                                                  \n"
                    );
     next_phase = false;
+
     do{ //primo menu.
         printf("Selezionare un'opzione.\n"
                        "1 - Comincia partita\n"
-                       "2 - Carica partita\n");
+                       "2 - Carica partita\n"
+                       "3 - Statistiche\n");
+
         scanf("%d", &option);
         switch(option){
             case 1:
@@ -44,11 +45,12 @@ int main() {
                 break;
             case 2:
                 printf("Inserire il nome del file di salvataggio da caricare\n");
-                scanf("%255s", buffer);
+                scanf("%s", buffer);
                 tavolo = LoadBoard(buffer);
                 if (tavolo)
                     next_phase = true;
                 break;
+            case 3:
             default:
                 printf("Opzione non disponibile.\n\n");
         }
@@ -66,8 +68,10 @@ int main() {
                 next_phase = true;
                 break;
             case 2:
-                AI_mode = true;
+                /*AI_mode = true;
                 next_phase = true;
+                break;*/
+                printf("Modalità non disponibile.\n\n");
                 break;
             default:
                 printf("Opzione non disponibile.\n\n");

@@ -5,10 +5,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 #include "Gameplay.h"
 
 #define D_SIDES 6 //giusto in caso si voglia giocare con dadi diversi.
+
+/* NOTA SUL TACCUINO
+ * Il taccuino non ha alcun dato di identificazione se non il nome dele giocatore.
+ * Cominciare una partita con lo stesso nome giocatore riscrive il contenuto del taccuino.
+ * Continuare una partita precedente dopo tale evento comunica informazioni incorrette
+ * sulla propria mano e il tavolo in console (il tavolo è e rimane intoccato).
+ */
 
 void leggiTaccuino(char* filename){
     FILE* tac;
@@ -86,7 +92,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
 
     //controlla il tavolo
     matching = tavolo->carteScoperte.cima;
-    for ( i=0; i<tavolo->carteScoperte.numCarte && !found; i++){
+    for ( i=0; i<tavolo->carteScoperte.numCarte; i++){
         if(checkCard(stanza, arma, sospetto, matching)){ //non è importante far decidere quale mostrare qua.
             strcpy(message, "Carta trovata sul tavolo!");
             printf(message);
@@ -116,7 +122,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
                 matching = matching->next;
         }
         if (found>1){
-            printf("CARTE NELLA MANO DI %s\n",  tavolo->giocatori[i%tavolo->numGiocatori].nome);
+            printf("MESSAGGIO PRIVATO PER %s\n",  tavolo->giocatori[i%tavolo->numGiocatori].nome);
             printf("Più carte dell' ipotesi sono nella tua mano. Decidi quale mostrare.\n");
             for (j=0; j<found; j++){
                 printf("%d: %s - %s\n", j, tipi(foundData[j].tipo, message), foundData[j].desc); //usiamo message come buffer temporaneo per la stringa di ritorno.
@@ -129,18 +135,22 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.
         }
         if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
+            printf("\nIpotesi errata.\n");
+            printf("MESSAGGIO PRIVATO PER %s\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
             strcpy(message,"Carta trovata nella mano di ");
             strcat(message, tavolo->giocatori[i%tavolo->numGiocatori].nome);
-            strcat(message, "!\n");
-            printf(message);
+            strcat(message, ".\n");
             logger(message);
+            printf(message);
+
             tipi(foundData[0].tipo, message);
             strcat(message, " - ");
             strcat(message, foundData[0].desc);
             strcat(message, "\n");
-            logger(message); //La carta non è stampata nel printf
+            logger(message);
+            printf("La carta mostrata è %s\n", message);
             scriviTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome, message);// La carta è comunicata esclusivamente al taccuino del giocatore.
-            // Senza fare il parsing del taccuino non c'è un buon modo per risolverlo. E il taccuino non ha un formato generico.
+            // Senza fare il parsing del taccuino non c'è un buon modo per risolverlo. E il taccuino non ha un formato restrittivo.
             return 0;
 
         }
