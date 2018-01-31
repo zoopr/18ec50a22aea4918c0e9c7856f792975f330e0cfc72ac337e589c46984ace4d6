@@ -242,6 +242,8 @@ void MainGame(Tabellone* tavolo){
 _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     int dice[2];
     _Bool reachable[STANZE_N];
+
+    printf("TURNO %d - GIOCATORE: %s\n", tavolo->numeroTurni, tavolo->giocatori[tavolo->turnoCorrente].nome);
     leggiTaccuino(giocatore->nome);
     if (giocatore->ipotesiEsatta){
         printf("Hai già compiuto l'ipotesi esatta.\n"
@@ -311,12 +313,12 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             printf("Valore non ammesso. Inserire un numero adeguato.\n");
             scanf("%d", &dice[1]);
         }
-        giocatore->ipotesiEsatta = checkSolution(stanze[giocatore->stanza], armi[dice[0]], sospetti[dice[1]]);
+        giocatore->ipotesiEsatta = checkSolution(stanze[giocatore->stanza], armi[dice[0]], sospetti[dice[1]], tavolo);
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
         }
-        printf("Turno finito.");
+        printf("Turno finito.\n");
 
 
 

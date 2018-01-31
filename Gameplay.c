@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "Gameplay.h"
 
 #define D_SIDES 6 //giusto in caso si voglia giocare con dadi diversi.
@@ -24,7 +25,20 @@ void leggiTaccuino(char* filename){
         getline(&sbuffer, (size_t*)&SBUF, tac);
         printf("%s\n", sbuffer);
     }
+}
 
+void scriviTaccuino(char* filename, char* message){
+    FILE* tac;
+    char buf[STANDARD_STRLEN + 4], *sbuffer;
+    strcpy(buf, filename);
+    strcat(buf, ".tac");
+
+    tac = fopen(buf, "a");
+    if (!tac){
+        exit(-2);
+    }
+    fprintf(tac, message);
+    fclose(tac);
 }
 
 
@@ -45,9 +59,90 @@ void validPaths(int layout[STANZE_N], int val, _Bool out[STANZE_N]){
     }
 }
 
-_Bool checkSolution(const char* stanza,const char* arma,const char* sospetto){
-//TODO
+int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo){
+    Carta* matching;
+    int found = 0;
+    Carta foundData[3];
+    char message[SBUF];
+    int i, j;
+
+    //controlla il tavolo
+    matching = tavolo->carteScoperte.cima;
+    for ( i=0; i<tavolo->carteScoperte.numCarte && !found; i++){
+        if(checkCard(stanza, arma, sospetto, matching)){ //non è importante far decidere quale mostrare qua.
+            printf("Carta trovata sul tavolo!");
+            strcpy(message, tipi[matching->tipo]);
+            strcat(message, " - ");
+            strcat(message,  matching->desc);
+            strcat(message, "\n");
+            printf(message);
+            for(j=0; j<tavolo->numGiocatori; j++)
+                scriviTaccuino(tavolo->giocatori[j].nome, message);
+            return 0;
+
+
+        }
+        if (matching->next)
+            matching = matching->next;
+    }
+
+    //controlla le mani dei giocatori in avanti fino al giocatore incluso.
+    for (i=tavolo->turnoCorrente; i<(tavolo->turnoCorrente + tavolo->numGiocatori) && !found; i++) {
+        matching = tavolo->giocatori[i%tavolo->numGiocatori].mano.cima;
+        for (j = 0; j < tavolo->giocatori[i%tavolo->numGiocatori].mano.numCarte; j++){
+            if (checkCard(stanza, arma, sospetto,
+                          matching)) { //cambiamo il tipo di broadcast pubblico per permettere la scelta di cosa mostrare.
+                foundData[found] = *matching;
+                found++;
+            }
+            if (matching->next)
+                matching = matching->next;
+        }
+        if (found>1){
+            printf("CARTE NELLA MANO DI %s\n",  tavolo->giocatori[i%tavolo->numGiocatori].nome);
+            printf("Più carte dell' ipotesi sono nella tua mano. Decidi quale mostrare.\n");
+            for (j=0; j<found; j++){
+                printf("%d: %s - %s\n", j, tipi[foundData[j].tipo], foundData[j].desc);
+            }
+            scanf("%d", &j);
+            do{
+                printf("Numero invalido. Reinserire.\n");
+                scanf("%d", &j);
+            }while(j<0 || j>=found);
+            foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.
+        }
+        if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
+            printf("Carta trovata nella mano di %s!\n", tavolo->giocatori[i%tavolo->numGiocatori].nome);
+            strcpy(message, tipi[foundData[0].tipo]);
+            strcat(message, " - ");
+            strcat(message, foundData[0].desc);
+            strcat(message, "\n");
+            printf(message);
+            for(j=0; j<tavolo->numGiocatori; j++)
+                if(j != i%tavolo->numGiocatori) //Non scriviamo la mano tra le carte degli avversari. Ce l'abbiamo già nel taccuino.
+                    scriviTaccuino(tavolo->giocatori[j].nome, message);
+            return 0;
+
+        }
+    }
+
+    return 1;//è tra le carte segrete.
+
 }
+
+int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* card){
+    if (strcmp(stanza, card->desc) == 0){
+        return 1;
+    }
+    else if(strcmp(arma, card->desc) == 0){
+        return 2;
+    }
+    else if(strcmp(sospetto, card->desc) == 0){
+        return 3;
+    }
+    return 0;
+}
+
 
 void saveState(char filename[STANDARD_STRLEN], Tabellone* board){
     FILE* save = fopen(filename, "w"); //qualunque cosa ci sia la sovrascrive.

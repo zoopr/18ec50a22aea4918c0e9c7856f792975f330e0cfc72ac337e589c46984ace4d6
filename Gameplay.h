@@ -13,7 +13,9 @@
 void leggiTaccuino(char* filename);
 void rollDice(int dice[2]);
 void validPaths(int layout[STANZE_N], int val, _Bool out[STANZE_N]);
-_Bool checkSolution(const char*stanza,const char* arma,const char* sospetto);
+int checkSolution(const char*stanza,const char* arma,const char* sospetto, Tabellone* tavolo);
+int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* card);
 void saveState(char filename[STANDARD_STRLEN], Tabellone* board);
+void scriviTaccuino(char* filename, char* message);
 
 #endif //CLUEDO_GAMEPLAY_H
