@@ -227,13 +227,15 @@ void MainGame(Tabellone* tavolo){
         }
         winner = Turn(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
     }
-    printf(        "                                 _         _           _             _ _ \n"
-                   "  ___ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _ ___(_) ___  _ __ (_) |\n"
-                   " / __/ _ \\| '_ \\ / _` | '__/ _` | __| | | | |/ _` |_  / |/ _ \\| '_ \\| | |\n"
-                   "| (_| (_) | | | | (_| | | | (_| | |_| |_| | | (_| |/ /| | (_) | | | | |_|\n"
-                   " \\___\\___/|_| |_|\\__, |_|  \\__,_|\\__|\\__,_|_|\\__,_/___|_|\\___/|_| |_|_(_)\n"
-                   "                 |___/                                                   \n"
-            "\n%s ha vinto!\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
+    printf("                                 _         _           _             _ _ \n"
+           "  ___ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _ ___(_) ___  _ __ (_) |\n"
+           " / __/ _ \\| '_ \\ / _` | '__/ _` | __| | | | |/ _` |_  / |/ _ \\| '_ \\| | |\n"
+           "| (_| (_) | | | | (_| | | | (_| | |_| |_| | | (_| |/ /| | (_) | | | | |_|\n"
+           " \\___\\___/|_| |_|\\__, |_|  \\__,_|\\__|\\__,_|_|\\__,_/___|_|\\___/|_| |_|_(_)\n"
+           "                 |___/                                                   \n"
+           "\n%s ha vinto!\n"
+           "Djanni può finalmente riposare in pace.\n\n"
+           "...almeno fino al gioco dell'anno prossimo.\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
     //todo record stats
     printf("Premere un pulsante per terminare\n");
     getchar();

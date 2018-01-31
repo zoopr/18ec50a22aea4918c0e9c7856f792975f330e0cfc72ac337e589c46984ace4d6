@@ -64,7 +64,6 @@ void copiaMoveset(int copyArea[STANZE_N][STANZE_N]) {
             12, 8, 4, 8, 12, 8, 4, 0, 2,
             14, 10, 6, 10, 10, 6, 2, 2, 0};
     memcpy(copyArea, moveset, STANZE_N*STANZE_N*sizeof(int));
-
 }
 
 
