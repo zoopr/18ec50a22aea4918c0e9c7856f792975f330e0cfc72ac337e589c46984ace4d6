@@ -35,6 +35,7 @@ typedef struct board{
     Mazzo carteScoperte;
     Mazzo soluzione;
     int layout[STANZE_N][STANZE_N];
+    int stats[3][STANZE_N];
 } Tabellone;
 
 Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*));

@@ -116,12 +116,13 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
         fclose(tac); // possiamo usare a+ ai turni successivi.
     }
 
+    statInit(tavolo);
+
     logger("\nCominciata nuova partita.\n");
 
     return tavolo;
 
 }
-
 
 Tabellone* LoadBoard(char* filename){
     int i, j;
@@ -205,9 +206,13 @@ Tabellone* LoadBoard(char* filename){
         fclose(save);
         //non ci preoccupiamo dei taccuini. La tag "a" crea i file se non esistenti.
         //...anche se taccuini di terze parti formattati in altri modi possono essere disorientanti.
+
+        statInit(table); // Carichiamo le statistiche da un secondo file.
+
         strcat(msgbuf, filename);
         strcat(msgbuf, "\n");
         logger(msgbuf);
+
 
         return table;
     }
@@ -243,7 +248,10 @@ void MainGame(Tabellone* tavolo){
            "\n%s ha vinto!\n"
            "Djanni può finalmente riposare in pace.\n\n"
            "...almeno fino al gioco dell'anno prossimo.\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
-    //todo record stats
+
+    statTrack(tavolo);
+    statSave(tavolo);
+
     logger("Partita finita.\n");
     printf("Premere un pulsante per terminare\n");
     getchar();
@@ -265,8 +273,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     leggiTaccuino(giocatore->nome);
     if (giocatore->ipotesiEsatta){
         printf("Hai già compiuto l'ipotesi esatta.\n"
-               "Premi un pulsante per procedere con il lancio dei dadi.\n");
-        getchar();
+               "Procedi direttamente al lancio dei dadi.\n");
         rollDice(dice);
         if (dice[0] == dice[1]){
             printf("Dadi doppi.\n");

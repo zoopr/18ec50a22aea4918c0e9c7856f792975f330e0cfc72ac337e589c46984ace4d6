@@ -65,15 +65,11 @@ Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2){
 Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte){
     int i, j, k;
     Carta *copy;
-    Carta *lista, *newElem;
-    Carta rebuild[18];
-    _Bool called[18];
+    Carta *rebuild = (Carta*)calloc(numCarte, sizeof(Carta));
+    _Bool *called = (_Bool*)calloc(numCarte, sizeof(_Bool)); //già inizializzato a zero.
 
-    for (i=0; i<numCarte; i++){
-        called[i] =0;
-    }
-
-    //costruisci un vettore statico random.
+    //costruisce un vettore statico random, poi sovrascrive le informazioni non di link.
+    //dal punto di vista pratico, stiamo randomizzando in quale locazione di memoria stia quale informazione.
     for (i=0; i<numCarte; i++){
         do {
             j = rand() % numCarte;
@@ -85,31 +81,16 @@ Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte){
         rebuild[i].tipo = copy->tipo;
         strcpy(rebuild[i].desc, copy->desc);
     }
-
-    //costruisce una lista random dal vettore.
-    lista = newElem = (Carta*)malloc(sizeof(Carta));
-
-    for (i=0; i<numCarte; i++){
-        *newElem = rebuild[i];
-        if(i<numCarte-1)
-            newElem = newElem->next = (Carta*)malloc(sizeof(Carta));
-        else
-            newElem->next = NULL;
-    }
-    //libera la lista vecchia.
     copy = mazzo->cima;
-    while(copy){
-        mazzo->cima = copy->next;
-        free(copy);
-        copy = mazzo->cima;
+    for (i=0; i<numCarte; i++){
+        strcpy(copy->desc ,rebuild[i].desc);
+        copy->tipo = rebuild[i].tipo;
+        if (copy->next)
+            copy = copy->next;
     }
-
-    mazzo->cima = lista;
-
-
-
+    free(rebuild);
+    free(called);
     return mazzo;
-
 }
 
 Carta* DealCards(Mazzo* mazzo, int numCarte){ //ritorna numCarte carte, aggiorna il mazzo per cominciare da quel punto.

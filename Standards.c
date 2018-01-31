@@ -7,7 +7,7 @@
 #include "Standards.h"
 
 char* tipi(int index, char* copyArea) {
-    char tipi[3][STANDARD_STRLEN] = {"Arma", "Sospetto", "Stanza"};
+    char tipi[3][STANDARD_STRLEN] = {"Stanza", "Arma", "Sospetto"};
     if(index <3 && index>-1) { // assicuriamoci che non stiamo chiamando parti di memoria a caso per errore
         strcpy(copyArea, tipi[index]);
         return copyArea;

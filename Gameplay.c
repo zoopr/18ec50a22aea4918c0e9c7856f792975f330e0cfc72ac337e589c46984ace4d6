@@ -93,7 +93,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     //controlla il tavolo
     matching = tavolo->carteScoperte.cima;
     for ( i=0; i<tavolo->carteScoperte.numCarte; i++){
-        if(checkCard(stanza, arma, sospetto, matching)){ //non è importante far decidere quale mostrare qua.
+        if(checkCard(stanza, arma, sospetto, matching) != -1){ //non è importante far decidere quale mostrare qua.
             strcpy(message, "Carta trovata sul tavolo!\n");
             printf(message);
             logger(message);
@@ -114,7 +114,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
         matching = tavolo->giocatori[i%tavolo->numGiocatori].mano.cima;
         for (j = 0; j < tavolo->giocatori[i%tavolo->numGiocatori].mano.numCarte; j++){
             if (checkCard(stanza, arma, sospetto,
-                          matching)) { //cambiamo il tipo di broadcast pubblico per permettere la scelta di cosa mostrare.
+                          matching) != -1) { //cambiamo il tipo di broadcast pubblico per permettere la scelta di cosa mostrare.
                 foundData[found] = *matching;
                 found++;
             }
@@ -169,7 +169,7 @@ int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* c
     else if(strcmp(sospetto, card->desc) == 0){
         return 3;
     }
-    return 0;
+    return -1;
 }
 
 
@@ -227,4 +227,102 @@ void logger(char* message){
 
     fprintf(logger, message);
     fclose(logger);
+}
+
+void statInit(Tabellone* tavolo){ //carica o eventualmente crea il file di statistiche e lo carica nel tavolo.
+    int i;
+    FILE* tac;
+
+    tac = fopen(STAT_DEFAULT, "r");
+    if(tac && !feof(tac)){ // Ci assicura che nella prima partita del sistema sia gestito correttamente.
+        fread(tavolo->stats, 3, STANZE_N*sizeof(int), tac);
+        fclose(tac);
+    }else{
+        for(i=0; i<3*STANZE_N; i++){
+            tavolo->stats[i/9][i%9] = 0;
+        }
+        statSave(tavolo); //Salviamo una versione azzerata se non troviamo le statistiche sul disco.
+    }
+}
+
+void statSave(Tabellone* tavolo){
+    FILE* tac;
+
+    tac = fopen(STAT_DEFAULT, "w");
+    if(!tac) {
+        exit(-2);
+    }
+    fwrite(tavolo->stats, 3, STANZE_N*sizeof(int), tac);
+    fclose(tac);
+}
+
+void statTrack(Tabellone* tavolo){
+    Carta daValutare[3];
+    int valSoluzioni[3];
+    Carta* scroll = tavolo->soluzione.cima;
+    int i;
+
+    //salviamo le carte in ordine: stanza, arma, sospetto.
+    for (i=0; i<3; i++){
+        switch(scroll->tipo){
+            case STANZA:
+                daValutare[0] = *scroll;
+                break;
+            case ARMA:
+                daValutare[1] = *scroll;
+            default:
+                daValutare[2] = *scroll;
+        }
+        if(scroll->next){
+            scroll = scroll->next;
+        }
+    }
+    // Estrapoliamo gli indici.
+    valSoluzioni[0] = checkCard_Archive(stanze, &daValutare[0], STANZE_N);
+    valSoluzioni[1] = checkCard_Archive(armi, &daValutare[1], ARMI_N);
+    valSoluzioni[2] = checkCard_Archive(sospetti, &daValutare[2], SOSPETTI_N);
+
+    //Aggiorniamo le statistiche caricate nel tavolo.
+    for(i=0; i<3; i++){
+        tavolo->stats[i][valSoluzioni[i]]++;
+    }
+}
+
+void statShow(){
+    char buf[STANDARD_STRLEN];
+    int statsArr[3][STANZE_N], i;
+    FILE* stats = fopen(STAT_DEFAULT, "r");
+    if(!stats){
+        printf("Nessun file di statistiche rilevato. Hai giocato ad almeno una partita?\n");
+        return;
+    }
+    else{
+        fread(statsArr, 3, 9*sizeof(int), stats);
+        printf("Statistiche del crimine: \n");
+        printf("STANZE\n");
+        for(i=0;i<STANZE_N; i++){
+            printf("%s - %d volte\n", stanze(i, buf), statsArr[0][i]);
+        }
+        printf("\nARMI\n");
+        for(i=0;i<ARMI_N; i++){
+            printf("%s - %d volte\n", armi(i, buf), statsArr[1][i]);
+        }
+        printf("\nSOSPETTI\n");
+        for(i=0;i<SOSPETTI_N; i++){
+            printf("%s - %d volte\n", sospetti(i, buf), statsArr[2][i]);
+        }
+        printf("\n");
+
+    }
+}
+
+int checkCard_Archive(char* (*func)(int, char*), Carta* card, int len){ //riporta l'indice dell'elemento nel vettore.
+    int i;
+    char buf[SBUF];
+    for(i=0; i<len; i++) {
+        if (strcmp(func(i, buf), card->desc) == 0) {
+            return i;
+        }
+    }
+    return -1;
 }

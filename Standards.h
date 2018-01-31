@@ -16,8 +16,9 @@
 #define GIOCATORI_MIN 3
 #define SBUF 256
 #define LOG_DEFAULT "log.txt"
+#define STAT_DEFAULT "stats.dat"
 
-typedef enum {ARMA, SOSPETTO, STANZA} tipoCarta;
+typedef enum {STANZA, ARMA, SOSPETTO} tipoCarta;
 
 char* tipi(int index, char* copyArea);
 char* stanze(int index, char* copyArea);

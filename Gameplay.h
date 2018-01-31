@@ -18,5 +18,10 @@ int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* c
 void saveState(char* filename, Tabellone* board);
 void scriviTaccuino(char* filename, char* message);
 void logger(char* message);
+void statInit(Tabellone* tavolo);
+void statSave(Tabellone* tavolo);
+void statTrack(Tabellone* tavolo);
+void statShow();
+int checkCard_Archive(char* (*func)(int, char*), Carta* card, int len);
 
 #endif //CLUEDO_GAMEPLAY_H

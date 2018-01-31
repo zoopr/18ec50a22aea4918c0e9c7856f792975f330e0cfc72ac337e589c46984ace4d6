@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "BoardManager.h"
+#include "Gameplay.h"
 
 int main() {
 
@@ -51,6 +52,8 @@ int main() {
                     next_phase = true;
                 break;
             case 3:
+                statShow();
+                break;
             default:
                 printf("Opzione non disponibile.\n\n");
         }
