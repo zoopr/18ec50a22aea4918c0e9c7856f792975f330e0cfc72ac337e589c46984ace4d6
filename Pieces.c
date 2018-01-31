@@ -7,14 +7,14 @@
 #include <stdio.h>
 #include "Pieces.h"
 
-Mazzo* buildDeck(tipoCarta tipo, int numCarte, const char values[][STANDARD_STRLEN]){
+Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*) ){
     int i;
     Carta vettore[numCarte];
     Carta *lista, *newElem;
     
     for (i=0; i<numCarte; i++){
         vettore[i].tipo = tipo;
-        strcpy(vettore[i].desc, values[i]);
+        func(i, vettore[i].desc); //copia il valore nella memoria dele parametro 2. vedi funzioni in standards.h
         //A questo punto abbiamo un vettore di carte dello stesso tipo.
 
     }
@@ -64,7 +64,7 @@ Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2){
 
 Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte){
     int i, j, k;
-    Carta* copy;
+    Carta *copy;
     Carta *lista, *newElem;
     Carta rebuild[18];
     _Bool called[18];
@@ -75,20 +75,17 @@ Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte){
 
     //costruisci un vettore statico random.
     for (i=0; i<numCarte; i++){
-        j = rand()%numCarte;
-        if(!called[j]){
-            called[j] = 1;
-            for(k=0, copy = mazzo->cima; k<j; k++){
-                copy = copy->next;
-            }
-            
-            rebuild[i].tipo = copy->tipo;
-            strcpy(rebuild[i].desc, copy->desc);
+        do {
+            j = rand() % numCarte;
+        }while(called[j]);
+        called[j] = 1;
+        for(k=0, copy = mazzo->cima; k<j; k++){
+            copy = copy->next;
         }
-        else{
-            i--;
-        }
+        rebuild[i].tipo = copy->tipo;
+        strcpy(rebuild[i].desc, copy->desc);
     }
+
     //costruisce una lista random dal vettore.
     lista = newElem = (Carta*)malloc(sizeof(Carta));
 

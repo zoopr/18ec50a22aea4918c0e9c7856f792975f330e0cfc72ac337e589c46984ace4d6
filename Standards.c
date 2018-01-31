@@ -2,4 +2,69 @@
 // Created by Mat on 18/01/30.
 //
 
+#include <mem.h>
+#include <stdio.h>
+#include "Standards.h"
+
+char* tipi(int index, char* copyArea) {
+    char tipi[3][STANDARD_STRLEN] = {"Arma", "Sospetto", "Stanza"};
+    if(index <3 && index>-1) { // assicuriamoci che non stiamo chiamando parti di memoria a caso per errore
+        strcpy(copyArea, tipi[index]);
+        return copyArea;
+    }else{
+        printf("Errore nell'offset di ingresso!\n");
+        return NULL;
+    }
+}
+
+char* stanze(int index, char* copyArea) {
+    char stanze[STANZE_N][STANDARD_STRLEN] = {"Laboratorio T", "Laboratorio M", "Bagno", "Aula Costa",
+                                                           "Giardino", "Entrata", "Parcheggio", "Simaz", "Batcaverna"};
+    if(index <STANZE_N && index>-1) {
+        strcpy(copyArea,stanze[index]);
+        return copyArea;
+    }else{
+        printf("Errore nell'offset di ingresso!\n");
+        return NULL;
+    }
+}
+char* armi(int index, char* copyArea){
+    char armi [ARMI_N][STANDARD_STRLEN] = {"Cavo di rete", "Sparacoriandoli", "Calcinaccio", "Tastiera USB",
+                                                    "Fumo caldaia", "Floppy disk 3.5"};
+    if(index <ARMI_N && index>-1) {
+        strcpy(copyArea,armi[index]);
+        return copyArea;
+    }else{
+        printf("Errore nell'offset di ingresso!\n");
+        return NULL;
+    }
+}
+
+char* sospetti(int index, char* copyArea) {
+    char sospetti[SOSPETTI_N][STANDARD_STRLEN] = {"Alan Turing", "G. M. Hopper", "Edsger Dijkstra", "G. F. Voronoj",
+                                                           "J. V. Neumann", "M. Hamilton"};
+    if(index <SOSPETTI_N && index>-1) {
+        strcpy(copyArea,sospetti[index]);
+        return copyArea;
+    }else{
+        printf("Errore nell'offset di ingresso!\n");
+        return NULL;
+    }
+}
+
+void copiaMoveset(int copyArea[STANZE_N][STANZE_N]) {
+    int moveset[STANZE_N][STANZE_N] = {
+            0, 4, 8, 4, 8, 12, 16, 12, 14,
+            4, 0, 4, 8, 12, 8, 12, 8, 10,
+            8, 4, 0, 12, 16, 12, 8, 4, 6,
+            4, 8, 12, 0, 4, 8, 12, 8, 10,
+            8, 12, 16, 4, 0, 4, 8, 12, 10,
+            12, 8, 12, 8, 4, 0, 4, 8, 6,
+            16, 12, 8, 12, 8, 4, 0, 4, 2,
+            12, 8, 4, 8, 12, 8, 4, 0, 2,
+            14, 10, 6, 10, 10, 6, 2, 2, 0};
+    memcpy(copyArea, moveset, STANZE_N*STANZE_N*sizeof(int));
+
+}
+
 

@@ -13,6 +13,8 @@
 void leggiTaccuino(char* filename){
     FILE* tac;
     char buf[STANDARD_STRLEN + 4], *sbuffer;
+    int linebuf = SBUF;
+
     strcpy(buf, filename);
     strcat(buf, ".tac");
 
@@ -22,14 +24,14 @@ void leggiTaccuino(char* filename){
     }
     sbuffer = (char*)malloc(SBUF*sizeof(char)); //la misura non conta molto, getline espande il buffer con realloc se necessario.
     while(!feof(tac)){
-        getline(&sbuffer, (size_t*)&SBUF, tac);
+        getline(&sbuffer, (size_t*)&linebuf, tac);
         printf("%s\n", sbuffer);
     }
 }
 
 void scriviTaccuino(char* filename, char* message){
     FILE* tac;
-    char buf[STANDARD_STRLEN + 4], *sbuffer;
+    char buf[STANDARD_STRLEN + 4];
     strcpy(buf, filename);
     strcat(buf, ".tac");
 
@@ -41,15 +43,13 @@ void scriviTaccuino(char* filename, char* message){
     fclose(tac);
 }
 
-
 void rollDice(int dice[2]){
     dice[0] = rand()%D_SIDES+1;
     dice[1] = rand()%D_SIDES+1;
     printf("Hai fatto %d + %d\n", dice[0], dice[1]);
 }
 
-
-void validPaths(int layout[STANZE_N], int val, _Bool out[STANZE_N]){
+void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
     int i;
     for (i=0; i<STANZE_N; i++){
         if (layout[i]<= val)
@@ -71,16 +71,13 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     for ( i=0; i<tavolo->carteScoperte.numCarte && !found; i++){
         if(checkCard(stanza, arma, sospetto, matching)){ //non è importante far decidere quale mostrare qua.
             printf("Carta trovata sul tavolo!");
-            strcpy(message, tipi[matching->tipo]);
+            tipi(matching->tipo, message);
             strcat(message, " - ");
             strcat(message,  matching->desc);
             strcat(message, "\n");
             printf(message);
-            for(j=0; j<tavolo->numGiocatori; j++)
-                scriviTaccuino(tavolo->giocatori[j].nome, message);
+            //Se la carta è sul tavolo si trova già nel taccuino.
             return 0;
-
-
         }
         if (matching->next)
             matching = matching->next;
@@ -102,7 +99,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             printf("CARTE NELLA MANO DI %s\n",  tavolo->giocatori[i%tavolo->numGiocatori].nome);
             printf("Più carte dell' ipotesi sono nella tua mano. Decidi quale mostrare.\n");
             for (j=0; j<found; j++){
-                printf("%d: %s - %s\n", j, tipi[foundData[j].tipo], foundData[j].desc);
+                printf("%d: %s - %s\n", j, tipi(foundData[j].tipo, message), foundData[j].desc); //usiamo message come buffer temporaneo per la stringa di ritorno.
             }
             scanf("%d", &j);
             while(j<0 || j>=found){
@@ -113,7 +110,8 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
         }
         if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
             printf("Carta trovata nella mano di %s!\n", tavolo->giocatori[i%tavolo->numGiocatori].nome);
-            strcpy(message, tipi[foundData[0].tipo]); //che orrore le stringhe in c
+            tipi(foundData[0].tipo, message);
+            strcat(message, " - ");
             strcat(message, foundData[0].desc);
             strcat(message, "\n");
             printf(message);

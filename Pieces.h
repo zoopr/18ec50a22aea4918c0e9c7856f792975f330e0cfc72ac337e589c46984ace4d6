@@ -37,7 +37,7 @@ typedef struct board{
     int layout[STANZE_N][STANZE_N];
 } Tabellone;
 
-Mazzo* buildDeck(tipoCarta tipo, int numCarte, const char values[][STANDARD_STRLEN]);
+Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*));
 Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2);
 Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte);
 Carta* DealCards(Mazzo* mazzo, int numCarte);
