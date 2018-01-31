@@ -223,6 +223,13 @@ Tabellone* LoadBoard(char* filename){
 void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*)){
     _Bool winner = 0;
     char buf[SBUF];
+    float dummyInterest[3][STANZE_N];
+    int i;
+
+    for(i =0; i<tavolo->numGiocatori; i++){ //Assicurarci che non collida con la matrice di una partita precedente.
+        initInterest_Global(tavolo, &tavolo->giocatori[i] ,dummyInterest); // Stessi problemi dei taccuini. Le AI perdono la memoria per mancanza di identificativi di sessione nei salvataggi.
+        saveInterest_init(tavolo->giocatori[i].nome, dummyInterest);
+    }
 
     while(!winner){
         tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
@@ -430,9 +437,9 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             printf("%d - %s\n", dice[0], armi(dice[0], buf[0]));
         }
         dice[0] = suspectStrategy(interest[1]);
-        while(dice[0] >= ARMI_N || dice[0] < 0 ){
+        while(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per il debugging e per il testing di feature diverse.
             printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[0]);
-            scanf("%d", &dice[0]); //come nelle stanze. questa opzione è qua per il debugging e per il testing di feature diverse.
+            scanf("%d", &dice[0]);
         }
 
         printf("Quale sospetto ha compiuto il delitto?\n");
@@ -460,8 +467,6 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             interest[2][dice[1]]*=1.5;
         }
         printf("Turno finito.\n");
-
-
-
+        saveInterest(tavolo, interest);
     }
 }

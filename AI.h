@@ -14,6 +14,8 @@
 void printTableStatus (Tabellone* tavolo);
 void initInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]);
 void saveInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]);
+void initInterest_Global(Tabellone* tavolo,Giocatore* giocatore, float loadArea[3][STANZE_N]);
+void saveInterest_init(char* filename, float loadArea[3][STANZE_N]);
 void readInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]);
 void generateCoordinates(Carta* carta, int coords[2]);
 int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable[STANZE_N]);
