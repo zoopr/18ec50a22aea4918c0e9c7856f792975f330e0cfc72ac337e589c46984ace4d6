@@ -248,7 +248,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     if (giocatore->ipotesiEsatta){
         printf("Hai già compiuto l'ipotesi esatta.\n"
                "Premi un pulsante per procedere con il lancio dei dadi.\n");
-        while(getchar()); //ripulisce il buffer se viene dato in input più di un invio.
+        getchar(); //ripulisce il buffer se viene dato in input più di un invio.
         rollDice(dice);
         if (dice[0] == dice[1]){
             printf("Dadi doppi.\n");

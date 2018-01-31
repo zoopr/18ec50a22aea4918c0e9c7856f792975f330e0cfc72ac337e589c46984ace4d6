@@ -105,22 +105,22 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
                 printf("%d: %s - %s\n", j, tipi[foundData[j].tipo], foundData[j].desc);
             }
             scanf("%d", &j);
-            do{
+            while(j<0 || j>=found){
                 printf("Numero invalido. Reinserire.\n");
                 scanf("%d", &j);
-            }while(j<0 || j>=found);
+            }
             foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.
         }
         if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
             printf("Carta trovata nella mano di %s!\n", tavolo->giocatori[i%tavolo->numGiocatori].nome);
-            strcpy(message, tipi[foundData[0].tipo]);
-            strcat(message, " - ");
+            strcpy(message, tipi[foundData[0].tipo]); //che orrore le stringhe in c
             strcat(message, foundData[0].desc);
             strcat(message, "\n");
             printf(message);
             for(j=0; j<tavolo->numGiocatori; j++)
                 if(j != i%tavolo->numGiocatori) //Non scriviamo la mano tra le carte degli avversari. Ce l'abbiamo già nel taccuino.
-                    scriviTaccuino(tavolo->giocatori[j].nome, message);
+                    scriviTaccuino(tavolo->giocatori[j].nome, message);// la stessa carta può essere scritta più volte. ciò implica fare un errore idiota da giocatore.
+            // Senza fare il parsing del taccuino non c'è un buon modo per risolverlo. E il taccuino non ha un formato generico.
             return 0;
 
         }
