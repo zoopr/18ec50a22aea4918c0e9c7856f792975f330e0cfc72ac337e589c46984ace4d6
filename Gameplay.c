@@ -44,9 +44,19 @@ void scriviTaccuino(char* filename, char* message){
 }
 
 void rollDice(int dice[2]){
-    dice[0] = rand()%D_SIDES+1;
-    dice[1] = rand()%D_SIDES+1;
+    char msgbuf[2][STANDARD_STRLEN];
+    int i;
+
+    logger("Dadi tirati.\n");
+    for(i=0; i<2; i++) {
+        dice[i] = rand() % D_SIDES + 1;
+        dtoc(dice[i], msgbuf[i]);
+    }
     printf("Hai fatto %d + %d\n", dice[0], dice[1]);
+    strcat(msgbuf[0], " + ");
+    strcat(msgbuf[0], msgbuf[1]);
+    strcat(msgbuf[0], "\n");
+    logger(msgbuf[0]);
 }
 
 void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
@@ -63,19 +73,29 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     Carta* matching;
     int found = 0;
     Carta foundData[3];
-    char message[SBUF];
+    char message[SBUF] ="L'ipotesi del giocatore è:\t";
     int i, j;
+
+    strncat(message, stanza, strlen(stanza));
+    strcat(message, "\t");
+    strncat(message, arma, strlen(arma));
+    strcat(message, "\t");
+    strncat(message, sospetto, strlen(sospetto));
+    strcat(message, "\n");
+    logger(message);
 
     //controlla il tavolo
     matching = tavolo->carteScoperte.cima;
     for ( i=0; i<tavolo->carteScoperte.numCarte && !found; i++){
         if(checkCard(stanza, arma, sospetto, matching)){ //non è importante far decidere quale mostrare qua.
-            printf("Carta trovata sul tavolo!");
+            strcpy(message, "Carta trovata sul tavolo!");
+            printf(message);
+            logger(message);
             tipi(matching->tipo, message);
             strcat(message, " - ");
             strcat(message,  matching->desc);
             strcat(message, "\n");
-            printf(message);
+            logger(message);
             //Se la carta è sul tavolo si trova già nel taccuino.
             return 0;
         }
@@ -109,15 +129,17 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.
         }
         if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
-            printf("Carta trovata nella mano di %s!\n", tavolo->giocatori[i%tavolo->numGiocatori].nome);
+            strcpy(message,"Carta trovata nella mano di ");
+            strcat(message, tavolo->giocatori[i%tavolo->numGiocatori].nome);
+            strcat(message, "!\n");
+            printf(message);
+            logger(message);
             tipi(foundData[0].tipo, message);
             strcat(message, " - ");
             strcat(message, foundData[0].desc);
             strcat(message, "\n");
-            printf(message);
-            for(j=0; j<tavolo->numGiocatori; j++)
-                if(j != i%tavolo->numGiocatori) //Non scriviamo la mano tra le carte degli avversari. Ce l'abbiamo già nel taccuino.
-                    scriviTaccuino(tavolo->giocatori[j].nome, message);// la stessa carta può essere scritta più volte. ciò implica fare un errore idiota da giocatore.
+            logger(message); //La carta non è stampata nel printf
+            scriviTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome, message);// La carta è comunicata esclusivamente al taccuino del giocatore.
             // Senza fare il parsing del taccuino non c'è un buon modo per risolverlo. E il taccuino non ha un formato generico.
             return 0;
 
@@ -142,12 +164,14 @@ int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* c
 }
 
 
-void saveState(char filename[STANDARD_STRLEN], Tabellone* board){
+void saveState(char* filename, Tabellone* board){
+    int i, j;
+    Carta* carta;
+    char msgbuf[SBUF] = "\nPartita salvata in ";
     FILE* save = fopen(filename, "w"); //qualunque cosa ci sia la sovrascrive.
     if (!save)
         exit(-2);
-    int i, j;
-    Carta* carta;
+
 
     fwrite(&board->turnoCorrente, 1, sizeof(int), save); //scrive turnoCorrente, numeroTurni, numeroGiocatori.
     fwrite(&board->numeroTurni, 1, sizeof(int), save);
@@ -180,4 +204,18 @@ void saveState(char filename[STANDARD_STRLEN], Tabellone* board){
             carta = carta->next;
     }
     fclose(save);
+    // composizione del messaggio di logging.
+    strcat(msgbuf, filename);
+    strcat(msgbuf, "\n\n");
+    logger(msgbuf);
+}
+
+
+void logger(char* message){
+    FILE* logger = fopen(LOG_DEFAULT, "a");
+    if(!logger)
+        exit(-2);
+
+    fprintf(logger, message);
+    fclose(logger);
 }

@@ -83,9 +83,8 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     second = third = NULL; //per sicurezza visto che abbiamo liberato i mazzi contenitore.
     mainDeck = shuffleDeck(mainDeck, mainDeck->numCarte); //mescoliamo un'altra volta.
 
-
-    tavolo->carteScoperte.cima = DealCards(mainDeck, mainDeck->numCarte%numGiocatori);
     tavolo->carteScoperte.numCarte = mainDeck->numCarte%numGiocatori;
+    tavolo->carteScoperte.cima = DealCards(mainDeck, mainDeck->numCarte%numGiocatori);
 
     cartePerGiocatore = mainDeck->numCarte / numGiocatori;
     for (i = 0; i<numGiocatori; i++){
@@ -99,6 +98,8 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
         strcpy(buffer, tavolo->giocatori[i].nome);
         strcat(buffer, ".tac");
         tac = fopen(buffer, "w"); //la tag w ci assicura che se esiste viene azzerato.
+        if(!tac)
+            exit(-2);
         fprintf(tac, "Le carte sul tavolo sono %d\n", tavolo->carteScoperte.numCarte);
         carta = tavolo->carteScoperte.cima;
         for (j=0; j<tavolo->carteScoperte.numCarte; j++){
@@ -118,6 +119,8 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
         fclose(tac); // possiamo usare a+ ai turni successivi.
     }
 
+    logger("\nCominciata nuova partita.\n");
+
     return tavolo;
 
 }
@@ -127,8 +130,9 @@ Tabellone* LoadBoard(char* filename){
     int i, j;
     Giocatore *ultimoG;
     Carta *ultimaC, *codaC;
+    char msgbuf[SBUF] = "\nCaricata partita da ";
 
-    FILE* save = fopen(filename, "r+");
+    FILE* save = fopen(filename, "r");
     if (!save){
         printf("Errore nel caricamento del file\n"
         "Verificare il nome e la posizione del file di salvataggio.\n");
@@ -204,15 +208,18 @@ Tabellone* LoadBoard(char* filename){
         fclose(save);
         //non ci preoccupiamo dei taccuini. La tag "a" crea i file se non esistenti.
         //...anche se taccuini di terze parti formattati in altri modi possono essere disorientanti.
+        strcat(msgbuf, filename);
+        strcat(msgbuf, "\n");
+        logger(msgbuf);
+
         return table;
     }
-
 
 }
 
 void MainGame(Tabellone* tavolo){
     _Bool winner = 0;
-    char buf[STANDARD_STRLEN];
+    char buf[SBUF];
 
     while(!winner){
         tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
@@ -227,6 +234,9 @@ void MainGame(Tabellone* tavolo){
         }
         winner = Turn(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
     }
+    strcpy(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);
+    strcat(buf, " ha vinto.\n");
+    logger(buf);
     printf("                                 _         _           _             _ _ \n"
            "  ___ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _ ___(_) ___  _ __ (_) |\n"
            " / __/ _ \\| '_ \\ / _` | '__/ _` | __| | | | |/ _` |_  / |/ _ \\| '_ \\| | |\n"
@@ -237,6 +247,7 @@ void MainGame(Tabellone* tavolo){
            "Djanni può finalmente riposare in pace.\n\n"
            "...almeno fino al gioco dell'anno prossimo.\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
     //todo record stats
+    logger("Partita finita.\n");
     printf("Premere un pulsante per terminare\n");
     getchar();
 }
@@ -246,7 +257,14 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     _Bool reachable[STANZE_N];
     char buf[3][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
 
-    printf("TURNO %d - GIOCATORE: %s\n", tavolo->numeroTurni, tavolo->giocatori[tavolo->turnoCorrente].nome);
+    strcpy(buf[0], "TURNO ");
+    strcat(buf[0],  dtoc(tavolo->numeroTurni, buf[1]));
+    strcat(buf[0], " - Giocatore: ");
+    strcat(buf[0], giocatore->nome);
+    strcat(buf[0], "\n");
+    printf(buf[0]);
+    logger(buf[0]);
+
     leggiTaccuino(giocatore->nome);
     if (giocatore->ipotesiEsatta){
         printf("Hai già compiuto l'ipotesi esatta.\n"
@@ -290,7 +308,12 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
                     scanf("%d", &dice[1]);
                 }
                 giocatore->stanza = dice[1];
-                printf("Giocatore %s spostato in %s\n", giocatore->nome, stanze(dice[1],buf[0]));
+                strcpy(buf[0], "Giocatore spostato in ");
+                strcat (buf[0], stanze(dice[1],buf[1]));
+                strcat(buf[0], "\n");
+                printf(buf[0]);
+                logger(buf[0]);
+
             }else {
                 printf("Giocatore obbligato a rimanere in %s\n", stanze(giocatore->stanza, buf[0]));
             }

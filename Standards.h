@@ -15,6 +15,7 @@
 #define GIOCATORI_MAX 6
 #define GIOCATORI_MIN 3
 #define SBUF 256
+#define LOG_DEFAULT "log.txt"
 
 typedef enum {ARMA, SOSPETTO, STANZA} tipoCarta;
 
@@ -23,5 +24,6 @@ char* stanze(int index, char* copyArea);
 char* armi(int index, char* copyArea);
 char* sospetti(int index, char* copyArea);
 void copiaMoveset(int copyArea[STANZE_N][STANZE_N]);
+char* dtoc(int decimal, char copyArea[STANDARD_STRLEN]);
 
 #endif //CLUEDO_STANDARDS_H

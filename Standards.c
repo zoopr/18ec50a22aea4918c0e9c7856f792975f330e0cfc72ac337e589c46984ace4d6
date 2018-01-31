@@ -66,4 +66,24 @@ void copiaMoveset(int copyArea[STANZE_N][STANZE_N]) {
     memcpy(copyArea, moveset, STANZE_N*STANZE_N*sizeof(int));
 }
 
+char* dtoc(int decimal, char copyArea[STANDARD_STRLEN]){ //supporto fino a 10^24 turni. Se non si fanno partite lunghe decenni o l'AI fallisce miseramente, è sicuro.
+    int i, j;
+    char buf[STANDARD_STRLEN];
+
+
+    for(i =0; i<STANDARD_STRLEN && decimal>0; i++, decimal/=10){
+        buf[i] = (char)('0' + decimal%10);
+    }
+    buf[i] = '\0'; //per usare correttamente strlen;
+
+
+    for(j=0, i--; j<strlen(buf); i--, j++){ //deincremento i per evitare di scrivere null nel primo carattere.
+        copyArea[j] = buf[i];
+    }
+    copyArea[j] = '\0';
+
+
+    return copyArea;
+}
+
 
