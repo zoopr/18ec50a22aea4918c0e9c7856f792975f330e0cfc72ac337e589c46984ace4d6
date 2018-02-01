@@ -169,6 +169,7 @@ Tabellone* LoadBoard(char* filename){
 
         }
         fread(&table->carteScoperte.numCarte, 1, sizeof(int), save); //Carichiamo le carte scoperte.
+        table->carteScoperte.cima = NULL;
         for (i = 0; i < table->carteScoperte.numCarte; i++) {
             ultimaC = (Carta *) malloc(sizeof(Carta));
             if (!ultimaC)
@@ -182,6 +183,7 @@ Tabellone* LoadBoard(char* filename){
                 while (codaC->next)
                     codaC = codaC->next;
                 codaC->next = ultimaC;
+                ultimaC->next = NULL;
             }
 
         }
@@ -218,6 +220,39 @@ Tabellone* LoadBoard(char* filename){
         return table;
     }
 
+}
+
+void FreeBoard(Tabellone* tavolo){
+    int i, j;
+    Carta *card1, *card2;
+
+    //Liberiamo le carte sul tavolo, scoperte e soluzione.
+    card1 = tavolo->soluzione.cima;
+    for (i = 0; i < tavolo->soluzione.numCarte; i++) {
+        card2 = card1->next;
+        free(card1);
+        card1 = card2;
+    }
+    card1 = tavolo->carteScoperte.cima;
+    for (i = 0; i < tavolo->carteScoperte.numCarte; i++) {
+        card2 = card1->next;
+        free(card1);
+        card1 = card2;
+    }
+    //Liberiamo le carte in mano a ogni giocatore.
+    for (i=0; i<tavolo->numGiocatori; i++){
+        card1 = tavolo->giocatori[i].mano.cima;
+        for (j = 0; j < tavolo->giocatori[i].mano.numCarte; j++) {
+            card2 = card1->next;
+            free(card1);
+            card1 = card2;
+        }
+    }
+    //Liberiamo l'array dei giocatori. Questo ci libera anche dei mazzi interni alle loro strutture.
+    free(tavolo->giocatori);
+    //Liberiamo il tavolo e con lui i mazzi che abbiamo liberato per primi.
+    free(tavolo);
+    tavolo = NULL;
 }
 
 void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool AI){

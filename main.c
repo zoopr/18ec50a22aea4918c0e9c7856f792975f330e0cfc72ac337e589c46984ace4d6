@@ -92,7 +92,8 @@ int main() {
         } else {
             MainGame(tavolo, Turn, AI_mode);
         }
-        //Alla fine di una partita.
+        //Alla fine di una partita, libera la memoria allocata dinamicamente e invia il prompt per rigiocare.
+        FreeBoard(tavolo);
         printf("\nProcedere con un'altra partita? S/N\n");
         scanf("%s", buffer);
         switch (tolower(buffer[0])) {
