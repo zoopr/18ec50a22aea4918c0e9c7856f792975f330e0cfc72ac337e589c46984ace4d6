@@ -426,7 +426,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         //Decisione spostamento se disponibile
         if(dice[1] > 1){
             printf("\nIn quale stanza desideri muoverti?\n");
-            dice[1] = movementStrategy(interest[0], reachable);
+            dice[1] = movementStrategy(interest[2], reachable);
             printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
             while(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
                 printf("Posizione non raggiungibile. Inserire stanza ammessa.\n");
@@ -450,7 +450,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
             printf("%d - %s\n", dice[0] + 1, armi(dice[0], buf[0]));
         }
-        dice[0] = suspectStrategy(interest[1]);
+        dice[0] = suspectStrategy(interest[0]);
         printf("L'AI ha scelto l'opzione %d\n", dice[0] + 1);
         while(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per la visualizzazione d'errore.
             printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[0]);
@@ -462,7 +462,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
             printf("%d - %s\n", dice[1] + 1, sospetti(dice[1], buf[0]));
         }
-        dice[1] = suspectStrategy(interest[2]);
+        dice[1] = suspectStrategy(interest[1]);
         printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
         while(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
             printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[1]);
