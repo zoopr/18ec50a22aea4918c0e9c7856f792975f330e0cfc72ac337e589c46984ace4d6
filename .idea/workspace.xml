@@ -11,11 +11,8 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e5106a0c-e2e0-429b-964e-bbd7d4d84e1c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/BoardManager.c.obj" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/BoardManager.c.obj" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/main.c.obj" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/main.c.obj" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/objects.a" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/objects.a" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/cluedo.exe" afterPath="$PROJECT_DIR$/cmake-build-debug/cluedo.exe" />
+    <list default="true" id="e5106a0c-e2e0-429b-964e-bbd7d4d84e1c" name="Default" comment="day 3. Fixed MAJOR game loading issues. Implemented deallocation at the end of the game.">
+      <change beforePath="$PROJECT_DIR$/Gameplay.h" afterPath="$PROJECT_DIR$/Gameplay.h" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -75,11 +72,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AI.h" pinned="false" current-in-tab="false">
+      <file leaf-file-name="AI.h" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/AI.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+            <state relative-caret-position="75">
+              <caret line="5" column="73" lean-forward="true" selection-start-line="5" selection-start-column="73" selection-end-line="5" selection-end-column="73" />
               <folding />
             </state>
           </provider>
@@ -111,8 +108,8 @@
       <file leaf-file-name="Gameplay.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Gameplay.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="45">
-              <caret line="3" column="53" lean-forward="false" selection-start-line="3" selection-start-column="53" selection-end-line="3" selection-end-column="53" />
+            <state relative-caret-position="345">
+              <caret line="23" column="80" lean-forward="false" selection-start-line="23" selection-start-column="80" selection-end-line="23" selection-end-column="80" />
               <folding>
                 <element signature="e#877#899#0" expanded="true" />
               </folding>
@@ -132,7 +129,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AI.c" pinned="false" current-in-tab="true">
+      <file leaf-file-name="AI.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/AI.c">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-295">
@@ -209,7 +206,6 @@
         <option value="$PROJECT_DIR$/Gameplay.c" />
         <option value="$PROJECT_DIR$/AI.h" />
         <option value="$PROJECT_DIR$/Pieces.c" />
-        <option value="$PROJECT_DIR$/Gameplay.h" />
         <option value="$PROJECT_DIR$/Pieces.h" />
         <option value="$PROJECT_DIR$/Standards.h" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
@@ -218,6 +214,7 @@
         <option value="$PROJECT_DIR$/BoardManager.h" />
         <option value="$PROJECT_DIR$/main.c" />
         <option value="$PROJECT_DIR$/BoardManager.c" />
+        <option value="$PROJECT_DIR$/Gameplay.h" />
       </list>
     </option>
   </component>
@@ -350,7 +347,7 @@
       <workItem from="1517403997697" duration="50569000" />
       <workItem from="1517490491043" duration="21175000" />
       <workItem from="1517519371224" duration="75000" />
-      <workItem from="1517520085923" duration="4570000" />
+      <workItem from="1517520085923" duration="5522000" />
     </task>
     <task id="LOCAL-00001" summary="day1. started writing basic structures. Nothing works yet.">
       <created>1517275196847</created>
@@ -601,7 +598,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="133931000" />
+    <option name="totallyTimeSpent" value="134883000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -622,7 +619,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3268817" sideWeight="0.5021075" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.4963119" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32795697" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24958678" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -1155,32 +1152,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Gameplay.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="53" lean-forward="false" selection-start-line="3" selection-start-column="53" selection-end-line="3" selection-end-column="53" />
-          <folding>
-            <element signature="e#877#899#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Standards.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="24" column="14" lean-forward="false" selection-start-line="24" selection-start-column="14" selection-end-line="24" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/AI.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Gameplay.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1635">
@@ -1206,14 +1177,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
           <caret line="95" column="26" lean-forward="false" selection-start-line="95" selection-start-column="26" selection-end-line="95" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pieces.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-15">
-          <caret line="13" column="20" lean-forward="false" selection-start-line="13" selection-start-column="20" selection-end-line="13" selection-end-column="20" />
           <folding />
         </state>
       </provider>
@@ -1262,6 +1225,40 @@
             <element signature="e#6205#7124#0" expanded="false" />
             <element signature="e#7126#8456#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Standards.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="24" column="14" lean-forward="false" selection-start-line="24" selection-start-column="14" selection-end-line="24" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Gameplay.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" column="80" lean-forward="false" selection-start-line="23" selection-start-column="80" selection-end-line="23" selection-end-column="80" />
+          <folding>
+            <element signature="e#877#899#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pieces.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-15">
+          <caret line="13" column="20" lean-forward="false" selection-start-line="13" selection-start-column="20" selection-end-line="13" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AI.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="73" lean-forward="true" selection-start-line="5" selection-start-column="73" selection-end-line="5" selection-end-column="73" />
+          <folding />
         </state>
       </provider>
     </entry>

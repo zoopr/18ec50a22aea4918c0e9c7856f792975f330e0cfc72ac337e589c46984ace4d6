@@ -21,7 +21,7 @@
 #include "Pieces.h"
 
 #define D_SIDES 6 //se si vuole giocare con dadi diversi.
-#define D_N 2 //Macro per il numero di dadi. Aumentare, ma non diminuire. Vari vettori per il lancio dei dadi sono usati per gestire dati temporaneamente.
+#define D_N 2 //Macro per il numero di dadi. Vivamente sconsigliato modificarla.
 
 void leggiTaccuino(char* filename);
 void rollDice(int dice[D_N]);
