@@ -1,7 +1,8 @@
 //
 // Created by Mat on 18/01/30.
 //
-// Contiene Tutti gli standard e le costanti di rilevanza globale nel progetto.
+// Contiene tutti gli standard e le costanti di rilevanza globale nel progetto,
+// incluse qualsiasi funzione di utility non disponibile nelle librerie standard.
 // Le funzioni sono commentate lungo il sorgente.
 //
 

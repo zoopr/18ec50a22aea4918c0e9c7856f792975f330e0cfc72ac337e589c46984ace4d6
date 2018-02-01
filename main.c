@@ -22,8 +22,6 @@ int main() {
 
     srand((unsigned int)time(NULL)); //inizializziamo il seed per tutte le operazioni di partita.
 
-
-
     printf("\n"
            " .d8888b.  888      88888     888 8888888888 8888888b.   .d88888b.  \n"
            "d88P  Y88b 888      88888     888 888        888  \"Y88b d88P\" \"Y88b \n"

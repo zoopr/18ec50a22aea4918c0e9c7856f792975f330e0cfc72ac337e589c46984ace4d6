@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "Pieces.h"
 
-Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*) ){
+Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*) ){ //Costruisce un mazzo da una delle nostre funzioni-vettore, alloca e collega le carte.
     int i;
     Carta vettore[numCarte];
     Carta *lista, *newElem;

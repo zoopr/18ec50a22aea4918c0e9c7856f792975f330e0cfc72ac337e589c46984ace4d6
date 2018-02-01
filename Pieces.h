@@ -17,7 +17,7 @@ typedef struct card{
     struct card* next;
 } Carta;
 
-typedef struct deck{ //usato sia per i mazzi sul tavolo che per le mani dei giocatori.
+typedef struct deck{ // Usato sia per i mazzi sul tavolo che per le mani dei giocatori.
     int numCarte;
     Carta* cima;
 } Mazzo;

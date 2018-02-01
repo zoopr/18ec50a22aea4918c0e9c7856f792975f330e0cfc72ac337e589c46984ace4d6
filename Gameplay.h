@@ -3,6 +3,8 @@
 //
 // Controllo degli step logici all'interno del turno.
 // Gestione delle task principali di read/write su disco e delle varie routine lungo i turni.
+// L'acquisizione dati dall'utente è gestita tramite strtol, che permette di sanitizzare l'input non-numerico settandolo a 0.
+// I menu sono presentati all'utente a partire da 1, sia per convenienza che per la gestione dell'eccezione appena accennata.
 // Le funzioni sono commentate lungo il sorgente.
 //
 // NOTA SUL TACCUINO
@@ -18,8 +20,8 @@
 #include "Standards.h"
 #include "Pieces.h"
 
-#define D_SIDES 6 //giusto in caso si voglia giocare con dadi diversi.
-#define D_N 2 //se si vuole aumentare il numero. Non diminuire. Varie grandezze sono usate come vettori lunghi almeno 2.
+#define D_SIDES 6 //se si vuole giocare con dadi diversi.
+#define D_N 2 //Macro per il numero di dadi. Aumentare, ma non diminuire. Vari vettori per il lancio dei dadi sono usati per gestire dati temporaneamente.
 
 void leggiTaccuino(char* filename);
 void rollDice(int dice[D_N]);

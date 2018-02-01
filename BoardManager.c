@@ -10,8 +10,6 @@
 #include "Gameplay.h"
 #include "AI.h"
 
-
-
 Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i valori iniziali come la posizione.
     int i; // Nella verisone umana chiede anche un nome per i giocatori.
     Giocatore* listaGiocatori;
@@ -262,7 +260,7 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
            "                 |___/                                                   \n"
            "\n%s ha vinto!\n"
            "Djanni può finalmente riposare in pace.\n\n"
-           "...almeno fino al gioco dell'anno prossimo.\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
+           "...fino al gioco dell'anno prossimo.\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
 
     statTrack(tavolo);
     statSave(tavolo);

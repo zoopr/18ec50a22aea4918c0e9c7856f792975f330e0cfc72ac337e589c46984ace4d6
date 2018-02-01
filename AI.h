@@ -8,8 +8,6 @@
 // Le funzioni sono commentate lungo il sorgente.
 //
 
-
-
 #ifndef CLUEDO_AI_H
 #define CLUEDO_AI_H
 
