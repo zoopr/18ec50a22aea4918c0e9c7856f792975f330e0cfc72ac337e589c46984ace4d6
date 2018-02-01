@@ -15,7 +15,7 @@ Giocatore* playerInit(int* num);
 Tabellone* FreshStart();
 Tabellone* LoadBoard(char* filename);
 
-void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*));
+void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool AI);
 _Bool Turn(Tabellone* tavolo, Giocatore* giocatore);
 _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore);
 

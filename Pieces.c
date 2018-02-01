@@ -3,7 +3,6 @@
 //
 
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
 #include "Pieces.h"
 
@@ -44,7 +43,7 @@ Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*) ){
     mazzo->cima = lista;
 
 
-    mazzo = shuffleDeck(mazzo, mazzo->numCarte); //mescoliamo il mazzo prima di presentarlo all'esterno.
+    mazzo = shuffleDeck_improved(mazzo, mazzo->numCarte); //mescoliamo il mazzo prima di presentarlo all'esterno.
     return mazzo;
 }
 
@@ -62,37 +61,6 @@ Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2){
     return m1;
 }
 
-Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte){
-    int i, j, k;
-    Carta *copy;
-    Carta *rebuild = (Carta*)calloc(numCarte, sizeof(Carta));
-    _Bool *called = (_Bool*)calloc(numCarte, sizeof(_Bool)); //già inizializzato a zero.
-
-    //costruisce un vettore statico random, poi sovrascrive le informazioni non di link.
-    //dal punto di vista pratico, stiamo randomizzando in quale locazione di memoria stia quale informazione.
-    for (i=0; i<numCarte; i++){
-        do {
-            j = rand() % numCarte;
-        }while(called[j]);
-        called[j] = 1;
-        for(k=0, copy = mazzo->cima; k<j; k++){
-            copy = copy->next;
-        }
-        rebuild[i].tipo = copy->tipo;
-        strcpy(rebuild[i].desc, copy->desc);
-    }
-    copy = mazzo->cima;
-    for (i=0; i<numCarte; i++){
-        strcpy(copy->desc ,rebuild[i].desc);
-        copy->tipo = rebuild[i].tipo;
-        if (copy->next)
-            copy = copy->next;
-    }
-    free(rebuild);
-    free(called);
-    return mazzo;
-}
-
 Carta* DealCards(Mazzo* mazzo, int numCarte){ //ritorna numCarte carte, aggiorna il mazzo per cominciare da quel punto.
     Carta *segnaposto, *testa;
     segnaposto = testa =  mazzo->cima;
@@ -106,6 +74,48 @@ Carta* DealCards(Mazzo* mazzo, int numCarte){ //ritorna numCarte carte, aggiorna
         segnaposto->next = NULL;
     }
     mazzo->numCarte -= numCarte;
+    if (!mazzo->numCarte){ //Se per qualsiasi motivo la coda della lista non era terminata correttamente. Può essere artifatto di malloc()
+        mazzo->cima = NULL;
+    }
     return testa;
+}
+
+Mazzo* shuffleDeck_improved(Mazzo* mazzo, int numCarte){ //Fisher-Yates in-place. Matematicamente ottimale, anche se con piccoli problemi
+    int i, j, k;                                         // a garantire completa casualità con seed generati da operazioni di modulo.
+    Carta *ph1, *ph2;
+    Carta *ref1, *ref2;
+
+    for(i=numCarte-1; i>0; i--){
+        j = rand()%(i+1);
+        if(j!=i){
+            ref1 = ref2 = mazzo->cima;
+            for (k = 0; k < i - 1; k++) {
+                if (k < j - 1) {
+                    ref2 = ref2->next;
+                }
+                ref1 = ref1->next;
+            }
+            if (j){
+                ph1 = ref1->next; //Sui due elementi da scambiare.
+                ph2 = ref2->next;
+                ref2->next = ph1;
+                ref1->next = ph2;
+                ref1 = ph1->next; //Salviamo il link per scambiare gli ultimi link sul posto
+                ph1->next = ph2->next;
+                ph2->next = ref1;
+            }
+            else{ //Se j è 0, il nostro reference è in realtà sull'elemento stesso e non quello prima.
+                ph1 = ref1->next;
+                ref1->next = ref2;
+                ph2 = ref2->next;
+                ref2->next = ph1->next;
+                ph1->next = ph2;
+                mazzo->cima = ph1; //Aggiorniamo il nuovo primo elemento.
+            }
+
+        }
+    }
+
+    return mazzo;
 }
 

@@ -42,7 +42,7 @@ typedef struct board{
 
 Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*));
 Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2);
-Mazzo* shuffleDeck(Mazzo* mazzo, int numCarte);
 Carta* DealCards(Mazzo* mazzo, int numCarte);
+Mazzo* shuffleDeck_improved(Mazzo* mazzo, int numCarte);
 
 #endif //CLUEDO_PIECES_H

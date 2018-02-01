@@ -9,14 +9,6 @@
 #include "AI.h"
 
 
-
-/* NOTA SUL TACCUINO
- * Il taccuino non ha alcun dato di identificazione se non il nome dele giocatore.
- * Cominciare una partita con lo stesso nome giocatore riscrive il contenuto del taccuino.
- * Continuare una partita precedente dopo tale evento comunica informazioni incorrette
- * sulla propria mano e il tavolo in console (il tavolo è e rimane intoccato).
- */
-
 void leggiTaccuino(char* filename){
     FILE* tac;
     char buf[STANDARD_STRLEN + 4], *sbuffer;
@@ -26,14 +18,18 @@ void leggiTaccuino(char* filename){
     strcat(buf, ".tac");
 
     tac = fopen(buf, "r");
-    if(!tac){
-        exit(-2);
+    if(tac){
+        sbuffer = (char*)malloc(SBUF*sizeof(char)); //la misura non conta molto, getline espande il buffer con realloc se necessario.
+        while(!feof(tac)){
+            getline(&sbuffer, (size_t*)&linebuf, tac);
+            printf("%s\n", sbuffer);
+        }
+    }else{
+        tac = fopen(buf, "a+"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
+        if (!tac) //Se pure la creazione automatica fallisce c'è chiaramente un errore di scala più grande del programma.
+            exit(-2);
     }
-    sbuffer = (char*)malloc(SBUF*sizeof(char)); //la misura non conta molto, getline espande il buffer con realloc se necessario.
-    while(!feof(tac)){
-        getline(&sbuffer, (size_t*)&linebuf, tac);
-        printf("%s\n", sbuffer);
-    }
+    fclose(tac);
 }
 
 void scriviTaccuino(char* filename, char* message){

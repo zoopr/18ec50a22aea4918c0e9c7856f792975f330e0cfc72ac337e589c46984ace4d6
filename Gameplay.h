@@ -5,6 +5,12 @@
 // Gestione delle task principali di read/write su disco e delle varie routine lungo i turni.
 // Le funzioni sono commentate lungo il sorgente.
 //
+// NOTA SUL TACCUINO
+// Il taccuino non ha alcun dato di identificazione se non il nome dele giocatore.
+// Cominciare una partita con lo stesso nome giocatore sovrascrive il contenuto del taccuino.
+// Continuare una partita precedente dopo tale evento dichiara informazioni incorrette
+// sulla propria mano e il tavolo in console all'inizio di ogni turno del giocatore.
+//
 
 #ifndef CLUEDO_GAMEPLAY_H
 #define CLUEDO_GAMEPLAY_H

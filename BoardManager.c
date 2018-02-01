@@ -1,8 +1,6 @@
 //
 // Created by Mat on 18/01/30.
 //
-// Control flow della partita e interazioni in-game.
-//
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +10,7 @@
 #include "Gameplay.h"
 #include "AI.h"
 
-#define DEBUG
+
 
 Giocatore* playerInit(int* num) {
     int i;
@@ -81,7 +79,7 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
 
     mainDeck = mergeDecks(mainDeck, mergeDecks(second, third)); //uniamo i tre mazzi in fila
     second = third = NULL; //per sicurezza visto che abbiamo liberato i mazzi contenitore in mergeDecks().
-    mainDeck = shuffleDeck(mainDeck, mainDeck->numCarte); //mescoliamo un'altra volta.
+    mainDeck = shuffleDeck_improved(mainDeck, mainDeck->numCarte); //mescoliamo un'altra volta.
 
     tavolo->carteScoperte.numCarte = mainDeck->numCarte%numGiocatori;
     tavolo->carteScoperte.cima = DealCards(mainDeck, mainDeck->numCarte%numGiocatori);
@@ -222,18 +220,20 @@ Tabellone* LoadBoard(char* filename){
 
 }
 
-void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*)){
+void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool AI){
     _Bool winner = 0;
     int i;
     char buf[SBUF];
     float loadArea[CARD_TYPES][STANZE_N];
 
-    for (i=0; i<tavolo->numGiocatori; i++){
-        tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
-        initInterest(tavolo, loadArea); //
-        showingStrategy(tavolo, &tavolo->giocatori[i], NULL, 0); // Inizializziamo le carte da nascondere a prescindere.
-
+    if(AI){
+        for (i=0; i<tavolo->numGiocatori; i++){
+            tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
+            initInterest(tavolo, loadArea); //
+            showingStrategy(tavolo, &tavolo->giocatori[i], NULL, 0); // Inizializziamo le carte da nascondere a prescindere.
+        }
     }
+
 
     while(!winner){
         tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;

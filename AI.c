@@ -168,22 +168,23 @@ int showingStrategy(Tabellone* tavolo, Giocatore* giocatore, int coords[], int l
     strcpy(buf, giocatore->nome);
     strcat(buf, "_hold.ai");
     shownMem = fopen(buf, "w+");
-    if (!shownMem) //effettivo problema.
+    if (!shownMem) //Problema di generazione file.
         exit(-2);
-    if(tavolo->numeroTurni<1){ //usato per l'inizializzazione a 0 al primo turno.
+    if(len == 0){ //usato per l'inizializzazione a 0 al primo turno.
         fwrite(shown, 6, sizeof(_Bool), shownMem);
         fclose(shownMem);
-    }else{
+    }else {
         fread(shown, 6, sizeof(_Bool), shownMem);// Carichiamo i dati nel vettore.
 
-        for (i = 0;i<len; i++){ //Scrolling nella nostra mano per vedere se abbiamo già presentato una carta agli indici contenuti in coords[]
-            if (shown[coords[i]] > 0){
+        for (i = 0; i <
+                    len; i++) { //Scrolling nella nostra mano per vedere se abbiamo già presentato una carta agli indici contenuti in coords[]
+            if (shown[coords[i]]) {
                 return i; //Ovviamente non richiede di aggiornare la nostra memoria.
             }
         }
         //Se siamo qua, nessuna carta che abbiamo già mostrato può essere mostrata.
         //Se nessuna delle carte da mostrare era stata mostrata prima, prendiamo la prima e registriamo che sia stata mostrata.
-        shown[coords[0]]= 1;
+        shown[coords[0]] = 1;
         fwrite(shown, 6, sizeof(_Bool), shownMem);
         fclose(shownMem);
     }

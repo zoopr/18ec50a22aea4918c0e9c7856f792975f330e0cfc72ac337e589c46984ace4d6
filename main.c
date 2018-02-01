@@ -19,7 +19,7 @@ int main() {
     _Bool next_phase, AI_mode = false;
     Tabellone* tavolo;
 
-    srand(time(NULL)); //inizializziamo il seed per tutte le operazioni di partita.
+    srand((unsigned int)time(NULL)); //inizializziamo il seed per tutte le operazioni di partita.
 
 
 
@@ -40,7 +40,7 @@ int main() {
                    );
     next_phase = false;
 
-    do{ //primo menu.
+    do{ //Primo menu. Inizializzazione tavolo da gioco.
         printf("Selezionare un'opzione.\n"
                        "1 - Comincia partita\n"
                        "2 - Carica partita\n"
@@ -88,10 +88,10 @@ int main() {
     }while(!next_phase);
 
     if (AI_mode){
-        MainGame(tavolo, Turn_AI);
+        MainGame(tavolo, Turn_AI, AI_mode);
     }
     else{
-        MainGame(tavolo, Turn);
+        MainGame(tavolo, Turn, AI_mode);
     }
 
     return 0;
