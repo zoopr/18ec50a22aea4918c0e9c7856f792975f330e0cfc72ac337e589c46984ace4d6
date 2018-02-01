@@ -2,7 +2,7 @@
 // Created by Mat on 18/01/30.
 //
 
-#include <mem.h>
+#include <string.h>
 #include <stdio.h>
 #include "Standards.h"
 
