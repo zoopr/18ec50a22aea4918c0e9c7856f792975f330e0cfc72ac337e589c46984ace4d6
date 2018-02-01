@@ -50,13 +50,13 @@ void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno anch
     }
 }
 
-void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){
+void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){ //Legge (o inizializza se mancante/danneggiato a metà partita) la matrice d'interesse del giocatore.
     char buf[SBUF];
     Giocatore* giocatore = &tavolo->giocatori[tavolo->turnoCorrente];
     strcpy(buf, giocatore->nome);
     strcat(buf, ".ai");
     FILE* interest = fopen(buf, "r+");
-    if(interest && !feof(interest) && tavolo->numeroTurni >= tavolo->numGiocatori){ // Ci assicura che al primo turno sia generato correttamente.
+    if(interest && !feof(interest)){ // Ci assicura che al primo turno sia generato correttamente.
         fread(loadArea, CARD_TYPES, STANZE_N*sizeof(float), interest);
         fclose(interest);
     }else { //Inizializza un diagramma interno e crea il file.
@@ -124,10 +124,11 @@ void generateCoordinates(Carta* carta, int coords[2]){ // Genera le coordinate s
 
 int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable[STANZE_N]){ //Decisione direttamente proporzionale al livello d'interesse su quella casella.
     float interesseCorretto[STANZE_N];
+    _Bool apathy[STANZE_N];
     int i;
     float sum, incremental, seed;
     for(i=0; i<STANZE_N; i++){
-        interesseCorretto[i] = interesseStanze[i]*reachable[i]; //azzera le stanze a cui non possiamo accedere questo turno.
+        interesseCorretto[i] = interesseStanze[i]*(float)reachable[i]; //azzera le stanze a cui non possiamo accedere questo turno.
     }
 
     sum = 0.0f;
@@ -143,13 +144,13 @@ int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable
             return i;
         }
     }
-    //Se nessuna delle stanze di cui abbia effetivo interesse è raggiungibile, l'AI si muove sulla prima raggiungibile.
+    //Se nessuna delle stanze di cui abbia effetivo interesse è raggiungibile, l'AI si muove secondo una logica random diretta.
     for(i=0; i<STANZE_N; i++){
-        if (reachable[i]){
-            return i;
-        }
+        interesseCorretto[i] = (float)reachable[i];
+        apathy[i] = 1;
     }
-
+    return movementStrategy(interesseCorretto, apathy); //In questa iterazione la maschera sono i float e il peso sono i bool, tutti uguali e positivi.
+                                                        // Dunque ha sempre soluzione casuale tra le stanze raggiungibili.
 }
 
 int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti e armi. Direttamente proporzionale al peso in "interesse".
@@ -177,7 +178,7 @@ int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti
     return 0;
 }
 
-int showingStrategy(Tabellone* tavolo, Giocatore* giocatore, int coords[], int len){ //Decide quali carte mostrare e aggiorna quelle mostrate.
+int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide quali carte mostrare e aggiorna quelle mostrate.
     _Bool shown[6] = {0, 0, 0, 0, 0, 0}; //c89 non permette l'inizializzazione parziale.
     char buf[SBUF];
     int i;

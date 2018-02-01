@@ -53,6 +53,7 @@ char* sospetti(int index, char* copyArea) {
 }
 
 void copiaMoveset(int copyArea[STANZE_N][STANZE_N]) {
+    int i, j;
     int moveset[STANZE_N][STANZE_N] = {
             0, 4, 8, 4, 8, 12, 16, 12, 14,
             4, 0, 4, 8, 12, 8, 12, 8, 10,
@@ -63,7 +64,11 @@ void copiaMoveset(int copyArea[STANZE_N][STANZE_N]) {
             16, 12, 8, 12, 8, 4, 0, 4, 2,
             12, 8, 4, 8, 12, 8, 4, 0, 2,
             14, 10, 6, 10, 10, 6, 2, 2, 0};
-    memcpy(copyArea, moveset, STANZE_N*STANZE_N*sizeof(int));
+    for (i=0; i<STANZE_N; i++){
+        for(j=0; j<STANZE_N; j++){
+            copyArea[i][j] = moveset[i][j];
+        }
+    }
 }
 
 char* dtoc(int decimal, char copyArea[STANDARD_STRLEN]){ //Da decimale a stringa. Supporto fino a 10^23, ben sopra il limite di un int da 4 byte. Usato nei dadi e nel turno.

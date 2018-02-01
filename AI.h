@@ -22,7 +22,7 @@ void initInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
 void saveInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
 void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
 void generateCoordinates(Carta* carta, int coords[2]);
-int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable[STANZE_N]);
+int movementStrategy(const float interesseStanze[STANZE_N], const _Bool reachable[STANZE_N]);
 int suspectStrategy(const float interesse_AoS[ARMI_N]);
-int showingStrategy(Tabellone* tavolo, Giocatore* giocatore, int coords[], int len);
+int showingStrategy(Giocatore* giocatore, const int coords[], int len);
 #endif //CLUEDO_AI_H

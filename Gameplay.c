@@ -66,7 +66,7 @@ void rollDice(int dice[D_N]){
 void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
     int i;
     for (i=0; i<STANZE_N; i++){
-        if (layout[i]<= val)
+        if (layout[i] <= val)
             out[i] = 1;
         else
             out[i] = 0;
@@ -88,13 +88,12 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     strncat(message, sospetto, strlen(sospetto));
     strcat(message, "\n");
     logger(message);
-    if(AI){
-        printf(message);
-    }
+    printf(message);
 
-    matching = tavolo->carteScoperte.cima; // Mai raggiungibile dall'AI.
+
+    matching = tavolo->carteScoperte.cima; // Mai raggiungibile dall'AI a meno che non si muova qua casualmente quando nessuna stanza d'interesse è disponibile.
     for ( i=0; i<tavolo->carteScoperte.numCarte; i++){
-        if(checkCard(stanza, arma, sospetto, matching) != -1){ //non è importante far decidere quale mostrare qua.
+        if(checkCard(stanza, arma, sospetto, matching) != -1){ //non è importante far decidere quale carta mostrare quando sono già sul tavolo.
             strcpy(message, "Carta trovata sul tavolo.\n");
             printf(message);
             logger(message);
@@ -103,8 +102,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             strcat(message,  matching->desc);
             strcat(message, "\n");
             logger(message);
-
-            //Se la carta è sul tavolo viene stampata di default a ogni turno.
+            //No printf: Se la carta è sul tavolo viene stampata di default a ogni turno.
             return 0;
         }
         if (matching->next)
@@ -128,23 +126,25 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             printf("MESSAGGIO PRIVATO PER %s\n",  tavolo->giocatori[i%tavolo->numGiocatori].nome);
             printf("Più carte dell' ipotesi sono nella tua mano. Decidi quale mostrare.\n");
             for (j=0; j<found; j++){
-                printf("%d: %s - %s\n", j, tipi(foundData[j].tipo, message), foundData[j].desc); //usiamo message come buffer temporaneo per la stringa di ritorno.
+                printf("%d: %s - %s\n", j + 1, tipi(foundData[j].tipo, message), foundData[j].desc); //usiamo message come buffer temporaneo per la stringa di ritorno.
             }
             if (AI){
-                j = showingStrategy(tavolo, &tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
-                printf("L'AI ha scelto l'opzione %d\n", j);
+                j = showingStrategy(&tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
+                printf("L'AI ha scelto l'opzione %d\n", j + 1);
             }else{
-                scanf("%d", &j);
+                scanf("%s", message);
+                j = strtol(message, NULL, 10) - 1;
             }
             while(j<0 || j>=found){ //Con la flag AI non dovrebbe mai entrare in questo branch.
                 printf("Numero invalido. Reinserire.\n");
-                scanf("%d", &j);
+                scanf("%s", message);
+                j = strtol(message, NULL, 10) - 1;
             }
             foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.
         }
         if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
             if (AI && found == 1){//Dobbiamo comunque aggiornare che carta abbiamo dovuto mostrare al giocatore corrente
-                showingStrategy(tavolo, &tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
+                showingStrategy(&tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
             }
             printf("\nIpotesi errata.\n");
             printf("MESSAGGIO PRIVATO PER %s\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
@@ -189,7 +189,6 @@ int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* c
     }
     return -1;
 }
-
 
 void saveState(char* filename, Tabellone* board){
     int i, j;
@@ -236,7 +235,6 @@ void saveState(char* filename, Tabellone* board){
     strcat(msgbuf, "\n\n");
     logger(msgbuf);
 }
-
 
 void logger(char* message){
     FILE* logger = fopen(LOG_DEFAULT, "a");
