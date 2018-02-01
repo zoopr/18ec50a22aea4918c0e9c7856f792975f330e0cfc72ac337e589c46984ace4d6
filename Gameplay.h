@@ -2,6 +2,8 @@
 // Created by Mat on 18/01/30.
 //
 // Controllo degli step logici all'interno del turno.
+// Gestione delle task principali di read/write su disco e delle varie routine lungo i turni.
+// Le funzioni sono commentate lungo il sorgente.
 //
 
 #ifndef CLUEDO_GAMEPLAY_H
@@ -10,10 +12,13 @@
 #include "Standards.h"
 #include "Pieces.h"
 
+#define D_SIDES 6 //giusto in caso si voglia giocare con dadi diversi.
+#define D_N 2 //se si vuole aumentare il numero. Non diminuire. Varie grandezze sono usate come vettori lunghi almeno 2.
+
 void leggiTaccuino(char* filename);
-void rollDice(int dice[2]);
+void rollDice(int dice[D_N]);
 void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]);
-int checkSolution(const char*stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[3][STANZE_N]);
+int checkSolution(const char*stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[CARD_TYPES][STANZE_N]);
 int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* card);
 void saveState(char* filename, Tabellone* board);
 void scriviTaccuino(char* filename, char* message);

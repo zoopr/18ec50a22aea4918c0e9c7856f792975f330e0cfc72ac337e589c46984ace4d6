@@ -2,6 +2,10 @@
 // Created by Mat on 18/01/31.
 //
 // Logica decisionale AI.
+// Decisioni sulla ipotesi basate sugli eventi dei turni precedenti e sulle carte a conoscenza dell'AI lungo la partita.
+// Decisioni su che carte mostrare a second di quali sono state mostrate.
+// R/W di queste informazioni in maniera azzerabile in sicurezza a ogni partita.
+// Le funzioni sono commentate lungo il sorgente.
 //
 
 
@@ -11,13 +15,14 @@
 
 #include "Pieces.h"
 
+#define INTEREST_FACTOR 1.5
+
 void printTableStatus (Tabellone* tavolo);
-void initInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]);
-void saveInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]);
-void initInterest_Global(Tabellone* tavolo,Giocatore* giocatore, float loadArea[3][STANZE_N]);
-void saveInterest_init(char* filename, float loadArea[3][STANZE_N]);
-void readInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]);
+void initInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
+void saveInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
+void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
 void generateCoordinates(Carta* carta, int coords[2]);
 int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable[STANZE_N]);
 int suspectStrategy(const float interesse_AoS[ARMI_N]);
+int showingStrategy(Tabellone* tavolo, Giocatore* giocatore, int coords[], int len);
 #endif //CLUEDO_AI_H

@@ -12,6 +12,8 @@
 #include "Gameplay.h"
 #include "AI.h"
 
+#define DEBUG
+
 Giocatore* playerInit(int* num) {
     int i;
     Giocatore* listaGiocatori;
@@ -73,7 +75,7 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
     mainDeck->numCarte--;
     second->numCarte--;
     third->numCarte--;
-    tavolo->soluzione.numCarte = 3;
+    tavolo->soluzione.numCarte = CARD_TYPES;
     printf("Omicidio eseguito. RIP Djanni.\n");
 
 
@@ -141,24 +143,24 @@ Tabellone* LoadBoard(char* filename){
         Tabellone *table = (Tabellone *) malloc(sizeof(Tabellone)); //seguendo il formato byte a byte delle specifiche.
         if (!table)
             exit(-1);
-        fread(table, 3, sizeof(int), save);
-        table->giocatori = (Giocatore*) calloc(table->numGiocatori, sizeof(Giocatore));
-        if (!table->giocatori)
+        fread(table, 3, sizeof(int), save); //Scrive i primi 3 int da disco, incluso il numero di giocatori necessario dopo.
+        table->giocatori = (Giocatore*) calloc(table->numGiocatori, sizeof(Giocatore)); //Allochiamo un vettore di dimensione variabile.
+        if (!table->giocatori)                                                          //in c89 non si può fare in allocazione automatica.
             exit(-1);
         for (i = 0; i < table->numGiocatori; i++) {
             ultimoG = &table->giocatori[i];
             fread(ultimoG, 1, STANDARD_STRLEN * sizeof(char) + 2 * sizeof(int), save);
-            fread(&ultimoG->mano.numCarte, 1, sizeof(int), save);
-            for (j = 0; j < ultimoG->mano.numCarte; j++) {
-                ultimaC = (Carta *) malloc(sizeof(Carta));
+            fread(&ultimoG->mano.numCarte, 1, sizeof(int), save); //Simile ai giocatori ma ogni carta è un nodo di LL
+            for (j = 0; j < ultimoG->mano.numCarte; j++) {        //e come tale lo possiamo allocare individualmente
+                ultimaC = (Carta *) malloc(sizeof(Carta));        //avendo il riferimento all'elemento successivo esplicito.
                 if (!ultimaC)
                     exit(-1);
-                fread(&ultimaC->tipo, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), save);
-                if (!ultimoG->mano.cima) {
+                fread(&ultimaC->tipo, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), save); //Il salvataggio contiene l'ordine e i valori non di link.
+                if (!ultimoG->mano.cima) {                                                        //Costruiamo i link della lista.
                     ultimoG->mano.cima = ultimaC;
                     ultimaC->next = NULL;
-                } else { //aggiungiamo in coda dalla second carta in poi.
-                    codaC = ultimoG->mano.cima;
+                } else {                                                                          //Aggiungiamo in coda dalla second carta in poi.
+                    codaC = ultimoG->mano.cima;                                                   //Preserviamo l'ordine con cui erano elencate.
                     while (codaC->next)
                         codaC = codaC->next;
                     codaC->next = ultimaC;
@@ -168,7 +170,7 @@ Tabellone* LoadBoard(char* filename){
             }
 
         }
-        fread(&table->carteScoperte.numCarte, 1, sizeof(int), save);
+        fread(&table->carteScoperte.numCarte, 1, sizeof(int), save); //Carichiamo le carte scoperte.
         for (i = 0; i < table->carteScoperte.numCarte; i++) {
             ultimaC = (Carta *) malloc(sizeof(Carta));
             if (!ultimaC)
@@ -185,7 +187,7 @@ Tabellone* LoadBoard(char* filename){
             }
 
         }
-        table->soluzione.numCarte = 3; //le carte segrete sono hardcoded per essere 3.
+        table->soluzione.numCarte = CARD_TYPES; //le carte segrete sono hardcoded per essere 3(o perlomeno una per tipo).
         table->soluzione.cima = NULL;
         for (i = 0; i < table->soluzione.numCarte; i++) {
             ultimaC = (Carta *) malloc(sizeof(Carta));
@@ -222,13 +224,15 @@ Tabellone* LoadBoard(char* filename){
 
 void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*)){
     _Bool winner = 0;
-    char buf[SBUF];
-    float dummyInterest[3][STANZE_N];
     int i;
+    char buf[SBUF];
+    float loadArea[CARD_TYPES][STANZE_N];
 
-    for(i =0; i<tavolo->numGiocatori; i++){ //Assicurarci che non collida con la matrice di una partita precedente.
-        initInterest_Global(tavolo, &tavolo->giocatori[i] ,dummyInterest); // Stessi problemi dei taccuini. Le AI perdono la memoria per mancanza di identificativi di sessione nei salvataggi.
-        saveInterest_init(tavolo->giocatori[i].nome, dummyInterest);
+    for (i=0; i<tavolo->numGiocatori; i++){
+        tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
+        initInterest(tavolo, loadArea); //
+        showingStrategy(tavolo, &tavolo->giocatori[i], NULL, 0); // Inizializziamo le carte da nascondere a prescindere.
+
     }
 
     while(!winner){
@@ -262,13 +266,13 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*)){
 
     logger("Partita finita.\n");
     printf("Premere un pulsante per terminare\n");
-    getchar();
+    while(!getchar());
 }
 
 _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     int dice[2];
     _Bool reachable[STANZE_N];
-    char buf[3][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
+    char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
 
     strcpy(buf[0], "\nTURNO ");
     strcat(buf[0],  dtoc(tavolo->numeroTurni, buf[1]));
@@ -290,7 +294,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             return 1;
         }
         else{
-            printf("Dadi spaiati. Turno finito.\n");
+            printf("Dadi spaiati. Turno finito.\n\n");
             return 0;
         }
     }
@@ -358,7 +362,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
         }
-        printf("Turno finito.\n");
+        printf("Turno finito.\n\n");
 
 
 
@@ -366,10 +370,10 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
 }
 
 _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più aderente possibile alla partita tradizionale, ma con feature che è meglio separare accuratamente.
-    int dice[2];
+    int dice[D_N];
     _Bool reachable[STANZE_N];
-    char buf[3][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
-    float interest[3][STANZE_N]; //parte della logica decisionale AI
+    char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
+    float interest[CARD_TYPES][STANZE_N]; //parte della logica decisionale AI
 
     strcpy(buf[0], "\nTURNO ");
     strcat(buf[0],  dtoc(tavolo->numeroTurni, buf[1]));
@@ -380,8 +384,8 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     logger(buf[0]);
 
     printTableStatus(tavolo); //stampa la posizione di ogni carta distribuita.
-    readInterest(tavolo, interest); //se è il primo turno, chiama initInterest e genera l'analisi di mazzo e tavolo.
-                                    //Altrimenti carica la matrice esistente nell'interesse del giocatore corrente.
+    readInterest(tavolo, interest); // Carica la matrice esistente nell'interesse del giocatore corrente.
+
     if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
         printf("Hai già compiuto l'ipotesi esatta.\n"
                        "Procedi direttamente al lancio dei dadi.\n");
@@ -393,7 +397,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             return 1;
         }
         else{
-            printf("Dadi spaiati. Turno finito.\n");
+            printf("Dadi spaiati. Turno finito.\n\n");
             return 0;
         }
     }
@@ -415,6 +419,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         if(dice[1] > 1){
             printf("\nIn quale stanza desideri muoverti?\n");
             dice[1] = movementStrategy(interest[0], reachable);
+            printf("L'AI ha scelto l'opzione %d\n", dice[1]);
             while(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
                 printf("Posizione non raggiungibile. Inserire stanza ammessa.\n");
                 scanf("%d", &dice[1]); //L'AI non sbaglia, specie con l'accesso diretto alla mask reachable. se atterriamo qua c'è da fare debugging.
@@ -437,6 +442,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             printf("%d - %s\n", dice[0], armi(dice[0], buf[0]));
         }
         dice[0] = suspectStrategy(interest[1]);
+        printf("L'AI ha scelto l'opzione %d\n", dice[0]);
         while(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per il debugging e per il testing di feature diverse.
             printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[0]);
             scanf("%d", &dice[0]);
@@ -447,6 +453,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             printf("%d - %s\n", dice[1], sospetti(dice[1], buf[0]));
         }
         dice[1] = suspectStrategy(interest[2]);
+        printf("L'AI ha scelto l'opzione %d\n", dice[1]);
         while(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
             printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[1]);
             scanf("%d", &dice[1]);
@@ -454,7 +461,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 1, interest);
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
-                           "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
+                           "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n\n");
         }else{
             /*
              * C'è una possibilità statistica non indifferente che le carte parte di una soluzione sbagliata ma non
@@ -462,11 +469,11 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
              * Questa sezione aggiusta un bias per le carte chiamate più volte e mai contestate.
              * La carta trovata è stata in precedenza azzerata.
              */
-            interest[0][giocatore->stanza]*=1.5;
-            interest[1][dice[0]]*=1.5;
-            interest[2][dice[1]]*=1.5;
+            interest[0][giocatore->stanza]*=INTEREST_FACTOR;
+            interest[1][dice[0]]*=INTEREST_FACTOR;
+            interest[2][dice[1]]*=INTEREST_FACTOR;
         }
-        printf("Turno finito.\n");
+        printf("Turno finito.\n\n");
         saveInterest(tavolo, interest);
     }
 }

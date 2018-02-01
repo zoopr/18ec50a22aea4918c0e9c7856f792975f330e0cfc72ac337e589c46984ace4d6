@@ -1,3 +1,10 @@
+//
+// Created by Mat on 18/01/30.
+//
+// Interfaccia di inizializzazione e setup del tavolo da gioco.
+// Selettore AI mode e visualizzatore statistiche.
+//
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -61,7 +68,7 @@ int main() {
     }while(!next_phase);
 
     next_phase = false;
-    do{ //secondo menu. AI mode
+    do{ //secondo menu. Selezione umana o AI.
         printf("Modalità di gioco\n"
                        "1 - Classica\n"
                        "2 - AI mode\n");
@@ -75,15 +82,12 @@ int main() {
                 AI_mode = true;
                 next_phase = true;
                 break;
-                //printf("Modalità non disponibile.\n\n");
-                //break;
             default:
                 printf("Opzione non disponibile.\n\n");
         }
     }while(!next_phase);
 
     if (AI_mode){
-        //TODO
         MainGame(tavolo, Turn_AI);
     }
     else{

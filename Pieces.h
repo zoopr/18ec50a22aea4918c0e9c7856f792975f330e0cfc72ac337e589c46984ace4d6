@@ -2,6 +2,8 @@
 // Created by Mat on 18/01/30.
 //
 // Organizza le strutture corrispondenti ai pezzi logici del tabellone.
+// Contiene le strutture di base essenziali al gameplay.
+// Le funzioni sono commentate lungo il sorgente.
 //
 
 #ifndef CLUEDO_PIECES_H

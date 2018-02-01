@@ -8,7 +8,7 @@
 #include "Gameplay.h"
 #include "AI.h"
 
-#define D_SIDES 6 //giusto in caso si voglia giocare con dadi diversi.
+
 
 /* NOTA SUL TACCUINO
  * Il taccuino non ha alcun dato di identificazione se non il nome dele giocatore.
@@ -50,15 +50,16 @@ void scriviTaccuino(char* filename, char* message){
     fclose(tac);
 }
 
-void rollDice(int dice[2]){
-    char msgbuf[2][STANDARD_STRLEN];
+void rollDice(int dice[D_N]){
+    char msgbuf[D_N][STANDARD_STRLEN];
     int i;
 
     logger("Dadi tirati.\n");
-    for(i=0; i<2; i++) {
+    for(i=0; i<D_N; i++) {
         dice[i] = rand() % D_SIDES + 1;
         dtoc(dice[i], msgbuf[i]);
     }
+
     printf("Hai fatto %d + %d\n", dice[0], dice[1]);
     strcat(msgbuf[0], " + ");
     strcat(msgbuf[0], msgbuf[1]);
@@ -76,10 +77,10 @@ void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
     }
 }
 
-int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[3][STANZE_N]){
+int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[CARD_TYPES][STANZE_N]){
     Carta* matching;
-    Carta foundData[3];
-    int i, j, coords[2];
+    Carta foundData[CARD_TYPES];
+    int i, j, coords[CARD_TYPES]; //Usiamo i campi per l'indice nella lista di chi ha le carte, ed i primi due campi per generare coordinate per chi has sbagliato.
     int found = 0;
     char message[SBUF] ="L'ipotesi del giocatore è:\t";
 
@@ -91,9 +92,11 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     strncat(message, sospetto, strlen(sospetto));
     strcat(message, "\n");
     logger(message);
+    if(AI){
+        printf(message);
+    }
 
-    //controlla il tavolo. Matematicamente impossibile da soddisfare con la flag AI. possibile ottimizzazione.
-    matching = tavolo->carteScoperte.cima;
+    matching = tavolo->carteScoperte.cima; // Mai raggiungibile dall'AI.
     for ( i=0; i<tavolo->carteScoperte.numCarte; i++){
         if(checkCard(stanza, arma, sospetto, matching) != -1){ //non è importante far decidere quale mostrare qua.
             strcpy(message, "Carta trovata sul tavolo.\n");
@@ -104,6 +107,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             strcat(message,  matching->desc);
             strcat(message, "\n");
             logger(message);
+
             //Se la carta è sul tavolo si trova già nel taccuino.
             return 0;
         }
@@ -118,6 +122,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             if (checkCard(stanza, arma, sospetto,
                           matching) != -1) { //cambiamo il tipo di broadcast pubblico per permettere la scelta di cosa mostrare.
                 foundData[found] = *matching;
+                coords[found] = j;
                 found++;
             }
             if (matching->next)
@@ -130,7 +135,8 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
                 printf("%d: %s - %s\n", j, tipi(foundData[j].tipo, message), foundData[j].desc); //usiamo message come buffer temporaneo per la stringa di ritorno.
             }
             if (AI){
-                j = 0; //L'AI non tiene traccia di quali carte ha già mostrato al momento. possibile todo
+                j = showingStrategy(tavolo, &tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
+                printf("L'AI ha scelto l'opzione %d\n", j);
             }else{
                 scanf("%d", &j);
             }
@@ -141,6 +147,9 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.
         }
         if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
+            if (AI && found == 1){//Dobbiamo comunque aggiornare che carta abbiamo dovuto mostrare al giocatore corrente
+                showingStrategy(tavolo, &tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
+            }
             printf("\nIpotesi errata.\n");
             printf("MESSAGGIO PRIVATO PER %s\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
             strcpy(message,"Carta trovata nella mano di ");
@@ -150,9 +159,10 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             printf(message);
 
             if(AI){
-                generateCoordinates(&foundData[0], coords);
+                generateCoordinates(foundData, coords);
                 interestFile[coords[0]][coords[1]] = 0.0f;
             }
+
             tipi(foundData[0].tipo, message);
             strcat(message, " - ");
             strcat(message, foundData[0].desc);
@@ -269,8 +279,8 @@ void statSave(Tabellone* tavolo){
 }
 
 void statTrack(Tabellone* tavolo){
-    Carta daValutare[3];
-    int valSoluzioni[3];
+    Carta daValutare[CARD_TYPES];
+    int valSoluzioni[CARD_TYPES];
     Carta* scroll = tavolo->soluzione.cima;
     int i;
 
@@ -290,26 +300,26 @@ void statTrack(Tabellone* tavolo){
         }
     }
     // Estrapoliamo gli indici.
-    valSoluzioni[0] = checkCard_Archive(stanze, &daValutare[0], STANZE_N);
-    valSoluzioni[1] = checkCard_Archive(armi, &daValutare[1], ARMI_N);
-    valSoluzioni[2] = checkCard_Archive(sospetti, &daValutare[2], SOSPETTI_N);
+    valSoluzioni[STANZA] = checkCard_Archive(stanze, &daValutare[0], STANZE_N);
+    valSoluzioni[ARMA] = checkCard_Archive(armi, &daValutare[1], ARMI_N);
+    valSoluzioni[SOSPETTO] = checkCard_Archive(sospetti, &daValutare[2], SOSPETTI_N);
 
     //Aggiorniamo le statistiche caricate nel tavolo.
-    for(i=0; i<3; i++){
+    for(i=0; i<CARD_TYPES; i++){
         tavolo->stats[i][valSoluzioni[i]]++;
     }
 }
 
 void statShow(){
     char buf[STANDARD_STRLEN];
-    int statsArr[3][STANZE_N], i;
+    int statsArr[CARD_TYPES][STANZE_N], i;
     FILE* stats = fopen(STAT_DEFAULT, "r");
     if(!stats){
         printf("Nessun file di statistiche rilevato. Hai giocato ad almeno una partita?\n");
         return;
     }
     else{
-        fread(statsArr, 3, 9*sizeof(int), stats);
+        fread(statsArr, CARD_TYPES, STANZE_N*sizeof(int), stats);
         printf("\nStatistiche del crimine:\n\n");
         printf("STANZE\n");
         for(i=0;i<STANZE_N; i++){

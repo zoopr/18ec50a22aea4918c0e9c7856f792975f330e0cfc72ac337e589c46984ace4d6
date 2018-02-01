@@ -1,6 +1,10 @@
 //
 // Created by Mat on 18/01/30.
 //
+// Interfaccia tra l'inizializazione e il gameplay. Controllo delle win conditions.
+// Control flow principale del gioco in Turn e Turn_AI.
+// Le funzioni sono commentate lungo il sorgente.
+//
 
 #ifndef CLUEDO_BOARDMANAGER_H
 #define CLUEDO_BOARDMANAGER_H

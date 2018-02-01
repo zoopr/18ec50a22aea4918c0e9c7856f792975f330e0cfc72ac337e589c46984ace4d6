@@ -1,20 +1,21 @@
 //
 // Created by Mat on 18/01/30.
 //
-// Contiene Tutti gli standard e le costanti al quale devono poter accedere i diversi elementi del gioco
-// a vari punti della partita.
+// Contiene Tutti gli standard e le costanti di rilevanza globale nel progetto.
+// Le funzioni sono commentate lungo il sorgente.
 //
 
 #ifndef CLUEDO_STANDARDS_H
 #define CLUEDO_STANDARDS_H
 
-#define STANDARD_STRLEN 24
+#define STANDARD_STRLEN 24 //lunghezza delle stringhe fondamentali delle strutture.
+#define CARD_TYPES 3
 #define STANZE_N 9
 #define ARMI_N 6
 #define SOSPETTI_N 6
 #define GIOCATORI_MAX 6
 #define GIOCATORI_MIN 3
-#define SBUF 256
+#define SBUF 256 //string buffer usato per ricevere linee stringa e altri dati dall'utente.
 #define LOG_DEFAULT "log.txt"
 #define STAT_DEFAULT "stats.dat"
 

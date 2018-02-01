@@ -36,18 +36,17 @@ void printTableStatus (Tabellone* tavolo){ // preso parzialmente dalla inizializ
         if (carta->next)
             carta = carta->next;
     }
+    printf("\n");
 }
 
-void readInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]){
+void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){
     char buf[SBUF];
-    int i;
     Giocatore* giocatore = &tavolo->giocatori[tavolo->turnoCorrente];
     strcpy(buf, giocatore->nome);
     strcat(buf, ".ai");
-    FILE* interest = fopen(buf, "r");
-
-    if(interest && !feof(interest)){ // Ci assicura che nella prima partita del sistema sia gestito correttamente.
-        fread(loadArea, 3, STANZE_N*sizeof(float), interest);
+    FILE* interest = fopen(buf, "r+");
+    if(interest && !feof(interest) && tavolo->numeroTurni >= tavolo->numGiocatori){ // Ci assicura che al primo turno sia generato correttamente.
+        fread(loadArea, CARD_TYPES, STANZE_N*sizeof(float), interest);
         fclose(interest);
     }else { //Inizializza un diagramma interno e crea il file.
         initInterest(tavolo, loadArea);
@@ -55,7 +54,7 @@ void readInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]){
     }
 }
 
-void saveInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]){ //salva la nostra matrice di nodi d'interesse su un file specifico al giocatore.
+void saveInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){ //salva la nostra matrice di nodi d'interesse su un file specifico al giocatore.
     char buf[SBUF];
     Giocatore* giocatore = &tavolo->giocatori[tavolo->turnoCorrente];
     strcpy(buf, giocatore->nome);
@@ -64,29 +63,17 @@ void saveInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]){ //salva la no
     if(!interest){
         exit(-2);
     }
-    fwrite(loadArea, 3, STANZE_N*sizeof(float), interest);
+    fwrite(loadArea, CARD_TYPES, STANZE_N*sizeof(float), interest);
     fclose(interest);
 }
 
-void saveInterest_init(char* filename, float loadArea[3][STANZE_N]){ //Azzerare su reinizializzazione. Stesso problema dei taccuini.
-    char buf[SBUF];
-    strcpy(buf, filename);
-    strcat(buf, ".ai");
-    FILE* interest = fopen(buf, "w");
-    if(!interest){
-        exit(-2);
-    }
-    fwrite(loadArea, 3, STANZE_N*sizeof(float), interest);
-    fclose(interest);
-}
-
-void initInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]){ //Inizializza le liste di interesse
-    int i[2];
+void initInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){ //Inizializza le liste di interesse
+    int i[2], j;
     Carta* carta;
 
-    for (i[0] = 0; i[0] < 3; i[0]++) {
+    for (i[0] = 0; i[0] < CARD_TYPES; i[0]++) {
         for (i[1]=0; i[1]<STANZE_N; i[1]++){
-            if(i[0]>=1 && i[1]>=ARMI_N){ //useremo questo spazio per gestire quali carte abbiamo mostrato. todo
+            if(i[0]>=1 && i[1]>=ARMI_N){
                 loadArea[i[0]][i[1]] = 0.0f;
             }else{
                 loadArea[i[0]][i[1]] = 1.0f;
@@ -95,41 +82,14 @@ void initInterest(Tabellone* tavolo, float loadArea[3][STANZE_N]){ //Inizializza
     }
     //Eliminiamo immediatamente le carte in mano e sul tavolo
     carta = tavolo->carteScoperte.cima;
-    while(carta){
+    for(j=0; j<tavolo->carteScoperte.numCarte; j++){
         generateCoordinates(carta, i);
         loadArea[i[0]][i[1]] = 0.0f;
         carta = carta->next;
     }
+
     carta = tavolo->giocatori[tavolo->turnoCorrente].mano.cima;
-    while(carta){
-        generateCoordinates(carta, i);
-        loadArea[i[0]][i[1]] = 0.0f;
-        carta = carta->next;
-    }
-}
-
-void initInterest_Global(Tabellone* tavolo, Giocatore* giocatore, float loadArea[3][STANZE_N]){
-    int i[2];
-    Carta* carta;
-
-    for (i[0] = 0; i[0] < 3; i[0]++) {
-        for (i[1]=0; i[1]<STANZE_N; i[1]++){
-            if(i[0]>=1 && i[1]>=ARMI_N){ //useremo questo spazio per gestire quali carte abbiamo mostrato. todo?
-                loadArea[i[0]][i[1]] = 0.0f;
-            }else{
-                loadArea[i[0]][i[1]] = 1.0f;
-            }
-        }
-    }
-    //Eliminiamo immediatamente le carte in mano e sul tavolo
-    carta = tavolo->carteScoperte.cima;
-    while(carta){
-        generateCoordinates(carta, i);
-        loadArea[i[0]][i[1]] = 0.0f;
-        carta = carta->next;
-    }
-    carta = giocatore->mano.cima;
-    while(carta){
+    for(j=0; j<tavolo->giocatori[tavolo->turnoCorrente].mano.numCarte; j++){
         generateCoordinates(carta, i);
         loadArea[i[0]][i[1]] = 0.0f;
         carta = carta->next;
@@ -158,6 +118,7 @@ int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable
     for(i=0; i<STANZE_N; i++){
         interesseCorretto[i] = interesseStanze[i]*reachable[i]; //azzera le stanze a cui non possiamo accedere questo turno.
     }
+
     sum = 0.0f;
     for(i=0; i<STANZE_N; i++) {
         sum += interesseCorretto[i];
@@ -166,18 +127,23 @@ int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable
     seed = (float)rand()/(float)RAND_MAX; //Generiamo un float da 0 a 1.
     incremental = 0.0f;
     for(i=0; i<STANZE_N; i++){
-        incremental += interesseCorretto[i]/sum;
+        incremental += (interesseCorretto[i]/sum);
         if (seed < incremental){ // Quando cade sulla fetta di un certo indice, ritorniamo quell'indice.
+            return i;
+        }
+    }
+    //Se nessuna delle stanze di cui abbia effetivo interesse è raggiungibile, l'AI si muove sulla prima raggiungibile.
+    for(i=0; i<STANZE_N; i++){
+        if (reachable[i]){
             return i;
         }
     }
 
 }
 
-int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti e armi.
+int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti e armi. Direttamente proporzionale al peso in "interesse".
     int i;
     float sum, incremental, seed;
-
     sum = 0.0f;
     for(i=0; i<ARMI_N; i++) {
         sum += interesse_AoS[i];
@@ -186,9 +152,40 @@ int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti
     seed = (float)rand()/(float)RAND_MAX; //Generiamo un float da 0 a 1.
     incremental = 0.0f;
     for(i=0; i<ARMI_N; i++){
-        incremental += interesse_AoS[i]/sum;
+        incremental += (interesse_AoS[i]/sum);
         if (seed < incremental){ // Quando cade sulla fetta di un certo indice, ritorniamo quell'indice.
             return i;
         }
     }
+}
+
+int showingStrategy(Tabellone* tavolo, Giocatore* giocatore, int coords[], int len){ //Decide quali carte mostrare e aggiorna quelle mostrate.
+    _Bool shown[6] = {0, 0, 0, 0, 0, 0}; //c89 non permette l'inizializzazione parziale.
+    char buf[SBUF];
+    int i;
+    FILE* shownMem;
+
+    strcpy(buf, giocatore->nome);
+    strcat(buf, "_hold.ai");
+    shownMem = fopen(buf, "w+");
+    if (!shownMem) //effettivo problema.
+        exit(-2);
+    if(tavolo->numeroTurni<1){ //usato per l'inizializzazione a 0 al primo turno.
+        fwrite(shown, 6, sizeof(_Bool), shownMem);
+        fclose(shownMem);
+    }else{
+        fread(shown, 6, sizeof(_Bool), shownMem);// Carichiamo i dati nel vettore.
+
+        for (i = 0;i<len; i++){ //Scrolling nella nostra mano per vedere se abbiamo già presentato una carta agli indici contenuti in coords[]
+            if (shown[coords[i]] > 0){
+                return i; //Ovviamente non richiede di aggiornare la nostra memoria.
+            }
+        }
+        //Se siamo qua, nessuna carta che abbiamo già mostrato può essere mostrata.
+        //Se nessuna delle carte da mostrare era stata mostrata prima, prendiamo la prima e registriamo che sia stata mostrata.
+        shown[coords[0]]= 1;
+        fwrite(shown, 6, sizeof(_Bool), shownMem);
+        fclose(shownMem);
+    }
+    return 0;
 }
