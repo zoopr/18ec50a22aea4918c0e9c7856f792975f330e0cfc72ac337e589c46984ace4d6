@@ -105,6 +105,6 @@ int main() {
                 next_phase = false;
         }
     }while(next_phase);
-    printf("\nArrivederci.\n");
+    printf("\nArrivederci!\n");
     return 0;
 }
