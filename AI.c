@@ -8,8 +8,8 @@
 #include "AI.h"
 #include "Gameplay.h"
 
-void printTableStatus (Tabellone* tavolo){ // preso parzialmente dalla inizializzazione del interestcuino. Aggiunte le funzionalità necessarie nel turno AI.
-    Carta* carta;
+void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno anche nella versione umana. Funzionalità di base derivata dalla versione AI.
+    Carta* carta;                                    //Rende il taccuino responsabile solo per le carte scoperte dagli avversari. Impatto sul gameplay minimizzato.
     int i, j;
     char buffer[SBUF];
 
@@ -20,23 +20,34 @@ void printTableStatus (Tabellone* tavolo){ // preso parzialmente dalla inizializ
         if (carta->next)
             carta = carta->next;
     }
-    for(i=0; i<tavolo->numGiocatori; i++) {
-        printf("Le carte nella mano di %s sono %d\n", tavolo->giocatori[i].nome, tavolo->giocatori[i].mano.numCarte);
-        carta = tavolo->giocatori[i].mano.cima;
-        for (j = 0; j < tavolo->giocatori[i].mano.numCarte; j++) {
+    if(AI){
+        for(i=0; i<tavolo->numGiocatori; i++) {
+            printf("Le carte nella mano di %s sono %d\n", tavolo->giocatori[i].nome, tavolo->giocatori[i].mano.numCarte);
+            carta = tavolo->giocatori[i].mano.cima;
+            for (j = 0; j < tavolo->giocatori[i].mano.numCarte; j++) {
+                printf("%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
+                if (carta->next)
+                    carta = carta->next;
+            }
+        }
+        printf("Le carte segrete sono %d\n", tavolo->soluzione.numCarte);
+        carta = tavolo->soluzione.cima;
+        for (j=0; j<tavolo->soluzione.numCarte; j++){
+            printf("%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
+            if (carta->next)
+                carta = carta->next;
+        }
+        printf("\n");
+    }
+    else{
+        printf("Le carte in mano al giocatore sono %d\n", tavolo->giocatori[tavolo->turnoCorrente].mano.numCarte);
+        carta = tavolo->giocatori[tavolo->turnoCorrente].mano.cima;
+        for (j = 0; j < tavolo->giocatori[tavolo->turnoCorrente].mano.numCarte; j++) {
             printf("%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
             if (carta->next)
                 carta = carta->next;
         }
     }
-    printf("Le carte segrete sono %d\n", tavolo->soluzione.numCarte);
-    carta = tavolo->soluzione.cima;
-    for (j=0; j<tavolo->soluzione.numCarte; j++){
-        printf("%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
-        if (carta->next)
-            carta = carta->next;
-    }
-    printf("\n");
 }
 
 void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){
@@ -157,6 +168,13 @@ int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti
             return i;
         }
     }
+    /*
+     * L'AI NON PUO' avere tutti gli interessi per armi o sospetti a 0 allo stesso tempo.
+     * Se abbiamo sbordato qua, probabilmente per un errore di R/W dei nodi di interesse,
+     * si comunica l'errore e ci si muove al prossimo punto di salvataggio.
+     */
+    fprintf(stderr, "SCELTA FUORI INDICE\n");
+    return 0;
 }
 
 int showingStrategy(Tabellone* tavolo, Giocatore* giocatore, int coords[], int len){ //Decide quali carte mostrare e aggiorna quelle mostrate.

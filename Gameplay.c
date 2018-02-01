@@ -104,7 +104,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             strcat(message, "\n");
             logger(message);
 
-            //Se la carta è sul tavolo si trova già nel taccuino.
+            //Se la carta è sul tavolo viene stampata di default a ogni turno.
             return 0;
         }
         if (matching->next)

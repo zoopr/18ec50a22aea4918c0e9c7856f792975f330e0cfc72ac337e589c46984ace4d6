@@ -38,37 +38,9 @@ int main() {
            "     /                                                                  \n"
            "                                                                  \n"
                    );
-    next_phase = false;
-
-    do{ //Primo menu. Inizializzazione tavolo da gioco.
-        printf("Selezionare un'opzione.\n"
-                       "1 - Comincia partita\n"
-                       "2 - Carica partita\n"
-                       "3 - Statistiche\n");
-
-        scanf("%d", &option);
-        switch(option){
-            case 1:
-                tavolo = FreshStart();
-                next_phase = true;
-                break;
-            case 2:
-                printf("Inserire il nome del file di salvataggio da caricare\n");
-                scanf("%s", buffer);
-                tavolo = LoadBoard(buffer);
-                if (tavolo)
-                    next_phase = true;
-                break;
-            case 3:
-                statShow();
-                break;
-            default:
-                printf("Opzione non disponibile.\n\n");
-        }
-    }while(!next_phase);
 
     next_phase = false;
-    do{ //secondo menu. Selezione umana o AI.
+    do{ //primo menu. Selezione umana o AI.
         printf("Modalità di gioco\n"
                        "1 - Classica\n"
                        "2 - AI mode\n");
@@ -81,6 +53,34 @@ int main() {
             case 2:
                 AI_mode = true;
                 next_phase = true;
+                break;
+            default:
+                printf("Opzione non disponibile.\n\n");
+        }
+    }while(!next_phase);
+
+    next_phase = false;
+    do{ //secondo menu. Inizializzazione tavolo da gioco.
+        printf("Selezionare un'opzione.\n"
+                       "1 - Comincia partita\n"
+                       "2 - Carica partita\n"
+                       "3 - Statistiche\n");
+
+        scanf("%d", &option);
+        switch(option){
+            case 1:
+                tavolo = FreshStart(AI_mode);
+                next_phase = true;
+                break;
+            case 2:
+                printf("Inserire il nome del file di salvataggio da caricare\n");
+                scanf("%s", buffer);
+                tavolo = LoadBoard(buffer);
+                if (tavolo)
+                    next_phase = true;
+                break;
+            case 3:
+                statShow();
                 break;
             default:
                 printf("Opzione non disponibile.\n\n");

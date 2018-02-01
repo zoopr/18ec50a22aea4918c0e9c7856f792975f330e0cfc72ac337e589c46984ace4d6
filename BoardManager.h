@@ -11,8 +11,8 @@
 
 #include "Pieces.h"
 
-Giocatore* playerInit(int* num);
-Tabellone* FreshStart();
+Giocatore* playerInit(int* num, _Bool AI);
+Tabellone* FreshStart(_Bool AI);
 Tabellone* LoadBoard(char* filename);
 
 void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool AI);

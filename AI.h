@@ -17,7 +17,7 @@
 
 #define INTEREST_FACTOR 1.5
 
-void printTableStatus (Tabellone* tavolo);
+void printTableStatus (Tabellone* tavolo, _Bool AI);
 void initInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
 void saveInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
 void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);

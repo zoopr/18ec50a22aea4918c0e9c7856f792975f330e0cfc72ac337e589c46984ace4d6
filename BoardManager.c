@@ -12,9 +12,10 @@
 
 
 
-Giocatore* playerInit(int* num) {
-    int i;
+Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i valori iniziali come la posizione.
+    int i; // Nella verisone umana chiede anche un nome per i giocatori.
     Giocatore* listaGiocatori;
+
 
 
     do{
@@ -23,23 +24,35 @@ Giocatore* playerInit(int* num) {
     }while(*num>GIOCATORI_MAX || *num <GIOCATORI_MIN );
 
 
-    listaGiocatori = (Giocatore*)calloc(*num, sizeof(Giocatore));
+    listaGiocatori = (Giocatore*)calloc((size_t)*num, sizeof(Giocatore));
     if (!listaGiocatori){
         exit(-1);
     }
-    for(i=0; i<*num; i++){
-        printf("Inserire il nome del giocatore %d (max %d caratteri)\n", i+1, STANDARD_STRLEN - 1);
-        scanf("%23s", listaGiocatori[i].nome);
-        listaGiocatori[i].ipotesiEsatta = 0;
-        listaGiocatori[i].mano.numCarte = 0;
-        listaGiocatori[i].mano.cima = NULL;
-        listaGiocatori[i].stanza = rand()%STANZE_N;
+    if(!AI){
+        for(i=0; i<*num; i++){
+            printf("Inserire il nome del giocatore %d (max %d caratteri)\n", i+1, STANDARD_STRLEN - 1);
+            scanf("%23s", listaGiocatori[i].nome);
+            listaGiocatori[i].ipotesiEsatta = 0;
+            listaGiocatori[i].mano.numCarte = 0;
+            listaGiocatori[i].mano.cima = NULL;
+            listaGiocatori[i].stanza = rand()%STANZE_N;
+        }
+    }else{
+        for(i=0; i<*num; i++){
+            strcpy(listaGiocatori[i].nome, "Player ");
+            dtoc(i+1, &listaGiocatori[i].nome[7]);
+            listaGiocatori[i].ipotesiEsatta = 0;
+            listaGiocatori[i].mano.numCarte = 0;
+            listaGiocatori[i].mano.cima = NULL;
+            listaGiocatori[i].stanza = rand()%STANZE_N;
+        }
     }
+
 
     return listaGiocatori;
 }
 
-Tabellone* FreshStart(){ //Inizializza il tavolo
+Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo
     int numGiocatori, cartePerGiocatore, i, j;
     Mazzo *mainDeck, *second, *third;
     Carta* carta;
@@ -51,7 +64,7 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
         exit(-1);
     }
     copiaMoveset(tavolo->layout); //copia il layout.
-    tavolo->giocatori = playerInit(&numGiocatori); //salviamo il numero all'interno di numGiocatori per le funzioni successive.
+    tavolo->giocatori = playerInit(&numGiocatori, AI); //salviamo il numero all'interno di numGiocatori per le funzioni successive.
     tavolo->numeroTurni = 0;
     tavolo->numGiocatori = numGiocatori;
     tavolo->turnoCorrente = rand()%numGiocatori;
@@ -98,20 +111,7 @@ Tabellone* FreshStart(){ //Inizializza il tavolo
         tac = fopen(buffer, "w"); //la tag w ci assicura che se esiste viene azzerato.
         if(!tac)
             exit(-2);
-        fprintf(tac, "Le carte sul tavolo sono %d\n", tavolo->carteScoperte.numCarte);
-        carta = tavolo->carteScoperte.cima;
-        for (j=0; j<tavolo->carteScoperte.numCarte; j++){
-            fprintf(tac, "%s : %s\n", tipi(carta->tipo, buffer), carta->desc); //riutilizziamo buffer una volta aperto il file.
-            if (carta->next)
-                carta = carta->next;
-        }
-        fprintf(tac, "Le carte nella tua mano sono %d\n", tavolo->giocatori[i].mano.numCarte );
-        carta = tavolo->giocatori[i].mano.cima;
-        for (j=0; j<tavolo->giocatori[i].mano.numCarte; j++){
-            fprintf(tac, "%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
-            if (carta->next)
-                carta = carta->next;
-        }
+
         fprintf(tac, "Le carte scoperte degli avversari sono:\n"); //per ora rimane vuoto. si popolerà nella ricerca dopo le ipotesi.
 
         fclose(tac); // possiamo usare a+ ai turni successivi.
@@ -143,7 +143,7 @@ Tabellone* LoadBoard(char* filename){
             exit(-1);
         fread(table, 3, sizeof(int), save); //Scrive i primi 3 int da disco, incluso il numero di giocatori necessario dopo.
         table->giocatori = (Giocatore*) calloc(table->numGiocatori, sizeof(Giocatore)); //Allochiamo un vettore di dimensione variabile.
-        if (!table->giocatori)                                                          //in c89 non si può fare in allocazione automatica.
+        if (!table->giocatori)
             exit(-1);
         for (i = 0; i < table->numGiocatori; i++) {
             ultimoG = &table->giocatori[i];
@@ -226,11 +226,11 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
     char buf[SBUF];
     float loadArea[CARD_TYPES][STANZE_N];
 
-    if(AI){
+    if(AI){ //Al caricamento della partita azzeriamo la memoria. Evita situazioni spiacevoli come credere in una mano sbagliata.
         for (i=0; i<tavolo->numGiocatori; i++){
             tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
             initInterest(tavolo, loadArea); //
-            showingStrategy(tavolo, &tavolo->giocatori[i], NULL, 0); // Inizializziamo le carte da nascondere a prescindere.
+            showingStrategy(tavolo, &tavolo->giocatori[i], NULL, 0);
         }
     }
 
@@ -282,7 +282,9 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     printf(buf[0]);
     logger(buf[0]);
 
+    printTableStatus(tavolo, 0);
     leggiTaccuino(giocatore->nome);
+
     if (giocatore->ipotesiEsatta){
         printf("Hai già compiuto l'ipotesi esatta.\n"
                "Procedi direttamente al lancio dei dadi.\n");
@@ -383,7 +385,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     printf(buf[0]);
     logger(buf[0]);
 
-    printTableStatus(tavolo); //stampa la posizione di ogni carta distribuita.
+    printTableStatus(tavolo, 1); //stampa la posizione di ogni carta distribuita.
     readInterest(tavolo, interest); // Carica la matrice esistente nell'interesse del giocatore corrente.
 
     if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
@@ -443,7 +445,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         }
         dice[0] = suspectStrategy(interest[1]);
         printf("L'AI ha scelto l'opzione %d\n", dice[0]);
-        while(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per il debugging e per il testing di feature diverse.
+        while(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per la visualizzazione d'errore.
             printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[0]);
             scanf("%d", &dice[0]);
         }
