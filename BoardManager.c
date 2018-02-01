@@ -378,9 +378,9 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
 }
 
 _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più aderente possibile alla partita tradizionale, ma con feature che è meglio separare accuratamente.
-    int dice[D_N];
+    int dice[D_N], i, j, k;
     _Bool reachable[STANZE_N];
-    char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
+    char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi. ordinato in ARMI, SOSPETTI, STANZE.
     float interest[CARD_TYPES][STANZE_N]; //parte della logica decisionale AI
 
     strcpy(buf[0], "\nTURNO ");
@@ -473,6 +473,19 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n\n");
+            //Se un giocatore fa l'ipotesi esatta tutte le AI ne prendono nota.
+            for(j=0; j<CARD_TYPES; j++){
+                for(k=0; k< STANZE_N; k++){
+                    interest[j][k] = 0.0f;
+                }
+            }
+            interest[STANZA][giocatore->stanza] = 1.0f; //giocatore è il vero riferimento al personaggio giocante di questo turno.
+            interest[ARMA][dice[0]] = 1.0f;
+            interest[SOSPETTO][dice[1]] = 1.0f;
+            for(i=0; i<tavolo->numGiocatori; i++){
+                tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
+                saveInterest(tavolo, interest); //saveInterest salva solo al giocatore indice di turnoCorrente.
+            }
         }else{
             /*
              * C'è una possibilità statistica non indifferente che le carte parte di una soluzione sbagliata ma non
