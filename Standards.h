@@ -20,7 +20,7 @@
 #define LOG_DEFAULT "log.txt"
 #define STAT_DEFAULT "stats.dat"
 
-typedef enum {STANZA, ARMA, SOSPETTO} tipoCarta;
+typedef enum {ARMA, SOSPETTO, STANZA} tipoCarta;
 
 char* tipi(int index, char* copyArea);
 char* stanze(int index, char* copyArea);
