@@ -229,7 +229,8 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
     if(AI){ //Al caricamento della partita azzeriamo la memoria. Evita situazioni spiacevoli come credere in una mano sbagliata.
         for (i=0; i<tavolo->numGiocatori; i++){
             tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
-            initInterest(tavolo, loadArea); //
+            initInterest(tavolo, loadArea);
+            saveInterest(tavolo, loadArea);
             showingStrategy(tavolo, &tavolo->giocatori[i], NULL, 0);
         }
     }
