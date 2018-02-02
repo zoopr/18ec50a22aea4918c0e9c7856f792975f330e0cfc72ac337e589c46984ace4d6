@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "Gameplay.h"
-#include "Ai.h"
+#include "AI.h"
 
 
 void leggiTaccuino(char* filename){
