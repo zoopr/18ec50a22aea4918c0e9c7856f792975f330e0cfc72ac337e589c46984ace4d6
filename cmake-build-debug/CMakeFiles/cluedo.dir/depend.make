@@ -14,7 +14,7 @@ CMakeFiles/cluedo.dir/BoardManager.c.obj: ../Gameplay.h
 CMakeFiles/cluedo.dir/BoardManager.c.obj: ../Pieces.h
 CMakeFiles/cluedo.dir/BoardManager.c.obj: ../Standards.h
 
-CMakeFiles/cluedo.dir/Gameplay.c.obj: ../Ai.h
+CMakeFiles/cluedo.dir/Gameplay.c.obj: ../AI.h
 CMakeFiles/cluedo.dir/Gameplay.c.obj: ../Gameplay.c
 CMakeFiles/cluedo.dir/Gameplay.c.obj: ../Gameplay.h
 CMakeFiles/cluedo.dir/Gameplay.c.obj: ../Pieces.h

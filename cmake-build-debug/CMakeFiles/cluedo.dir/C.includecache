@@ -22,10 +22,6 @@ C:/Users/Mat/CLionProjects/cluedo/AI.h
 Pieces.h
 C:/Users/Mat/CLionProjects/cluedo/Pieces.h
 
-C:/Users/Mat/CLionProjects/cluedo/Ai.h
-Pieces.h
-C:/Users/Mat/CLionProjects/cluedo/Pieces.h
-
 C:/Users/Mat/CLionProjects/cluedo/BoardManager.c
 stdio.h
 -
@@ -55,8 +51,8 @@ string.h
 -
 Gameplay.h
 C:/Users/Mat/CLionProjects/cluedo/Gameplay.h
-Ai.h
-C:/Users/Mat/CLionProjects/cluedo/Ai.h
+AI.h
+C:/Users/Mat/CLionProjects/cluedo/AI.h
 
 C:/Users/Mat/CLionProjects/cluedo/Gameplay.h
 Standards.h
