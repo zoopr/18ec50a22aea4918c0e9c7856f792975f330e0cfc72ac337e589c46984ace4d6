@@ -105,15 +105,25 @@ int main() {
         }
         //Alla fine di una partita, libera la memoria allocata dinamicamente e invia il prompt per rigiocare.
         FreeBoard(tavolo);
+
+        next_phase = false;
         printf("\nProcedere con un'altra partita? S/N\n");
-        scanf("%s", buffer);
-        switch (tolower(buffer[0])) {
-            case 's':
-                exit_flag = true;
-                break;
-            default:
-                exit_flag = false;
-        }
+        do{
+            scanf("%s", buffer);
+            switch (tolower(buffer[0])) {
+                case 's':
+                    exit_flag = false;
+                    next_phase = true;
+                    break;
+                case 'n':
+                    exit_flag = true;
+                    next_phase = true;
+                    break;
+                default:
+                    printf("Opzione non riconisciuta. Inserire risposta adeguata.\n");
+                    break;
+            }
+        }while(!next_phase);
     }while(!exit_flag);
     printf("\nArrivederci!\n");
     return 0;
