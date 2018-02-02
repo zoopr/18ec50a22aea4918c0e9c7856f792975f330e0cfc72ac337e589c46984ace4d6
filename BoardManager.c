@@ -259,6 +259,7 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
     _Bool winner = 0;
     int i;
     char buf[SBUF];
+    char turnobuf[STANDARD_STRLEN];
     float loadArea[CARD_TYPES][STANZE_N];
 
     if(AI){ //Al caricamento della partita azzeriamo la memoria. Evita situazioni spiacevoli come credere in una mano sbagliata.
@@ -274,6 +275,19 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
     while(!winner){
         tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
         tavolo->numeroTurni +=1;
+
+        strcpy(buf, "\nTURNO ");
+        strcat(buf,  dtoc(tavolo->numeroTurni, turnobuf));
+        strcat(buf, " - Giocatore: ");
+        strcat(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);
+        strcat(buf, "\n");
+        printf(buf);
+        logger(buf);
+
+        printTableStatus(tavolo, AI);
+        if(!AI){
+            leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);
+        }
 
         printf("\nVuoi salvare lo stato attuale della partita? S/N\n");
         scanf("%23s", buf);
@@ -295,7 +309,7 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
            "                 |___/                                                   \n"
            "\n%s ha vinto!\n"
            "Djanni può finalmente riposare in pace.\n\n"
-           "...fino al gioco dell'anno prossimo.\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
+           "...fino al gioco dell'anno prossimo.\n", buf);
 
     statTrack(tavolo);
     statSave(tavolo);
@@ -308,16 +322,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     _Bool reachable[STANZE_N];
     char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
 
-    strcpy(buf[0], "\nTURNO ");
-    strcat(buf[0],  dtoc(tavolo->numeroTurni, buf[1]));
-    strcat(buf[0], " - Giocatore: ");
-    strcat(buf[0], giocatore->nome);
-    strcat(buf[0], "\n");
-    printf(buf[0]);
-    logger(buf[0]);
 
-    printTableStatus(tavolo, 0);
-    leggiTaccuino(giocatore->nome);
 
     if (giocatore->ipotesiEsatta){
         printf("Hai già compiuto l'ipotesi esatta.\n"
@@ -418,15 +423,6 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi. ordinato in ARMI, SOSPETTI, STANZE.
     float interest[CARD_TYPES][STANZE_N]; //parte della logica decisionale AI
 
-    strcpy(buf[0], "\nTURNO ");
-    strcat(buf[0],  dtoc(tavolo->numeroTurni, buf[1]));
-    strcat(buf[0], " - Giocatore: ");
-    strcat(buf[0], giocatore->nome);
-    strcat(buf[0], "\n");
-    printf(buf[0]);
-    logger(buf[0]);
-
-    printTableStatus(tavolo, 1); //stampa la posizione di ogni carta distribuita.
     readInterest(tavolo, interest); // Carica la matrice esistente nell'interesse del giocatore corrente.
 
     if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
