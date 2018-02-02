@@ -17,7 +17,7 @@ int main() {
 
     int option;
     char buffer[SBUF];
-    _Bool next_phase, AI_mode = false;
+    _Bool next_phase, AI_mode, exit_flag = false;
     Tabellone* tavolo;
 
     srand((unsigned int)time(NULL)); //inizializziamo il seed per tutte le operazioni di partita.
@@ -43,7 +43,8 @@ int main() {
             printf("Modalità di gioco\n"
                            "1 - Classica\n"
                            "2 - AI mode\n"
-                           "3 - Statistiche\n");
+                           "3 - Statistiche\n"
+                           "4 - Esci\n");
             scanf("%s", buffer);
             option = strtol(buffer,NULL, 10);
             switch (option) {
@@ -58,10 +59,20 @@ int main() {
                 case 3:
                     statShow();
                     break;
+                case 4:
+                    next_phase = true;
+                    exit_flag = true;
+                    break;
                 default:
                     printf("Opzione non disponibile.\n\n");
             }
         } while (!next_phase);
+
+        //Usciamo dal programma se riceviamo il prompt adeguato.
+        //Mantiene qualsiasi parte di codice abbiamo prima dell'effettiva uscita (in questo caso solo il messaggio di chiusura).
+        if(exit_flag){
+            continue;
+        }
 
         next_phase = false;
         do { //secondo menu. Inizializzazione tavolo da gioco.
@@ -98,12 +109,12 @@ int main() {
         scanf("%s", buffer);
         switch (tolower(buffer[0])) {
             case 's':
-                next_phase = true;
+                exit_flag = true;
                 break;
             default:
-                next_phase = false;
+                exit_flag = false;
         }
-    }while(next_phase);
+    }while(!exit_flag);
     printf("\nArrivederci!\n");
     return 0;
 }

@@ -52,7 +52,7 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
     return listaGiocatori;
 }
 
-Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo
+Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e distribuisce le carte.
     int numGiocatori, cartePerGiocatore, i;
     Mazzo *mainDeck, *second, *third;
     FILE* tac;
@@ -81,7 +81,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo
     tavolo->soluzione.cima->next->next = third->cima;
     third->cima = third->cima->next;
     tavolo->soluzione.cima->next->next->next = NULL;
-
+    // Aggiorniamo gli indici di carte.
     mainDeck->numCarte--;
     second->numCarte--;
     third->numCarte--;
@@ -309,7 +309,7 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
            "                 |___/                                                   \n"
            "\n%s ha vinto!\n"
            "Djanni può finalmente riposare in pace.\n\n"
-           "...fino al gioco dell'anno prossimo.\n", buf);
+           "...fino al gioco dell'anno prossimo.\n", tavolo->giocatori[tavolo->turnoCorrente].nome);
 
     statTrack(tavolo);
     statSave(tavolo);
@@ -459,10 +459,9 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             printf("\nIn quale stanza desideri muoverti?\n");
             dice[1] = movementStrategy(interest[2], reachable);
             printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
-            while(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
-                printf("Posizione non raggiungibile. Inserire stanza ammessa.\n");
-                scanf("%s", buf[0]);
-                dice[1] = strtol(buf[0], NULL, 10) - 1; //L'AI non sbaglia, specie con l'accesso diretto alla mask reachable. se atterriamo qua c'è da fare debugging.
+            if(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
+                fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]); //L'AI non sbaglia, specie con l'accesso diretto alla mask reachable. se atterriamo qua c'è da fare debugging.
+                exit(-3);
             }
             giocatore->stanza = dice[1];
             strcpy(buf[0], "Giocatore spostato in ");
@@ -483,10 +482,9 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         }
         dice[0] = suspectStrategy(interest[0]);
         printf("L'AI ha scelto l'opzione %d\n", dice[0] + 1);
-        while(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per la visualizzazione d'errore.
-            printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[0]);
-            scanf("%s", buf[0]);
-            dice[0] = strtol(buf[0], NULL, 10) - 1;
+        if(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per la visualizzazione d'errore.
+            fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
+            exit(-3);
         }
 
         printf("Quale sospetto ha compiuto il delitto?\n");
@@ -495,16 +493,16 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         }
         dice[1] = suspectStrategy(interest[1]);
         printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
-        while(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
-            printf("%d: Valore non ammesso. Inserire un numero adeguato.\n", dice[1]);
-            scanf("%s", buf[0]);
-            dice[1] = strtol(buf[0], NULL, 10) - 1;
+        if(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
+            fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
+            exit(-3);
         }
-        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 1, interest);
+        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 1, interest); //Passiamo le stringhe corrispondenti alle opzioni.
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n\n");
-            //Se un giocatore fa l'ipotesi esatta tutte le AI ne prendono nota.
+            // Se un giocatore fa l'ipotesi esatta tutte le AI ne prendono nota.
+            // Crea la matrice di interesse adeguata.
             for(j=0; j<CARD_TYPES; j++){
                 for(k=0; k< STANZE_N; k++){
                     interest[j][k] = 0.0f;
@@ -513,6 +511,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             interest[STANZA][giocatore->stanza] = 1.0f; //giocatore è il vero riferimento al personaggio giocante di questo turno.
             interest[ARMA][dice[0]] = 1.0f;
             interest[SOSPETTO][dice[1]] = 1.0f;
+            // Sovrascrive le matrici deie giocatori.
             for(i=0; i<tavolo->numGiocatori; i++){
                 tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
                 saveInterest(tavolo, interest); //saveInterest salva solo al giocatore indice di turnoCorrente.
