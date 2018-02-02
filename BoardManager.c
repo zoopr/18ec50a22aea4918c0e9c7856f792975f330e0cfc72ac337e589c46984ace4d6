@@ -39,8 +39,8 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
         }
     }else{
         for(i=0; i<*num; i++){
-            strcpy(listaGiocatori[i].nome, "Player ");
-            dtoc(i+1, &listaGiocatori[i].nome[7]);
+            strcpy(listaGiocatori[i].nome, "Player ");                          // Crea un nome unico per ogni giocatore AI da un template comune e la loro posizione..
+            dtoc(i+1, &listaGiocatori[i].nome[strlen(listaGiocatori[i].nome)]); // Compatibile per essere usata su nomi standard AI minori di 21 caratteri.
             listaGiocatori[i].ipotesiEsatta = 0;
             listaGiocatori[i].mano.numCarte = 0;
             listaGiocatori[i].mano.cima = NULL;
