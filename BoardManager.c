@@ -290,10 +290,10 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
         }
 
         printf("\nVuoi salvare lo stato attuale della partita? S/N\n");
-        scanf("%23s", buf);
+        scanf("%s", buf);
         if(tolower(buf[0]) == 's'){
             printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
-            scanf("%23s", buf);
+            scanf("%s", buf);
             saveState(buf, tavolo);
         }
         winner = turnType(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
