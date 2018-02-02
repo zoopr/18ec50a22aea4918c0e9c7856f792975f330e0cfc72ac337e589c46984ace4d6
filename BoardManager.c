@@ -405,7 +405,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             scanf("%s", buf[0]);
             dice[1] = strtol(buf[0], NULL, 10) - 1;
         }
-        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 0, NULL); //
+        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 0, NULL); //Controllo ipotesi. Ritorna int 0 - 1.
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");

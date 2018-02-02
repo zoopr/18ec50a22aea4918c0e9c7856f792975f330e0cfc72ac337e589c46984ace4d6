@@ -170,8 +170,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
 
         }
     }
-    strcpy(message, "Ipotesi esatta.\n");
-    //l'AI perde completamente il controllo del game flow da qui in poi.
+    strcpy(message, "Ipotesi esatta.\n"); // Sia il giocatore che 'AI perdono completamente il controllo del game flow da qui in poi.
     logger(message);
     return 1;//è tra le carte segrete.
 
