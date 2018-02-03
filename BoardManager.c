@@ -264,9 +264,8 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
 
     if(AI){ //Al caricamento della partita azzeriamo la memoria. Evita situazioni spiacevoli come credere in una mano sbagliata.
         for (i=0; i<tavolo->numGiocatori; i++){
-            tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
-            initInterest(tavolo, loadArea);
-            saveInterest(tavolo, loadArea);
+            initInterest(tavolo, &tavolo->giocatori[i], loadArea);
+            saveInterest(&tavolo->giocatori[i], loadArea);
             showingStrategy(&tavolo->giocatori[i], NULL, 0);
         }
     }
@@ -423,7 +422,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi. ordinato in ARMI, SOSPETTI, STANZE.
     float interest[CARD_TYPES][STANZE_N]; //parte della logica decisionale AI
 
-    readInterest(tavolo, interest); // Carica la matrice esistente nell'interesse del giocatore corrente.
+    readInterest(tavolo, giocatore, interest); // Carica la matrice esistente nell'interesse del giocatore corrente.
 
     if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
         printf("Hai già compiuto l'ipotesi esatta.\n"
@@ -511,10 +510,9 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             interest[STANZA][giocatore->stanza] = 1.0f; //giocatore è il vero riferimento al personaggio giocante di questo turno.
             interest[ARMA][dice[0]] = 1.0f;
             interest[SOSPETTO][dice[1]] = 1.0f;
-            // Sovrascrive le matrici deie giocatori.
+            // Sovrascrive le matrici dei giocatori.
             for(i=0; i<tavolo->numGiocatori; i++){
-                tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
-                saveInterest(tavolo, interest); //saveInterest salva solo al giocatore indice di turnoCorrente.
+                saveInterest(&tavolo->giocatori[i], interest);
             }
         }else{
             /*
@@ -528,6 +526,6 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             interest[2][dice[1]]*=INTEREST_FACTOR;
         }
         printf("Turno finito.\n\n");
-        saveInterest(tavolo, interest);
+        saveInterest(giocatore, interest);
     }
 }

@@ -16,9 +16,9 @@
 #define INTEREST_FACTOR 1.5
 
 void printTableStatus (Tabellone* tavolo, _Bool AI);
-void initInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
-void saveInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
-void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]);
+void initInterest(Tabellone* tavolo, Giocatore* giocatore, float loadArea[CARD_TYPES][STANZE_N]);
+void saveInterest(Giocatore* giocatore, float loadArea[CARD_TYPES][STANZE_N]);
+void readInterest(Tabellone* tavolo, Giocatore* giocatore, float loadArea[CARD_TYPES][STANZE_N]);
 void generateCoordinates(Carta* carta, int coords[2]);
 int movementStrategy(const float interesseStanze[STANZE_N], const _Bool reachable[STANZE_N]);
 int suspectStrategy(const float interesse_AoS[ARMI_N]);

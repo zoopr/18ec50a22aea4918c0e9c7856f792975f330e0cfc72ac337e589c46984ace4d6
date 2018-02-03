@@ -50,9 +50,8 @@ void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno anch
     }
 }
 
-void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){ //Legge (o inizializza se mancante/danneggiato a metà partita) la matrice d'interesse del giocatore.
+void readInterest(Tabellone* tavolo, Giocatore* giocatore, float loadArea[CARD_TYPES][STANZE_N]){ //Legge (o inizializza se mancante/danneggiato a metà partita) la matrice d'interesse del giocatore.
     char buf[SBUF];
-    Giocatore* giocatore = &tavolo->giocatori[tavolo->turnoCorrente];
     strcpy(buf, giocatore->nome);
     strcat(buf, ".ai");
     FILE* interest = fopen(buf, "r+");
@@ -60,14 +59,13 @@ void readInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){ //Le
         fread(loadArea, CARD_TYPES, STANZE_N*sizeof(float), interest);
         fclose(interest);
     }else { //Inizializza un diagramma interno e crea il file.
-        initInterest(tavolo, loadArea);
-        saveInterest(tavolo, loadArea);
+        initInterest(tavolo, giocatore, loadArea);
+        saveInterest(giocatore, loadArea);
     }
 }
 
-void saveInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){ //salva la nostra matrice di nodi d'interesse su un file specifico al giocatore.
+void saveInterest(Giocatore* giocatore, float loadArea[CARD_TYPES][STANZE_N]){ //salva la nostra matrice di nodi d'interesse su un file specifico al giocatore.
     char buf[SBUF];
-    Giocatore* giocatore = &tavolo->giocatori[tavolo->turnoCorrente];
     strcpy(buf, giocatore->nome);
     strcat(buf, ".ai");
     FILE* interest = fopen(buf, "w");
@@ -78,29 +76,28 @@ void saveInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){ //sa
     fclose(interest);
 }
 
-void initInterest(Tabellone* tavolo, float loadArea[CARD_TYPES][STANZE_N]){ //Inizializza le liste di interesse
+void initInterest(Tabellone* tavolo, Giocatore* giocatore, float loadArea[CARD_TYPES][STANZE_N]){ //Inizializza le liste di interesse
     int i[2], j;
     Carta* carta;
-
     for (i[0] = 0; i[0] < CARD_TYPES; i[0]++) {
         for (i[1]=0; i[1]<STANZE_N; i[1]++){
-            if(i[0]<=1 && i[1]>=ARMI_N){ //azzerare le opzioni ARMI e STANZE che non possiamo selezionare. L'algoritmo di selezione le restringe comunque.
+            if(i[0]<=1 && i[1]>=ARMI_N){ //azzerare le opzioni ARMI e SOSPETTI che non possiamo selezionare. L'algoritmo di selezione le restringe comunque.
                 loadArea[i[0]][i[1]] = 0.0f;
             }else{
                 loadArea[i[0]][i[1]] = 1.0f;
             }
         }
     }
-    //Eliminiamo immediatamente le carte in mano e sul tavolo
+    //Eliminiamo le carte sul tavolo.
     carta = tavolo->carteScoperte.cima;
     for(j=0; j<tavolo->carteScoperte.numCarte; j++){
         generateCoordinates(carta, i);
         loadArea[i[0]][i[1]] = 0.0f;
         carta = carta->next;
     }
-
-    carta = tavolo->giocatori[tavolo->turnoCorrente].mano.cima;
-    for(j=0; j<tavolo->giocatori[tavolo->turnoCorrente].mano.numCarte; j++){
+    //Eliminiamo le carte in mano al giocatore.
+    carta = giocatore->mano.cima;
+    for(j=0; j<giocatore->mano.numCarte; j++){
         generateCoordinates(carta, i);
         loadArea[i[0]][i[1]] = 0.0f;
         carta = carta->next;

@@ -277,25 +277,27 @@ void statTrack(Tabellone* tavolo){
     Carta* scroll = tavolo->soluzione.cima;
     int i;
 
-    //salviamo le carte in ordine: stanza, arma, sospetto.
-    for (i=0; i<3; i++){
+    //salviamo le carte in ordine.
+    for (i=0; i<CARD_TYPES; i++){
         switch(scroll->tipo){
             case STANZA:
-                daValutare[0] = *scroll;
+                daValutare[STANZA] = *scroll;
                 break;
             case ARMA:
-                daValutare[1] = *scroll;
+                daValutare[ARMA] = *scroll;
+                break;
             default:
-                daValutare[2] = *scroll;
+                daValutare[SOSPETTO] = *scroll;
+                break;
         }
         if(scroll->next){
             scroll = scroll->next;
         }
     }
     // Estrapoliamo gli indici.
-    valSoluzioni[STANZA] = checkCard_Archive(stanze, &daValutare[0], STANZE_N);
-    valSoluzioni[ARMA] = checkCard_Archive(armi, &daValutare[1], ARMI_N);
-    valSoluzioni[SOSPETTO] = checkCard_Archive(sospetti, &daValutare[2], SOSPETTI_N);
+    valSoluzioni[STANZA] = checkCard_Archive(stanze, &daValutare[STANZA], STANZE_N);
+    valSoluzioni[ARMA] = checkCard_Archive(armi, &daValutare[ARMA], ARMI_N);
+    valSoluzioni[SOSPETTO] = checkCard_Archive(sospetti, &daValutare[SOSPETTO], SOSPETTI_N);
 
     //Aggiorniamo le statistiche caricate nel tavolo.
     for(i=0; i<CARD_TYPES; i++){
@@ -316,18 +318,18 @@ void statShow(){
         printf("\nStatistiche del crimine:\n\n");
         printf("STANZE\n");
         for(i=0;i<STANZE_N; i++){
-            printf("%s - %d volte\n", stanze(i, buf), statsArr[0][i]);
+            printf("%s - %d volte\n", stanze(i, buf), statsArr[STANZA][i]);
         }
         printf("\nARMI\n");
         for(i=0;i<ARMI_N; i++){
-            printf("%s - %d volte\n", armi(i, buf), statsArr[1][i]);
+            printf("%s - %d volte\n", armi(i, buf), statsArr[ARMA][i]);
         }
         printf("\nSOSPETTI\n");
         for(i=0;i<SOSPETTI_N; i++){
-            printf("%s - %d volte\n", sospetti(i, buf), statsArr[2][i]);
+            printf("%s - %d volte\n", sospetti(i, buf), statsArr[SOSPETTO][i]);
         }
         printf("\n");
-
+        fclose(stats);
     }
 }
 
