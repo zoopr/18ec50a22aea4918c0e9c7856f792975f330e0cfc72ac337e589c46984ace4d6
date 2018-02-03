@@ -476,7 +476,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
             printf("%d - %s\n", dice[0] + 1, armi(dice[0], ipotesi[ARMA].desc));
         }
-        dice[0] = suspectStrategy(interest[0]);
+        dice[0] = suspectStrategy(interest[ARMA]);
         printf("L'AI ha scelto l'opzione %d\n", dice[0] + 1);
         if(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per la visualizzazione d'errore.
             fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
@@ -488,7 +488,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
             printf("%d - %s\n", dice[1] + 1, sospetti(dice[1], ipotesi[SOSPETTO].desc));
         }
-        dice[1] = suspectStrategy(interest[1]);
+        dice[1] = suspectStrategy(interest[SOSPETTO]);
         printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
         if(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
             fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
@@ -526,9 +526,9 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
              * Questa sezione aggiusta un bias per le carte chiamate più volte e mai contestate.
              * La carta trovata è stata in precedenza azzerata.
              */
-            interest[0][giocatore->stanza]*=INTEREST_FACTOR;
-            interest[1][dice[0]]*=INTEREST_FACTOR;
-            interest[2][dice[1]]*=INTEREST_FACTOR;
+            interest[STANZA][giocatore->stanza]*=INTEREST_FACTOR;
+            interest[ARMA][dice[0]]*=INTEREST_FACTOR;
+            interest[SOSPETTO][dice[1]]*=INTEREST_FACTOR;
         }
         printf("Turno finito.\n\n");
         saveInterest(giocatore, interest);

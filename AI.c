@@ -172,7 +172,7 @@ int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti
      * si comunica l'errore e ci si muove al prossimo punto di salvataggio.
      */
     fprintf(stderr, "SCELTA FUORI INDICE\n");
-    return 0;
+    exit(-4);
 }
 
 int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide quali carte mostrare e aggiorna quelle mostrate.
