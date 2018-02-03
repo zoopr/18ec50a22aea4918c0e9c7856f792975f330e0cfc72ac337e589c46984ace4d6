@@ -388,7 +388,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
         }
         sospetti(dice[1], ipotesi[SOSPETTO].desc);
 
-        for(i = 0; i<CARD_TYPES; i++){
+        for(i = 0; i<CARD_TYPES; i++){ //Aggiungiamo l'ipotesi al taccuino di questo turno.
             aggiornaTaccuino(&tac, ipotesi[i]);
         }
         giocatore->ipotesiEsatta = checkSolution(ipotesi[STANZA].desc, ipotesi[ARMA].desc, ipotesi[SOSPETTO].desc, tavolo, 0, NULL, &tac); //Controllo ipotesi. Ritorna int 0 - 1.
