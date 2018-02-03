@@ -212,9 +212,8 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             strcat(message, "\n");
             logger(message);
             printf("La carta mostrata è %s\n", message);
-            if( (i%tavolo->numGiocatori) != tavolo->turnoCorrente ) { // La carta è aggiunta esclusivamente al taccuino del giocatore, solo se non è del giocatore.
-                aggiornaTaccuino(tac, foundData[0]); //Può capitare per uno scivolone nella partita umana, o per mancanza di stanze d'interesse nella partita AI.
-            }
+             // La carta è aggiunta esclusivamente al taccuino del giocatore.
+            aggiornaTaccuino(tac, foundData[0]);
             return 0;
 
         }

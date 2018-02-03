@@ -289,7 +289,7 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
 }
 
 _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
-    int dice[2];
+    int dice[2], i;
     Taccuino tac;
     Carta ipotesi[3]; // Ipotesi salvata in struttura carta. Buffer temporaneo per stringhe della decisione.
     char buf[SBUF];
@@ -388,8 +388,8 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
         }
         sospetti(dice[1], ipotesi[SOSPETTO].desc);
 
-        for(dice[0] = 0; dice[0]<CARD_TYPES; dice[0]++){
-            aggiornaTaccuino(&tac, ipotesi[dice[0]]);
+        for(i = 0; i<CARD_TYPES; i++){
+            aggiornaTaccuino(&tac, ipotesi[i]);
         }
         giocatore->ipotesiEsatta = checkSolution(ipotesi[STANZA].desc, ipotesi[ARMA].desc, ipotesi[SOSPETTO].desc, tavolo, 0, NULL, &tac); //Controllo ipotesi. Ritorna int 0 - 1.
 
@@ -497,8 +497,8 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         sospetti(dice[1], ipotesi[SOSPETTO].desc);
 
         // Salviamo le carte ipotesi in coda sul taccuino.
-        for(dice[0] = 0; dice[0]<CARD_TYPES; dice[0]++){
-            aggiornaTaccuino(&tac, ipotesi[dice[0]]);
+        for(i = 0; i<CARD_TYPES; i++){
+            aggiornaTaccuino(&tac, ipotesi[i]);
         }
 
         giocatore->ipotesiEsatta = checkSolution(ipotesi[STANZA].desc, ipotesi[ARMA].desc, ipotesi[SOSPETTO].desc, tavolo, 1, interest, &tac); //Passiamo le stringhe corrispondenti alle opzioni.
