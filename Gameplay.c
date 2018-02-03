@@ -9,40 +9,64 @@
 #include "AI.h"
 
 
-void leggiTaccuino(char* filename){
+Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le carte adeguate e lo ritorna.
     FILE* tac;
-    char buf[STANDARD_STRLEN + 4], *sbuffer;
-    int linebuf = SBUF;
+    char buf[STANDARD_STRLEN + 4];
+    Taccuino tacFile = {0, NULL};
+    int i;
+    Carta* carta;
 
     strcpy(buf, filename);
     strcat(buf, ".tac");
 
-    tac = fopen(buf, "r");
+    tac = fopen(buf, "rb");
     if(tac){
-        sbuffer = (char*)malloc(SBUF*sizeof(char)); //la misura non conta molto, getline espande il buffer con realloc se necessario.
-        while(!feof(tac)){
-            getline(&sbuffer, (size_t*)&linebuf, tac);
-            printf("\t%s\n", sbuffer);
+        fread(&tacFile.numCarte, 1, sizeof(int), tac);
+        for(i=0; i<tacFile.numCarte; i++){
+            carta = (Carta*)malloc(sizeof(Carta));
+            fread(carta, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), tac);
+            carta->next = tacFile.cima;
+            tacFile.cima = carta; // Non è importante preservare l'ordine della lista qua.
         }
     }else{
-        tac = fopen(buf, "a+"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
+        tac = fopen(buf, "wb"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
         if (!tac) //Se pure la creazione automatica fallisce c'è chiaramente un errore di scala più grande del programma.
             exit(-2);
     }
     fclose(tac);
+    return tacFile;
 }
 
-void scriviTaccuino(char* filename, char* message){
+void aggiornaTaccuino(Taccuino* tac, Carta carta){ //Inserisamo una nuova carta trovata in cima.
+    Carta* cartaTac;
+
+    cartaTac = (Carta*)malloc(sizeof(Carta));
+    *cartaTac = carta;
+    cartaTac->next = tac->cima; //Aggiungiamo la nuova carta in cima.
+    tac->cima = cartaTac;
+    tac->numCarte++;
+}
+
+void scriviTaccuino(char* filename, Taccuino* tacFile){ //Salviamo il contenuto del taccuino a fine turno e deallochiamo le carte caricate al momento.
     FILE* tac;
     char buf[STANDARD_STRLEN + 4];
+    int i;
+    Carta* carta;
+
     strcpy(buf, filename);
     strcat(buf, ".tac");
 
-    tac = fopen(buf, "a");
+    tac = fopen(buf, "wb");
     if (!tac){
         exit(-2);
     }
-    fprintf(tac, message);
+    fwrite(tacFile, 1, sizeof(int), tac);
+    for(i=0; i<tacFile->numCarte; i++){ //Scriviamo e liberiamo le carte.
+        carta = tacFile->cima;
+        fwrite(carta, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), tac);
+        tacFile->cima = carta->next;
+        free(carta);
+    }
     fclose(tac);
 }
 
@@ -73,7 +97,7 @@ void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
     }
 }
 
-int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[CARD_TYPES][STANZE_N]){
+int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[CARD_TYPES][STANZE_N], Taccuino* tac){
     Carta* matching;
     Carta foundData[CARD_TYPES];
     int i, j, coords[CARD_TYPES]; //Usiamo i campi per l'indice nella lista di chi ha le carte, ed i primi due campi per generare coordinate per chi has sbagliato.
@@ -165,7 +189,9 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             strcat(message, "\n");
             logger(message);
             printf("La carta mostrata è %s\n", message);
-            scriviTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome, message);// La carta è comunicata esclusivamente al taccuino del giocatore.
+            if( (i%tavolo->numGiocatori) != tavolo->turnoCorrente ) { // La carta è aggiunta esclusivamente al taccuino del giocatore, solo se non è del giocatore.
+                aggiornaTaccuino(tac, foundData[0]); //Può capitare per uno scivolone nella partita umana, o per mancanza di stanze d'interesse nella partita AI.
+            }
             return 0;
 
         }

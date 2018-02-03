@@ -107,7 +107,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
     for (i=0; i<numGiocatori; i++){ //inizializzazione taccuini
         strcpy(buffer, tavolo->giocatori[i].nome);
         strcat(buffer, ".tac");
-        tac = fopen(buffer, "w"); //la tag w ci assicura che se esiste viene azzerato.
+        tac = fopen(buffer, "wb"); //la tag w ci assicura che se esiste viene azzerato.
         if(!tac)
             exit(-2);
         fclose(tac); // possiamo usare a+ ai turni successivi.
@@ -126,7 +126,7 @@ Tabellone* LoadBoard(char* filename){
     Carta *ultimaC, *codaC;
     char msgbuf[SBUF] = "\nCaricata partita da ";
 
-    FILE* save = fopen(filename, "r");
+    FILE* save = fopen(filename, "rb");
     if (!save){
         printf("Errore nel caricamento del file\n"
         "Verificare il nome e la posizione del file di salvataggio.\n");
@@ -256,7 +256,6 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
     _Bool winner = 0;
     int i;
     char buf[SBUF];
-    char turnobuf[STANDARD_STRLEN];
     float loadArea[CARD_TYPES][STANZE_N];
 
     if(AI){ //Al caricamento della partita azzeriamo la memoria. Evita situazioni spiacevoli come credere in una mano sbagliata.
@@ -272,27 +271,6 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
         tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
         tavolo->numeroTurni +=1;
 
-        strcpy(buf, "\nTURNO ");
-        strcat(buf,  dtoc(tavolo->numeroTurni, turnobuf));
-        strcat(buf, " - Giocatore: ");
-        strcat(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);
-        strcat(buf, "\n");
-        printf(buf);
-        logger(buf);
-
-        printTableStatus(tavolo, AI);
-        if(!AI){
-            printf("Le carte trovate nelle mani dei tuoi avversari sono:\n");
-            leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);
-        }
-
-        printf("\nVuoi salvare lo stato attuale della partita? S/N\n");
-        scanf("%s", buf);
-        if(tolower(buf[0]) == 's'){
-            printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
-            scanf("%s", buf);
-            saveState(buf, tavolo);
-        }
         winner = turnType(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
     }
     strcpy(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);
@@ -316,9 +294,12 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
 
 _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     int dice[2];
+    Taccuino tac;
     _Bool reachable[STANZE_N];
     char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
 
+
+    tac = IntroLines(tavolo, 0); //Carichiamo il taccuino in memoria temporanea, allochiamo dinamicamente i dati delle sue carte.
 
 
     if (giocatore->ipotesiEsatta){
@@ -402,25 +383,26 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             scanf("%s", buf[0]);
             dice[1] = strtol(buf[0], NULL, 10) - 1;
         }
-        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 0, NULL); //Controllo ipotesi. Ritorna int 0 - 1.
+        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 0, NULL, &tac); //Controllo ipotesi. Ritorna int 0 - 1.
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
         }
         printf("Turno finito.\n\n");
-
-
-
+        scriviTaccuino(giocatore->nome, &tac);
+        return 0;
     }
 }
 
 _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più aderente possibile alla partita tradizionale, ma con feature che è meglio separare accuratamente.
     int dice[D_N], i, j, k;
     _Bool reachable[STANZE_N];
+    Taccuino tac;
     char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi. ordinato in ARMI, SOSPETTI, STANZE.
     float interest[CARD_TYPES][STANZE_N]; //parte della logica decisionale AI
 
     readInterest(tavolo, giocatore, interest); // Carica la matrice esistente nell'interesse del giocatore corrente.
+    tac = IntroLines(tavolo, 1);
 
     if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
         printf("Hai già compiuto l'ipotesi esatta.\n"
@@ -494,7 +476,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
             exit(-3);
         }
-        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 1, interest); //Passiamo le stringhe corrispondenti alle opzioni.
+        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 1, interest, &tac); //Passiamo le stringhe corrispondenti alle opzioni.
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n\n");
@@ -525,5 +507,44 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         }
         printf("Turno finito.\n\n");
         saveInterest(giocatore, interest);
+        scriviTaccuino(giocatore->nome, &tac);
+        return 0;
     }
+}
+
+Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Vogliamo mantenere il taccuino solo nella lifetime del turno: l'unico motivo per cui allochiamo le carte è il c89.
+    char buf[SBUF], turnobuf[STANDARD_STRLEN];
+    Taccuino tac;
+    int i;
+    Carta* carta;
+
+    strcpy(buf, "\nTURNO ");
+    strcat(buf,  dtoc(tavolo->numeroTurni, turnobuf));
+    strcat(buf, " - Giocatore: ");
+    strcat(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);
+    strcat(buf, "\n");
+    printf(buf);
+    logger(buf);
+
+    printTableStatus(tavolo, AI);
+    tac = leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);
+    if(!AI){
+        printf("Le carte trovate nelle mani dei tuoi avversari sono:\n");
+        carta = tac.cima;
+        for(i=0; i<tac.numCarte; i++){
+            printf("\t%-8s : %s\n", tipi(carta->tipo, buf), carta->desc);
+            if (carta->next)
+                carta = carta->next;
+        }
+    }
+
+    printf("\nVuoi salvare lo stato attuale della partita? S/N\n");
+    scanf("%s", buf);
+    if(tolower(buf[0]) == 's'){
+        printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
+        scanf("%s", buf);
+        saveState(buf, tavolo);
+    }
+
+    return tac;
 }

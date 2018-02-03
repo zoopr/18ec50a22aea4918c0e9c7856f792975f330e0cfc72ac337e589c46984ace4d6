@@ -40,6 +40,8 @@ typedef struct board{
     int stats[3][STANZE_N];
 } Tabellone;
 
+typedef struct deck Taccuino;
+
 Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*));
 Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2);
 Carta* DealCards(Mazzo* mazzo, int numCarte);
