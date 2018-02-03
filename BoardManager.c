@@ -529,7 +529,7 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Vogliamo mantenere il taccui
     printTableStatus(tavolo, AI);
     tac = leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);
     if(!AI){
-        printf("Le carte trovate nelle mani dei tuoi avversari sono:\n");
+        printf("Le carte trovate nelle mani dei tuoi avversari sono %d.\n", tac.numCarte);
         carta = tac.cima;
         for(i=0; i<tac.numCarte; i++){
             printf("\t%-8s : %s\n", tipi(carta->tipo, buf), carta->desc);

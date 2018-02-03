@@ -13,7 +13,7 @@ void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno,  an
     int i, j;
     char buffer[SBUF];
 
-    printf("Le carte sul tavolo sono %d\n", tavolo->carteScoperte.numCarte);
+    printf("Le carte sul tavolo sono %d.\n", tavolo->carteScoperte.numCarte);
     carta = tavolo->carteScoperte.cima;
     for (j=0; j<tavolo->carteScoperte.numCarte; j++){
         printf("\t%-8s : %s\n", tipi(carta->tipo, buffer), carta->desc);
@@ -22,7 +22,7 @@ void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno,  an
     }
     if(AI){
         for(i=0; i<tavolo->numGiocatori; i++) {
-            printf("Le carte nella mano di %s sono %d\n", tavolo->giocatori[i].nome, tavolo->giocatori[i].mano.numCarte);
+            printf("Le carte nella mano di %s sono %d.\n", tavolo->giocatori[i].nome, tavolo->giocatori[i].mano.numCarte);
             carta = tavolo->giocatori[i].mano.cima;
             for (j = 0; j < tavolo->giocatori[i].mano.numCarte; j++) {
                 printf("\t%-8s : %s\n", tipi(carta->tipo, buffer), carta->desc);
