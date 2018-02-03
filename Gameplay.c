@@ -24,6 +24,8 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
         fread(&tacFile.numCarte, 1, sizeof(int), tac);
         for(i=0; i<tacFile.numCarte; i++){
             carta = (Carta*)malloc(sizeof(Carta));
+            if(!carta)
+                exit(-1);
             fread(carta, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), tac);
             carta->next = tacFile.cima;
             tacFile.cima = carta; // Non è importante preservare l'ordine della lista qua.
@@ -41,6 +43,8 @@ void aggiornaTaccuino(Taccuino* tac, Carta carta){ //Inserisamo una nuova carta 
     Carta* cartaTac;
 
     cartaTac = (Carta*)malloc(sizeof(Carta));
+    if(!cartaTac)
+        exit(-1);
     *cartaTac = carta;
     cartaTac->next = tac->cima; //Aggiungiamo la nuova carta in cima.
     tac->cima = cartaTac;
@@ -99,7 +103,7 @@ void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
 
 int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[CARD_TYPES][STANZE_N], Taccuino* tac){
     Carta* matching;
-    Carta foundData[CARD_TYPES];
+    Carta foundData[CARD_TYPES]; //Vettore temporaneo di tre carte per salvare i dati di qualsiasi delle tre carte d'ipotesi sia stata trovata.
     int i, j, coords[CARD_TYPES]; //Usiamo i campi per l'indice nella lista di chi ha le carte, ed i primi due campi per generare coordinate per chi has sbagliato.
     int found = 0;
     char message[SBUF] ="L'ipotesi del giocatore è:\t";
@@ -115,10 +119,10 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     printf(message);
 
 
-    matching = tavolo->carteScoperte.cima; // Mai raggiungibile dall'AI a meno che non si muova qua casualmente quando nessuna stanza d'interesse è disponibile.
-    for ( i=0; i<tavolo->carteScoperte.numCarte; i++){
-        if(checkCard(stanza, arma, sospetto, matching) != -1){ //non è importante far decidere quale carta mostrare quando sono già sul tavolo.
-            strcpy(message, "Carta trovata sul tavolo.\n");
+    matching = tavolo->carteScoperte.cima;
+    for ( i=0; i<tavolo->carteScoperte.numCarte; i++){// Mai raggiungibile dall'AI a meno che non si muova qua casualmente quando nessuna stanza d'interesse è disponibile.
+        if(checkCard(stanza, arma, sospetto, matching) != -1){
+            strcpy(message, "Carta trovata sul tavolo.\n"); // Non è importante far decidere quale mostrare se almeno una carta è sul tavolo.
             printf(message);
             logger(message);
             tipi(matching->tipo, message);
@@ -126,19 +130,19 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             strcat(message,  matching->desc);
             strcat(message, "\n");
             logger(message);
-            //No printf: Se la carta è sul tavolo viene stampata di default a ogni turno.
+            // Se la carta è sul tavolo viene stampata di default a ogni turno. Nessun taccuino (e 0 interesse di default).
             return 0;
         }
         if (matching->next)
             matching = matching->next;
     }
 
-    //controlla le mani dei giocatori in avanti fino al giocatore incluso.
+    //controlla le mani dei giocatori in avanti fino al giocatore stesso.
     for (i=tavolo->turnoCorrente + 1; i<=(tavolo->turnoCorrente + tavolo->numGiocatori) && !found; i++) {
         matching = tavolo->giocatori[i%tavolo->numGiocatori].mano.cima;
         for (j = 0; j < tavolo->giocatori[i%tavolo->numGiocatori].mano.numCarte; j++){
             if (checkCard(stanza, arma, sospetto,
-                          matching) != -1) { //cambiamo il tipo di broadcast pubblico per permettere la scelta di cosa mostrare.
+                          matching) != -1) { // Permettere la scelta di cosa mostrare.
                 foundData[found] = *matching;
                 coords[found] = j;
                 found++;
@@ -167,7 +171,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.
         }
         if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
-            if (AI && found == 1){//Dobbiamo comunque aggiornare che carta abbiamo dovuto mostrare al giocatore corrente
+            if (AI && found == 1){//il giocatore che teneva una carta per fermare l'ipotesi aggiorna che carta ha dovuto mostrare al giocatore corrente.
                 showingStrategy(&tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
             }
             printf("\nIpotesi errata.\n");

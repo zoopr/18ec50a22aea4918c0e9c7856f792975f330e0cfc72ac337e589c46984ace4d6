@@ -110,7 +110,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
         tac = fopen(buffer, "wb"); //la tag w ci assicura che se esiste viene azzerato.
         if(!tac)
             exit(-2);
-        fclose(tac); // possiamo usare a+ ai turni successivi.
+        fclose(tac);
     }
 
     statInit(tavolo);
@@ -201,11 +201,8 @@ Tabellone* LoadBoard(char* filename){
                 codaC->next = ultimaC;
                 ultimaC->next = NULL;
             }
-
         }
         fclose(save);
-        //non ci preoccupiamo dei taccuini. La tag "a" crea i file se non esistenti.
-        //...anche se taccuini di terze parti formattati in altri modi possono essere disorientanti.
 
         statInit(table); // Carichiamo le statistiche da un secondo file.
 
@@ -389,7 +386,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
         }
         printf("Turno finito.\n\n");
-        scriviTaccuino(giocatore->nome, &tac);
+        scriviTaccuino(giocatore->nome, &tac); //Il file di taccuino è salvato, le carte deallocate e il taccuino stesso deallocato alla fine dello scope.
         return 0;
     }
 }
@@ -402,7 +399,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     float interest[CARD_TYPES][STANZE_N]; //parte della logica decisionale AI
 
     readInterest(tavolo, giocatore, interest); // Carica la matrice esistente nell'interesse del giocatore corrente.
-    tac = IntroLines(tavolo, 1);
+    tac = IntroLines(tavolo, 1); //Inizializzazione taccuino temporaneo.
 
     if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
         printf("Hai già compiuto l'ipotesi esatta.\n"
@@ -507,12 +504,12 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         }
         printf("Turno finito.\n\n");
         saveInterest(giocatore, interest);
-        scriviTaccuino(giocatore->nome, &tac);
+        scriviTaccuino(giocatore->nome, &tac); //Salvataggio taccuino su disco. Deallocazione delle carte taccuino di questo turno.
         return 0;
     }
 }
 
-Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Vogliamo mantenere il taccuino solo nella lifetime del turno: l'unico motivo per cui allochiamo le carte è il c89.
+Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino e indirizzi delle carte caricate.
     char buf[SBUF], turnobuf[STANDARD_STRLEN];
     Taccuino tac;
     int i;
