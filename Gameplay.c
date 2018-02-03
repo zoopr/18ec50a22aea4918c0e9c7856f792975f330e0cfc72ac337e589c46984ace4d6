@@ -134,7 +134,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     }
 
     //controlla le mani dei giocatori in avanti fino al giocatore incluso.
-    for (i=tavolo->turnoCorrente; i<(tavolo->turnoCorrente + tavolo->numGiocatori) && !found; i++) {
+    for (i=tavolo->turnoCorrente + 1; i<=(tavolo->turnoCorrente + tavolo->numGiocatori) && !found; i++) {
         matching = tavolo->giocatori[i%tavolo->numGiocatori].mano.cima;
         for (j = 0; j < tavolo->giocatori[i%tavolo->numGiocatori].mano.numCarte; j++){
             if (checkCard(stanza, arma, sospetto,
