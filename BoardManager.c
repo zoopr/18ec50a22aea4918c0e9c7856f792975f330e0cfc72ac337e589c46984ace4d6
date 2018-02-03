@@ -110,9 +110,6 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
         tac = fopen(buffer, "w"); //la tag w ci assicura che se esiste viene azzerato.
         if(!tac)
             exit(-2);
-
-        fprintf(tac, "Le carte scoperte degli avversari sono:\n"); //per ora rimane vuoto. si popolerà nella ricerca dopo le ipotesi.
-
         fclose(tac); // possiamo usare a+ ai turni successivi.
     }
 
@@ -285,6 +282,7 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
 
         printTableStatus(tavolo, AI);
         if(!AI){
+            printf("Le carte trovate nelle mani dei tuoi avversari sono:\n");
             leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);
         }
 

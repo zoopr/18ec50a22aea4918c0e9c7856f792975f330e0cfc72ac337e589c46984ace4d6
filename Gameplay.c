@@ -22,7 +22,7 @@ void leggiTaccuino(char* filename){
         sbuffer = (char*)malloc(SBUF*sizeof(char)); //la misura non conta molto, getline espande il buffer con realloc se necessario.
         while(!feof(tac)){
             getline(&sbuffer, (size_t*)&linebuf, tac);
-            printf("%s\n", sbuffer);
+            printf("\t%s\n", sbuffer);
         }
     }else{
         tac = fopen(buf, "a+"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
@@ -170,9 +170,9 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
 
         }
     }
-    strcpy(message, "Ipotesi esatta.\n"); // Sia il giocatore che 'AI perdono completamente il controllo del game flow da qui in poi.
+    strcpy(message, "Ipotesi esatta.\n"); // Sia il giocatore che l'AI perdono completamente il controllo del game flow da qui in poi.
     logger(message);
-    return 1;//è tra le carte segrete.
+    return 1;
 
 }
 

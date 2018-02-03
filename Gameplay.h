@@ -23,12 +23,13 @@
 #define D_SIDES 6 //se si vuole giocare con dadi diversi.
 #define D_N 2 //Macro per il numero di dadi. Vivamente sconsigliato modificarla.
 
-void leggiTaccuino(char* filename);
+
 void rollDice(int dice[D_N]);
 void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]);
 int checkSolution(const char*stanza,const char* arma,const char* sospetto, Tabellone* tavolo, _Bool AI, float interestFile[CARD_TYPES][STANZE_N]);
 int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* card);
 void saveState(char* filename, Tabellone* board);
+void leggiTaccuino(char* filename);
 void scriviTaccuino(char* filename, char* message);
 void logger(char* message);
 void statInit(Tabellone* tavolo);

@@ -23,4 +23,5 @@ void generateCoordinates(Carta* carta, int coords[2]);
 int movementStrategy(const float interesseStanze[STANZE_N], const _Bool reachable[STANZE_N]);
 int suspectStrategy(const float interesse_AoS[ARMI_N]);
 int showingStrategy(Giocatore* giocatore, const int coords[], int len);
+
 #endif //CLUEDO_AI_H

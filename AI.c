@@ -8,15 +8,15 @@
 #include "AI.h"
 #include "Gameplay.h"
 
-void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno anche nella versione umana. Funzionalità di base derivata dalla versione AI.
-    Carta* carta;                                    //Rende il taccuino responsabile solo per le carte scoperte dagli avversari. Impatto sul gameplay minimizzato.
+void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno,  anche nella versione umana.
+    Carta* carta;                                    //Rende il taccuino responsabile solo per le carte scoperte dagli avversari.
     int i, j;
     char buffer[SBUF];
 
     printf("Le carte sul tavolo sono %d\n", tavolo->carteScoperte.numCarte);
     carta = tavolo->carteScoperte.cima;
     for (j=0; j<tavolo->carteScoperte.numCarte; j++){
-        printf("%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
+        printf("\t%-8s : %s\n", tipi(carta->tipo, buffer), carta->desc);
         if (carta->next)
             carta = carta->next;
     }
@@ -25,7 +25,7 @@ void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno anch
             printf("Le carte nella mano di %s sono %d\n", tavolo->giocatori[i].nome, tavolo->giocatori[i].mano.numCarte);
             carta = tavolo->giocatori[i].mano.cima;
             for (j = 0; j < tavolo->giocatori[i].mano.numCarte; j++) {
-                printf("%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
+                printf("\t%-8s : %s\n", tipi(carta->tipo, buffer), carta->desc);
                 if (carta->next)
                     carta = carta->next;
             }
@@ -33,7 +33,7 @@ void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno anch
         printf("Le carte segrete sono %d\n", tavolo->soluzione.numCarte);
         carta = tavolo->soluzione.cima;
         for (j=0; j<tavolo->soluzione.numCarte; j++){
-            printf("%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
+            printf("\t%-8s : %s\n", tipi(carta->tipo, buffer), carta->desc);
             if (carta->next)
                 carta = carta->next;
         }
@@ -43,7 +43,7 @@ void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno anch
         printf("Le carte in mano al giocatore sono %d\n", tavolo->giocatori[tavolo->turnoCorrente].mano.numCarte);
         carta = tavolo->giocatori[tavolo->turnoCorrente].mano.cima;
         for (j = 0; j < tavolo->giocatori[tavolo->turnoCorrente].mano.numCarte; j++) {
-            printf("%s : %s\n", tipi(carta->tipo, buffer), carta->desc);
+            printf("\t%-8s : %s\n", tipi(carta->tipo, buffer), carta->desc);
             if (carta->next)
                 carta = carta->next;
         }
