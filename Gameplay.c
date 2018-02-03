@@ -12,9 +12,9 @@
 Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le carte adeguate e lo ritorna.
     FILE* tac;
     char buf[STANDARD_STRLEN + 4];
-    Taccuino tacFile = {0, NULL};
+    Taccuino tacFile = {0, NULL}; //il nostro file interno.
     int i;
-    Carta* carta;
+    Carta *carta, *coda;
 
     strcpy(buf, filename);
     strcat(buf, ".tac");
@@ -22,13 +22,23 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
     tac = fopen(buf, "rb");
     if(tac){
         fread(&tacFile.numCarte, 1, sizeof(int), tac);
+        tacFile.cima = NULL;
         for(i=0; i<tacFile.numCarte; i++){
             carta = (Carta*)malloc(sizeof(Carta));
             if(!carta)
                 exit(-1);
             fread(carta, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), tac);
-            carta->next = tacFile.cima;
-            tacFile.cima = carta; // Non è importante preservare l'ordine della lista qua.
+            carta->next = NULL;
+            //Aggiungiamo in coda.
+            coda = tacFile.cima;
+            if(!coda){
+                tacFile.cima = carta;
+            }else{
+                while(coda->next){
+                    coda = coda->next;
+                }
+                coda->next = carta;
+            }
         }
     }else{
         tac = fopen(buf, "wb"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
@@ -39,15 +49,24 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
     return tacFile;
 }
 
-void aggiornaTaccuino(Taccuino* tac, Carta carta){ //Inserisamo una nuova carta trovata in cima.
-    Carta* cartaTac;
+void aggiornaTaccuino(Taccuino* tac, Carta carta){ //Inserisamo una nuova carta in coda al taccuino.
+    Carta* cartaTac, *coda;
 
     cartaTac = (Carta*)malloc(sizeof(Carta));
     if(!cartaTac)
         exit(-1);
+
     *cartaTac = carta;
-    cartaTac->next = tac->cima; //Aggiungiamo la nuova carta in cima.
-    tac->cima = cartaTac;
+    cartaTac->next = NULL;
+    coda = tac->cima;
+    if(!coda){
+        tac->cima = cartaTac;
+    }else{
+        while(coda->next){
+            coda = coda->next;
+        }
+        coda->next = cartaTac;
+    }
     tac->numCarte++;
 }
 
@@ -223,7 +242,7 @@ void saveState(char* filename, Tabellone* board){
     int i, j;
     Carta* carta;
     char msgbuf[SBUF] = "\nPartita salvata in ";
-    FILE* save = fopen(filename, "w"); //qualunque cosa ci sia la sovrascrive.
+    FILE* save = fopen(filename, "wb"); //qualunque cosa ci sia la sovrascrive.
     if (!save)
         exit(-2);
 
@@ -276,12 +295,12 @@ void logger(char* message){
 
 void statInit(Tabellone* tavolo){ //carica o eventualmente crea il file di statistiche e lo carica nel tavolo.
     int i;
-    FILE* tac;
+    FILE* stat;
 
-    tac = fopen(STAT_DEFAULT, "r");
-    if(tac && !feof(tac)){ // Ci assicura che nella prima partita del sistema sia gestito correttamente.
-        fread(tavolo->stats, 3, STANZE_N*sizeof(int), tac);
-        fclose(tac);
+    stat = fopen(STAT_DEFAULT, "r");
+    if(stat && !feof(stat)){ // Ci assicura che nella prima partita del sistema sia gestito correttamente.
+        fread(tavolo->stats, 3, STANZE_N*sizeof(int), stat);
+        fclose(stat);
     }else{
         for(i=0; i<3*STANZE_N; i++){
             tavolo->stats[i/STANZE_N][i%STANZE_N] = 0;
@@ -372,4 +391,27 @@ int checkCard_Archive(char* (*func)(int, char*), Carta* card, int len){ //riport
         }
     }
     return -1;
+}
+
+void parseTac(Taccuino* tac){
+    Carta* carta;
+    int i;
+    char buf[STANDARD_STRLEN];
+
+    carta = tac->cima;
+    while(carta && carta->next) { //Sia che il taccuino sia vuoto, sia che sia alla fine. Lo short circuit ci garantisce un controllo sicuro di carta->next.
+        printf("\nHai compiuto questa ipotesi.\n");
+        for (i = 0; i < CARD_TYPES; i++) {
+            printf("\t%-8s : %s\n", tipi(carta->tipo, buf), carta->desc);
+            carta = carta->next;
+        }
+        if (carta) {
+            printf("L'ipotesi era errata. La carta mostrata era:\n");
+            printf("\t%-8s : %s\n", tipi(carta->tipo, buf), carta->desc);
+            carta = carta->next;
+        } else {
+            printf("L'ipotesi era esatta.\n");
+        }
+        printf("\n");
+    }
 }

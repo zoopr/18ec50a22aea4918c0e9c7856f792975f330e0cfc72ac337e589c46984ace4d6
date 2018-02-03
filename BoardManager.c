@@ -145,21 +145,21 @@ Tabellone* LoadBoard(char* filename){
         for (i = 0; i < table->numGiocatori; i++) {
             ultimoG = &table->giocatori[i];
             fread(ultimoG, 1, STANDARD_STRLEN * sizeof(char) + 2 * sizeof(int), save);
-            fread(&ultimoG->mano.numCarte, 1, sizeof(int), save); //Simile ai giocatori ma ogni carta è un nodo di LL
+            fread(&ultimoG->mano.numCarte, 1, sizeof(int), save);//Simile ai giocatori ma ogni carta è un nodo di LL
+            ultimoG->mano.cima = NULL;
             for (j = 0; j < ultimoG->mano.numCarte; j++) {        //e come tale lo possiamo allocare individualmente
                 ultimaC = (Carta *) malloc(sizeof(Carta));        //avendo il riferimento all'elemento successivo esplicito.
                 if (!ultimaC)
                     exit(-1);
                 fread(&ultimaC->tipo, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), save); //Il salvataggio contiene l'ordine e i valori non di link.
+                ultimaC->next = NULL;
                 if (!ultimoG->mano.cima) {                                                        //Costruiamo i link della lista.
                     ultimoG->mano.cima = ultimaC;
-                    ultimaC->next = NULL;
                 } else {                                                                          //Aggiungiamo in coda dalla second carta in poi.
                     codaC = ultimoG->mano.cima;                                                   //Preserviamo l'ordine con cui erano elencate.
                     while (codaC->next)
                         codaC = codaC->next;
                     codaC->next = ultimaC;
-                    ultimaC->next = NULL;
                 }
 
             }
@@ -246,7 +246,6 @@ void FreeBoard(Tabellone* tavolo){
     free(tavolo->giocatori);
     //Liberiamo il tavolo e con lui i mazzi che abbiamo liberato per primi.
     free(tavolo);
-    tavolo = NULL;
 }
 
 void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool AI){
@@ -292,9 +291,13 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
 _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     int dice[2];
     Taccuino tac;
+    Carta ipotesi[3]; // Ipotesi salvata in struttura carta. Buffer temporaneo per stringhe della decisione.
+    char buf[SBUF];
     _Bool reachable[STANZE_N];
-    char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi.
-
+    // Inizializziamo i tipi della ipotesi.
+    ipotesi[STANZA].tipo = STANZA;
+    ipotesi[ARMA].tipo = ARMA;
+    ipotesi[SOSPETTO].tipo = SOSPETTO;
 
     tac = IntroLines(tavolo, 0); //Carichiamo il taccuino in memoria temporanea, allochiamo dinamicamente i dati delle sue carte.
 
@@ -302,8 +305,8 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
     if (giocatore->ipotesiEsatta){
         printf("Hai già compiuto l'ipotesi esatta.\n"
                "Procedi direttamente al lancio dei dadi.\n");
-        strcpy(buf[0], "IL giocatore sta cercando di fare dadi doppi.\n");
-        logger(buf[0]);
+        strcpy(buf, "IL giocatore sta cercando di fare dadi doppi.\n");
+        logger(buf);
         rollDice(dice);
         if (dice[0] == dice[1]){
             printf("Dadi doppi.\n");
@@ -315,13 +318,13 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
         }
     }
     else{
-        printf("Posizione attuale: %s\n", stanze(giocatore->stanza, buf[0]));
+        printf("Posizione attuale: %s\n", stanze(giocatore->stanza, ipotesi[STANZA].desc));
         printf("Vuoi procedere direttamente con l'ipotesi o lanciare i dadi?\n");
         do{
             printf("1 - Lancio dadi\n"
                            "2 - Ipotesi diretta\n ");
-            scanf("%s", buf[0]);
-            dice[0] = strtol(buf[0], NULL, 10); //La variabile non è stata ancora usata in questo scopo.
+            scanf("%s", buf);
+            dice[0] = strtol(buf, NULL, 10); //La variabile non è stata ancora usata in questo scopo.
         }while(dice[0] !=1 && dice[0] !=2);
         if (dice[0] == 1){
             rollDice(dice);
@@ -330,57 +333,67 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             printf("Movimenti validi:\n");
             for(dice[0] = 0, dice[1] = 0; dice[0] < STANZE_N; dice[0]++){
                 if(reachable[dice[0]]){
-                    printf("%d - %s\n", dice[0] + 1, stanze(dice[0], buf[0]));
+                    printf("%d - %s\n", dice[0] + 1, stanze(dice[0], ipotesi[STANZA].desc));
                     dice[1]++;
                 }
             }
             //Decisione spostamento se disponibile
             if(dice[1] > 1){
                 printf("\nIn quale stanza desideri muoverti?\n");
-                scanf("%s", buf[0]);
-                dice[1] = strtol(buf[0], NULL, 10) - 1;
+                scanf("%s", buf);
+                dice[1] = strtol(buf, NULL, 10) - 1;
                 while(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
                     printf("Posizione non raggiungibile. Inserire stanza ammessa.\n");
-                    scanf("%s", buf[0]);
-                    dice[1] = strtol(buf[0], NULL, 10) - 1;
+                    scanf("%s", buf);
+                    dice[1] = strtol(buf, NULL, 10) - 1;
                 }
                 giocatore->stanza = dice[1];
-                strcpy(buf[0], "Giocatore spostato in ");
-                strcat (buf[0], stanze(dice[1],buf[1]));
-                strcat(buf[0], "\n");
-                printf(buf[0]);
-                logger(buf[0]);
+                strcpy(buf, "Giocatore spostato in ");
+                strcat (buf, stanze(dice[1], ipotesi[STANZA].desc));
+                strcat(buf, "\n");
+                printf(buf);
+                logger(buf);
 
             }else {
-                printf("Giocatore obbligato a rimanere in %s\n", stanze(giocatore->stanza, buf[0]));
+                printf("Giocatore obbligato a rimanere in %s\n", stanze(giocatore->stanza, ipotesi[STANZA].desc));
             }
         }
         //Formulazione ipotesi
-        printf("L'ipotesi è obbligata a svolgersi nella tua stanza attuale(%s).\n", stanze(giocatore->stanza, buf[0]));
+        printf("L'ipotesi è obbligata a svolgersi nella tua stanza attuale(%s).\n", ipotesi[STANZA].desc);
+
+
         printf("Con quale arma si è compiuto il delitto?\n");
         for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
-            printf("%d - %s\n", dice[0] + 1, armi(dice[0], buf[0]));
+            printf("%d - %s\n", dice[0] + 1, armi(dice[0], ipotesi[ARMA].desc));
         }
-        scanf("%s", buf[0]);
-        dice[0] = strtol(buf[0], NULL, 10) - 1;
+        scanf("%s", buf);
+        dice[0] = strtol(buf, NULL, 10) - 1;
         while(dice[0] >= ARMI_N || dice[0] < 0 ){
             printf("Valore non ammesso. Inserire un numero adeguato.\n");
-            scanf("%s", buf[0]);
-            dice[0] = strtol(buf[0], NULL, 10) - 1;
+            scanf("%s", buf);
+            dice[0] = strtol(buf, NULL, 10) - 1;
         }
+        armi(dice[0], ipotesi[ARMA].desc);
 
         printf("Quale sospetto ha compiuto il delitto?\n");
         for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
-            printf("%d - %s\n", dice[1] + 1, sospetti(dice[1], buf[0]));
+            printf("%d - %s\n", dice[1] + 1, sospetti(dice[1], ipotesi[SOSPETTO].desc));
         }
-        scanf("%s", buf[0]);
-        dice[1] = strtol(buf[0], NULL, 10) - 1;
+        scanf("%s", buf);
+        dice[1] = strtol(buf, NULL, 10) - 1;
         while(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
             printf("Valore non ammesso. Inserire un numero adeguato.\n");
-            scanf("%s", buf[0]);
-            dice[1] = strtol(buf[0], NULL, 10) - 1;
+            scanf("%s", buf);
+            dice[1] = strtol(buf, NULL, 10) - 1;
         }
-        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 0, NULL, &tac); //Controllo ipotesi. Ritorna int 0 - 1.
+        sospetti(dice[1], ipotesi[SOSPETTO].desc);
+
+        for(dice[0] = 0; dice[0]<CARD_TYPES; dice[0]++){
+            aggiornaTaccuino(&tac, ipotesi[dice[0]]);
+        }
+        giocatore->ipotesiEsatta = checkSolution(ipotesi[STANZA].desc, ipotesi[ARMA].desc, ipotesi[SOSPETTO].desc, tavolo, 0, NULL, &tac); //Controllo ipotesi. Ritorna int 0 - 1.
+
+
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
@@ -395,7 +408,13 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     int dice[D_N], i, j, k;
     _Bool reachable[STANZE_N];
     Taccuino tac;
-    char buf[CARD_TYPES][STANDARD_STRLEN] ;  //per lo storage temporaneo delle stringhe da stampare e della ipotesi. ordinato in ARMI, SOSPETTI, STANZE.
+    Carta ipotesi[3];
+    char buf[SBUF]; // buffer per linee da stampare.
+    //Inizializziamo il tipo delle ipotesi.
+    ipotesi[STANZA].tipo = STANZA;
+    ipotesi[ARMA].tipo = ARMA;
+    ipotesi[SOSPETTO].tipo = SOSPETTO;
+
     float interest[CARD_TYPES][STANZE_N]; //parte della logica decisionale AI
 
     readInterest(tavolo, giocatore, interest); // Carica la matrice esistente nell'interesse del giocatore corrente.
@@ -404,8 +423,8 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
         printf("Hai già compiuto l'ipotesi esatta.\n"
                        "Procedi direttamente al lancio dei dadi.\n");
-        strcpy(buf[0], "Il giocatore sta cercando di fare dadi doppi.\n");
-        logger(buf[0]);
+        strcpy(buf, "Il giocatore sta cercando di fare dadi doppi.\n");
+        logger(buf);
         rollDice(dice);
         if (dice[0] == dice[1]){
             printf("Dadi doppi.\n");
@@ -417,7 +436,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         }
     }
     else{
-        printf("Posizione attuale: %s\n", stanze(giocatore->stanza, buf[0]));
+        printf("Posizione attuale: %s\n", stanze(giocatore->stanza, ipotesi[STANZA].desc));
         printf("Procedere al lancio dei dadi.\n");
         //La scelta ottimale per l'AI (ma anche per i giocatori umani) è sempre di valutare le opzioni di spostamento ed eventualmente stare fermi.
         rollDice(dice);
@@ -426,7 +445,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         printf("Movimenti validi:\n");
         for(dice[0] = 0, dice[1] = 0; dice[0] < STANZE_N; dice[0]++){
             if(reachable[dice[0]]){
-                printf("%d - %s\n", dice[0] + 1, stanze(dice[0], buf[0]));
+                printf("%d - %s\n", dice[0] + 1, stanze(dice[0], ipotesi[STANZA].desc));
                 dice[1]++;
             }
         }
@@ -440,21 +459,22 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
                 exit(-3);
             }
             giocatore->stanza = dice[1];
-            strcpy(buf[0], "Giocatore spostato in ");
-            strcat (buf[0], stanze(dice[1],buf[1]));
-            strcat(buf[0], "\n");
-            printf(buf[0]);
-            logger(buf[0]);
+            strcpy(buf, "Giocatore spostato in ");
+            strcat (buf, stanze(giocatore->stanza, ipotesi[STANZA].desc));
+            strcat(buf, "\n");
+            printf(buf);
+            logger(buf);
 
         }else {
-            printf("Giocatore obbligato a rimanere in %s\n", stanze(giocatore->stanza, buf[0]));
+            printf("Giocatore obbligato a rimanere in %s\n", stanze(giocatore->stanza, ipotesi[STANZA].desc));
         }
 
         //Formulazione ipotesi
-        printf("L'ipotesi è obbligata a svolgersi nella tua stanza attuale(%s).\n", stanze(giocatore->stanza, buf[0]));
+        printf("L'ipotesi è obbligata a svolgersi nella tua stanza attuale(%s).\n", ipotesi[STANZA].desc);
+
         printf("Con quale arma si è compiuto il delitto?\n");
         for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
-            printf("%d - %s\n", dice[0] + 1, armi(dice[0], buf[0]));
+            printf("%d - %s\n", dice[0] + 1, armi(dice[0], ipotesi[ARMA].desc));
         }
         dice[0] = suspectStrategy(interest[0]);
         printf("L'AI ha scelto l'opzione %d\n", dice[0] + 1);
@@ -462,10 +482,11 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
             exit(-3);
         }
+        armi(dice[0], ipotesi[ARMA].desc);
 
         printf("Quale sospetto ha compiuto il delitto?\n");
         for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
-            printf("%d - %s\n", dice[1] + 1, sospetti(dice[1], buf[0]));
+            printf("%d - %s\n", dice[1] + 1, sospetti(dice[1], ipotesi[SOSPETTO].desc));
         }
         dice[1] = suspectStrategy(interest[1]);
         printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
@@ -473,7 +494,14 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
             exit(-3);
         }
-        giocatore->ipotesiEsatta = checkSolution(stanze(giocatore->stanza, buf[0]), armi(dice[0], buf[1]), sospetti(dice[1], buf[2]), tavolo, 1, interest, &tac); //Passiamo le stringhe corrispondenti alle opzioni.
+        sospetti(dice[1], ipotesi[SOSPETTO].desc);
+
+        // Salviamo le carte ipotesi in coda sul taccuino.
+        for(dice[0] = 0; dice[0]<CARD_TYPES; dice[0]++){
+            aggiornaTaccuino(&tac, ipotesi[dice[0]]);
+        }
+
+        giocatore->ipotesiEsatta = checkSolution(ipotesi[STANZA].desc, ipotesi[ARMA].desc, ipotesi[SOSPETTO].desc, tavolo, 1, interest, &tac); //Passiamo le stringhe corrispondenti alle opzioni.
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n\n");
@@ -512,8 +540,6 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
 Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino e indirizzi delle carte caricate.
     char buf[SBUF], turnobuf[STANDARD_STRLEN];
     Taccuino tac;
-    int i;
-    Carta* carta;
 
     strcpy(buf, "\nTURNO ");
     strcat(buf,  dtoc(tavolo->numeroTurni, turnobuf));
@@ -525,14 +551,9 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
 
     printTableStatus(tavolo, AI);
     tac = leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);
+
     if(!AI){
-        printf("Le carte trovate nelle mani dei tuoi avversari sono %d.\n", tac.numCarte);
-        carta = tac.cima;
-        for(i=0; i<tac.numCarte; i++){
-            printf("\t%-8s : %s\n", tipi(carta->tipo, buf), carta->desc);
-            if (carta->next)
-                carta = carta->next;
-        }
+        parseTac(&tac);
     }
 
     printf("\nVuoi salvare lo stato attuale della partita? S/N\n");
@@ -540,6 +561,9 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
     if(tolower(buf[0]) == 's'){
         printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
         scanf("%s", buf);
+        //Facciamo un breve rewind alla fine del turno precedente.
+        tavolo->turnoCorrente  = (tavolo->turnoCorrente+tavolo->numGiocatori - 1)%tavolo->numGiocatori;
+        tavolo->numeroTurni -= 1;
         saveState(buf, tavolo);
     }
 

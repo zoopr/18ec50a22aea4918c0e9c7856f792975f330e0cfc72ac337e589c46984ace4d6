@@ -38,5 +38,6 @@ void statSave(Tabellone* tavolo);
 void statTrack(Tabellone* tavolo);
 void statShow();
 int checkCard_Archive(char* (*func)(int, char*), Carta* card, int len);
+void parseTac(Taccuino* tac);
 
 #endif //CLUEDO_GAMEPLAY_H
