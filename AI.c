@@ -119,7 +119,7 @@ void generateCoordinates(Carta* carta, int coords[2]){ // Genera le coordinate s
     }
 }
 
-int movementStrategy(float interesseStanze[STANZE_N],_Bool reachable[STANZE_N], int layout[STANZE_N][STANZE_N]){ //Decisione direttamente proporzionale al livello d'interesse su quella casella.
+int movementStrategy(float interesseStanze[STANZE_N], _Bool reachable[STANZE_N], int layout[STANZE_N][STANZE_N]){ //Decisione direttamente proporzionale al livello d'interesse su quella casella.
     float interesseCorretto[STANZE_N];
     _Bool newMask[STANZE_N];
     int i, j, lastIndex;
@@ -145,7 +145,7 @@ int movementStrategy(float interesseStanze[STANZE_N],_Bool reachable[STANZE_N], 
         }
     } else { // Se nessuna delle stanze di cui abbia effetivo interesse è raggiungibile, l'AI si muove secondo un pathing più ottimale possibile verso un punto di interesse.
         for(i=0, j=0; i<STANZE_N; i++){ // Incluso stare fermo se possibile.
-            if(interesseStanze[i]>0.0f){ //Controlliamo se aveva una specifica destinazione in mente.
+            if(interesseStanze[i]>0.0f){ // Controlliamo se aveva una specifica destinazione in mente o se voleva investigare più di una stanza.
                 j++;
                 lastIndex = i;
             }
@@ -154,7 +154,7 @@ int movementStrategy(float interesseStanze[STANZE_N],_Bool reachable[STANZE_N], 
         }
         // Se aveva una singola destinazione in mente, massimizziamo il movimento per quel punto.
         // Altrimenti massimizziamo la distanza verso almeno uno dei punti di interesse decisi a caso.
-        if(j == 1){
+        if(j == 1){ // j è almeno 1 e lastIndex è sempre inzializzato, a meno di errori nel R/W della matrice di interesse che sono catturati nello scopo superiore con uscita -3.
             return SimpleGeometry(reachable, lastIndex, layout);
         } else {
             lastIndex = movementStrategy(interesseCorretto,
