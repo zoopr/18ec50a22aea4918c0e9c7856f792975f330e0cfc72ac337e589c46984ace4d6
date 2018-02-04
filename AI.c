@@ -119,10 +119,10 @@ void generateCoordinates(Carta* carta, int coords[2]){ // Genera le coordinate s
     }
 }
 
-int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable[STANZE_N]){ //Decisione direttamente proporzionale al livello d'interesse su quella casella.
+int movementStrategy(float interesseStanze[STANZE_N],_Bool reachable[STANZE_N], int layout[STANZE_N][STANZE_N]){ //Decisione direttamente proporzionale al livello d'interesse su quella casella.
     float interesseCorretto[STANZE_N];
-    _Bool apathy[STANZE_N];
-    int i;
+    _Bool newMask[STANZE_N];
+    int i, j, lastIndex;
     float sum, incremental, seed;
     for(i=0; i<STANZE_N; i++){
         interesseCorretto[i] = interesseStanze[i]*(float)reachable[i]; //azzera le stanze a cui non possiamo accedere questo turno.
@@ -135,22 +135,37 @@ int movementStrategy(const float interesseStanze[STANZE_N],const _Bool reachable
 
     seed = (float)rand()/(float)RAND_MAX; //Generiamo un float da 0 a 1.
     incremental = 0.0f;
-    for(i=0; i<STANZE_N; i++){
-        incremental += (interesseCorretto[i]/sum);
-        if (seed < incremental){ // Quando cade sulla fetta di un certo indice, ritorniamo quell'indice.
-            return i;
+
+    if(sum > 0.0f) {
+        for (i = 0; i < STANZE_N; i++) {
+            incremental += (interesseCorretto[i] / sum);
+            if (seed < incremental) { // Quando cade sulla fetta di un certo indice, ritorniamo quell'indice.
+                return i;
+            }
+        }
+    } else { // Se nessuna delle stanze di cui abbia effetivo interesse è raggiungibile, l'AI si muove secondo un pathing più ottimale possibile verso un punto di interesse.
+        for(i=0, j=0; i<STANZE_N; i++){ // Incluso stare fermo se possibile.
+            if(interesseStanze[i]>0.0f){ //Controlliamo se aveva una specifica destinazione in mente.
+                j++;
+                lastIndex = i;
+            }
+            interesseCorretto[i] = (float)reachable[i];
+            newMask[i] = 1;
+        }
+        // Se aveva una singola destinazione in mente, massimizziamo il movimento per quel punto.
+        // Altrimenti massimizziamo la distanza verso almeno uno dei punti di interesse decisi a caso.
+        if(j == 1){
+            return SimpleGeometry(reachable, lastIndex, layout);
+        } else {
+            lastIndex = movementStrategy(interesseCorretto,
+                                    newMask, layout); //In questa iterazione la maschera sono i float e il peso sono i bool, tutti uguali e positivi.
+                                                      // Dunque ha sempre soluzione casuale tra le stanze raggiungibili e non raggiunge mai questo branch ricorsivamente.
+            return SimpleGeometry(reachable, lastIndex, layout);
         }
     }
-    //Se nessuna delle stanze di cui abbia effetivo interesse è raggiungibile, l'AI si muove secondo una logica random diretta.
-    for(i=0; i<STANZE_N; i++){
-        interesseCorretto[i] = (float)reachable[i];
-        apathy[i] = 1;
-    }
-    return movementStrategy(interesseCorretto, apathy); //In questa iterazione la maschera sono i float e il peso sono i bool, tutti uguali e positivi.
-                                                        // Dunque ha sempre soluzione casuale tra le stanze raggiungibili.
 }
 
-int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti e armi. Direttamente proporzionale al peso in "interesse".
+int suspectStrategy(float interesse_AoS[ARMI_N]){ //Decisione per sospetti e armi. Direttamente proporzionale al peso in "interesse".
     int i;
     float sum, incremental, seed;
     sum = 0.0f;
@@ -169,7 +184,7 @@ int suspectStrategy(const float interesse_AoS[ARMI_N]){ //Decisione per sospetti
     /*
      * L'AI NON PUO' avere tutti gli interessi per armi o sospetti a 0 allo stesso tempo.
      * Se abbiamo sbordato qua, probabilmente per un errore di R/W dei nodi di interesse,
-     * si comunica l'errore e ci si muove al prossimo punto di salvataggio.
+     * si comunica l'errore.
      */
     fprintf(stderr, "SCELTA FUORI INDICE\n");
     exit(-4);
@@ -206,3 +221,25 @@ int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide
     }
     return 0;
 }
+
+int SimpleGeometry(_Bool reachable[STANZE_N], int end, int layout[STANZE_N][STANZE_N]){
+    int i, minIndex, minDist = 999; // MinDist ci permette di non dover inizializzare minIndex con un'iterazione inutile lungo reachable.
+
+    /* Tutti i nodi sono connessi tra loro con distanza ottimale. Ciò significa che se il collegamento in un passo non è disponibile
+     * e la destinazione non è il nodo più vicino alla partenza, esiste almeno un altro percorso di distanza ottimale in 2 o più passi.
+     * Non c'è bisogno di nessun pathing: si tratta solo di valutare quale offra i dadi più efficaci a raggiungere la destinazione al prossimo turno,
+     * cioè la distanza minima al prossimo turno: non necessariamente la distanza massima percorribile con i dadi di questo turno!
+     */
+    for(i=0; i<STANZE_N; i++){
+        if(reachable[i]){
+            if (layout[i][end] < minDist){
+                minIndex = i;
+                minDist = layout[minIndex][end];
+            }
+        }
+    }
+    return minIndex; // MinDist, e per estensione minIndex, è sempre inizializzato dato che reachable contiene sempre la partenza
+                     // e ogni nodo è connesso tra loro con distanza tra 0 e 16 (MinDist è settato a 999).
+}
+
+

@@ -452,10 +452,10 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         //Decisione spostamento se disponibile
         if(dice[1] > 1){
             printf("\nIn quale stanza desideri muoverti?\n");
-            dice[1] = movementStrategy(interest[2], reachable);
+            dice[1] = movementStrategy(interest[2], reachable, tavolo->layout);
             printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
             if(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
-                fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]); //L'AI non sbaglia, specie con l'accesso diretto alla mask reachable. se atterriamo qua c'è da fare debugging.
+                fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]); //L'AI non sbaglia, specie con l'accesso alla mask reachable. se atterriamo qua c'è da fare debugging.
                 exit(-3);
             }
             giocatore->stanza = dice[1];
@@ -478,7 +478,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         }
         dice[0] = suspectStrategy(interest[ARMA]);
         printf("L'AI ha scelto l'opzione %d\n", dice[0] + 1);
-        if(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per la visualizzazione d'errore.
+        if(dice[0] >= ARMI_N || dice[0] < 0 ){ //come nelle stanze, questa opzione è qua per la visualizzazione d'errore. Normalmente è catturato in SuspectStrategy con -4.
             fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
             exit(-3);
         }
