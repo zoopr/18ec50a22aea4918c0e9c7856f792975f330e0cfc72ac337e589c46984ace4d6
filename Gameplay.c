@@ -325,7 +325,7 @@ void statInit(Tabellone* tavolo){ //carica o eventualmente crea il file di stati
     int i;
     FILE* stat;
 
-    stat = fopen(STAT_DEFAULT, "r");
+    stat = fopen(STAT_DEFAULT, "rb");
     if(stat && !feof(stat)){ // Ci assicura che nella prima partita del sistema sia gestito correttamente.
         fread(tavolo->stats, 3, STANZE_N*sizeof(int), stat);
         fclose(stat);
@@ -340,7 +340,7 @@ void statInit(Tabellone* tavolo){ //carica o eventualmente crea il file di stati
 void statSave(Tabellone* tavolo){
     FILE* tac;
 
-    tac = fopen(STAT_DEFAULT, "w");
+    tac = fopen(STAT_DEFAULT, "wb");
     if(!tac) {
         exit(-2);
     }

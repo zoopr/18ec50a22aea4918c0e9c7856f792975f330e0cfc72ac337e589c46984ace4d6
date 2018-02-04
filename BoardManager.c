@@ -548,22 +548,23 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
     printf(buf);
     logger(buf);
 
-    printTableStatus(tavolo, AI);
-    tac = leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);
-
-    if(!AI){
-        parseTac(&tac);
-    }
-
     printf("\nVuoi salvare lo stato attuale della partita? S/N\n");
     scanf("%s", buf);
     if(tolower(buf[0]) == 's'){
         printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
         scanf("%s", buf);
         //Facciamo un breve rewind alla fine del turno precedente.
-        tavolo->turnoCorrente  = (tavolo->turnoCorrente+tavolo->numGiocatori - 1)%tavolo->numGiocatori;
+        tavolo->turnoCorrente  = (tavolo->turnoCorrente+ tavolo->numGiocatori - 1)%tavolo->numGiocatori;
         tavolo->numeroTurni -= 1;
         saveState(buf, tavolo);
+        tavolo->turnoCorrente  = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
+        tavolo->numeroTurni += 1;
+    }
+    printTableStatus(tavolo, AI);
+    tac = leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);
+
+    if(!AI){
+        parseTac(&tac);
     }
 
     return tac;
