@@ -11,12 +11,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e5106a0c-e2e0-429b-964e-bbd7d4d84e1c" name="Default" comment="day 5. Important notebook fix.">
+    <list default="true" id="e5106a0c-e2e0-429b-964e-bbd7d4d84e1c" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/BoardManager.c" afterPath="$PROJECT_DIR$/BoardManager.c" />
       <change beforePath="$PROJECT_DIR$/Gameplay.c" afterPath="$PROJECT_DIR$/Gameplay.c" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/Gameplay.c.obj" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/Gameplay.c.obj" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/objects.a" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cluedo.dir/objects.a" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/cluedo.exe" afterPath="$PROJECT_DIR$/cmake-build-debug/cluedo.exe" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -39,16 +37,18 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BoardManager.c" pinned="false" current-in-tab="false">
+      <file leaf-file-name="BoardManager.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/BoardManager.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-840">
-              <caret line="480" column="164" lean-forward="false" selection-start-line="480" selection-start-column="164" selection-end-line="480" selection-end-column="164" />
+            <state relative-caret-position="240">
+              <caret line="31" column="33" lean-forward="false" selection-start-line="31" selection-start-column="33" selection-end-line="31" selection-end-column="33" />
               <folding>
-                <element signature="e#181#1795#0" expanded="false" />
-                <element signature="e#1797#4401#0" expanded="false" />
-                <element signature="e#8639#9658#0" expanded="false" />
-                <element signature="e#9660#11371#0" expanded="false" />
+                <element signature="e#4831#9065#0" expanded="false" />
+                <element signature="e#9067#10086#0" expanded="false" />
+                <element signature="e#10088#11799#0" expanded="false" />
+                <element signature="e#11801#16771#0" expanded="false" />
+                <element signature="e#16773#23237#0" expanded="false" />
+                <element signature="e#23239#24320#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -64,31 +64,27 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Pieces.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pieces.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="42" column="29" lean-forward="false" selection-start-line="42" selection-start-column="29" selection-end-line="42" selection-end-column="29" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Gameplay.c" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Gameplay.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Gameplay.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="241">
-              <caret line="30" column="42" lean-forward="true" selection-start-line="30" selection-start-column="42" selection-end-line="30" selection-end-column="42" />
+            <state relative-caret-position="171">
+              <caret line="72" column="119" lean-forward="true" selection-start-line="72" selection-start-column="119" selection-end-line="72" selection-end-column="119" />
               <folding>
                 <element signature="e#38#57#0" expanded="true" />
-                <element signature="e#3572#3961#0" expanded="false" />
-                <element signature="e#9149#9457#0" expanded="false" />
-                <element signature="e#11628#11786#0" expanded="false" />
-                <element signature="e#11788#12375#0" expanded="false" />
-                <element signature="e#12377#12577#0" expanded="false" />
-                <element signature="e#12579#13627#0" expanded="false" />
-                <element signature="e#13629#14521#0" expanded="false" />
-                <element signature="e#14523#14806#0" expanded="false" />
+                <element signature="e#137#2095#0" expanded="false" />
+                <element signature="e#2574#3042#0" expanded="false" />
+                <element signature="e#3044#3705#0" expanded="false" />
+                <element signature="e#3707#4096#0" expanded="false" />
+                <element signature="e#4098#4314#0" expanded="false" />
+                <element signature="e#4316#9282#0" expanded="false" />
+                <element signature="e#9284#9592#0" expanded="false" />
+                <element signature="e#9594#11761#0" expanded="false" />
+                <element signature="e#11763#11921#0" expanded="false" />
+                <element signature="e#11923#12510#0" expanded="false" />
+                <element signature="e#12512#12712#0" expanded="false" />
+                <element signature="e#12714#13762#0" expanded="false" />
+                <element signature="e#13764#14656#0" expanded="false" />
+                <element signature="e#14658#14941#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -158,8 +154,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sca</find>
-      <find>scanf</find>
       <find>buf</find>
       <find>tipoCarta</find>
       <find>strtol</find>
@@ -174,7 +168,6 @@
       <find>//.*taccuin</find>
       <find>LE carte</find>
       <find>stanze(</find>
-      <find>tac</find>
       <find>L'ipotesi è obbligata a svolgersi nella tua stanza attuale</find>
       <find>stderr.*INDICE</find>
       <find>indice</find>
@@ -187,7 +180,10 @@
       <find>ipotesi esatta!</find>
       <find>k=</find>
       <find>int i, min</find>
+      <find>tac</find>
       <find>parse</find>
+      <find>tavolo pron</find>
+      <find>exit(-2)</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -209,11 +205,11 @@
         <option value="$PROJECT_DIR$/Pieces.h" />
         <option value="$PROJECT_DIR$/BoardManager.h" />
         <option value="$PROJECT_DIR$/AI.h" />
-        <option value="$PROJECT_DIR$/BoardManager.c" />
         <option value="$PROJECT_DIR$/AI.c" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/Gameplay.h" />
         <option value="$PROJECT_DIR$/Gameplay.c" />
+        <option value="$PROJECT_DIR$/BoardManager.c" />
       </list>
     </option>
   </component>
@@ -278,6 +274,11 @@
             <path>
               <item name="cluedo" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
               <item name="cluedo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="cluedo" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="cluedo" type="462c0819:PsiDirectoryNode" />
+              <item name="cmake-build-debug" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -351,14 +352,7 @@
       <workItem from="1517605227083" duration="1525000" />
       <workItem from="1517672282373" duration="7875000" />
       <workItem from="1517681105780" duration="8868000" />
-      <workItem from="1517750342159" duration="8692000" />
-    </task>
-    <task id="LOCAL-00006" summary="day1. started savefile loading">
-      <created>1517319435149</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1517319435149</updated>
+      <workItem from="1517750342159" duration="11201000" />
     </task>
     <task id="LOCAL-00007" summary="day1. most of the initialization done. started gameplay template.">
       <created>1517339882357</created>
@@ -696,11 +690,18 @@
       <option name="project" value="LOCAL" />
       <updated>1517759075584</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="day 5. Important notebook fix.">
+      <created>1517759142606</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1517759142606</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="168452000" />
+    <option name="totallyTimeSpent" value="170961000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -717,12 +718,12 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15911485" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.4966942" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3268817" sideWeight="0.49789253" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3268817" sideWeight="0.49789253" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3268817" sideWeight="0.5021075" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.4963119" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32795697" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24958678" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32795697" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -788,7 +789,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="day 3. Made cmake file platform neutral again." />
     <MESSAGE value="day 3. Changed mem.h to string.h for cross platform stdlib support" />
     <MESSAGE value="day 3. Critical AI bug arisen after specifics change fixed." />
     <MESSAGE value="day 3. Improved AI endgame behaviour." />
@@ -813,39 +813,35 @@
     <MESSAGE value="day 5. literally nothing." />
     <MESSAGE value="day 5. AI overhaul. Better decisions when presented with a suboptimal diceroll." />
     <MESSAGE value="day 5. Safer notebook parsing and reading." />
-    <option name="LAST_COMMIT_MESSAGE" value="day 5. Safer notebook parsing and reading." />
+    <MESSAGE value="day 5. Important notebook fix." />
+    <option name="LAST_COMMIT_MESSAGE" value="day 5. Important notebook fix." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/BoardManager.c</url>
-          <line>384</line>
-          <option name="timeStamp" value="47" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Gameplay.c</url>
-          <line>169</line>
+          <line>171</line>
           <option name="timeStamp" value="74" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/BoardManager.c</url>
-          <line>124</line>
+          <line>125</line>
           <option name="timeStamp" value="76" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/BoardManager.c</url>
-          <line>187</line>
+          <line>188</line>
           <option name="timeStamp" value="77" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/BoardManager.c</url>
-          <line>169</line>
+          <line>170</line>
           <option name="timeStamp" value="79" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Gameplay.c</url>
-          <line>274</line>
+          <line>276</line>
           <option name="timeStamp" value="84" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -858,8 +854,18 @@
           <line>145</line>
           <option name="timeStamp" value="87" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/BoardManager.c</url>
+          <line>394</line>
+          <option name="timeStamp" value="89" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Gameplay.c</url>
+          <line>243</line>
+          <option name="timeStamp" value="90" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="88" />
+      <option name="time" value="91" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -935,28 +941,26 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/BoardManager.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Gameplay.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1725">
           <caret line="115" column="0" lean-forward="false" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
           <folding>
             <element signature="e#38#57#0" expanded="true" />
-            <element signature="e#3572#3961#0" expanded="false" />
-            <element signature="e#9149#9457#0" expanded="false" />
-            <element signature="e#11628#11786#0" expanded="false" />
-            <element signature="e#11788#12375#0" expanded="false" />
-            <element signature="e#12377#12577#0" expanded="false" />
-            <element signature="e#12579#13627#0" expanded="false" />
-            <element signature="e#13629#14521#0" expanded="false" />
-            <element signature="e#14523#14806#0" expanded="false" />
+            <element signature="e#137#2095#0" expanded="false" />
+            <element signature="e#2574#3042#0" expanded="false" />
+            <element signature="e#3044#3705#0" expanded="false" />
+            <element signature="e#3707#4096#0" expanded="false" />
+            <element signature="e#4098#4314#0" expanded="false" />
+            <element signature="e#4316#9282#0" expanded="false" />
+            <element signature="e#9284#9592#0" expanded="false" />
+            <element signature="e#9594#11761#0" expanded="false" />
+            <element signature="e#11763#11921#0" expanded="false" />
+            <element signature="e#11923#12510#0" expanded="false" />
+            <element signature="e#12512#12712#0" expanded="false" />
+            <element signature="e#12714#13762#0" expanded="false" />
+            <element signature="e#13764#14656#0" expanded="false" />
+            <element signature="e#14658#14941#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1008,10 +1012,12 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#181#1795#0" expanded="false" />
-            <element signature="e#1797#4401#0" expanded="false" />
-            <element signature="e#8639#9658#0" expanded="false" />
-            <element signature="e#9660#11371#0" expanded="false" />
+            <element signature="e#4831#9065#0" expanded="false" />
+            <element signature="e#9067#10086#0" expanded="false" />
+            <element signature="e#10088#11799#0" expanded="false" />
+            <element signature="e#11801#16771#0" expanded="false" />
+            <element signature="e#16773#23237#0" expanded="false" />
+            <element signature="e#23239#24320#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1030,14 +1036,20 @@
           <caret line="24" column="32" lean-forward="false" selection-start-line="24" selection-start-column="32" selection-end-line="24" selection-end-column="32" />
           <folding>
             <element signature="e#38#57#0" expanded="true" />
-            <element signature="e#3572#3961#0" expanded="false" />
-            <element signature="e#9149#9457#0" expanded="false" />
-            <element signature="e#11628#11786#0" expanded="false" />
-            <element signature="e#11788#12375#0" expanded="false" />
-            <element signature="e#12377#12577#0" expanded="false" />
-            <element signature="e#12579#13627#0" expanded="false" />
-            <element signature="e#13629#14521#0" expanded="false" />
-            <element signature="e#14523#14806#0" expanded="false" />
+            <element signature="e#137#2095#0" expanded="false" />
+            <element signature="e#2574#3042#0" expanded="false" />
+            <element signature="e#3044#3705#0" expanded="false" />
+            <element signature="e#3707#4096#0" expanded="false" />
+            <element signature="e#4098#4314#0" expanded="false" />
+            <element signature="e#4316#9282#0" expanded="false" />
+            <element signature="e#9284#9592#0" expanded="false" />
+            <element signature="e#9594#11761#0" expanded="false" />
+            <element signature="e#11763#11921#0" expanded="false" />
+            <element signature="e#11923#12510#0" expanded="false" />
+            <element signature="e#12512#12712#0" expanded="false" />
+            <element signature="e#12714#13762#0" expanded="false" />
+            <element signature="e#13764#14656#0" expanded="false" />
+            <element signature="e#14658#14941#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1104,10 +1116,12 @@
         <state relative-caret-position="420">
           <caret line="28" column="0" lean-forward="true" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
           <folding>
-            <element signature="e#181#1795#0" expanded="false" />
-            <element signature="e#1797#4401#0" expanded="false" />
-            <element signature="e#8639#9658#0" expanded="false" />
-            <element signature="e#9660#11371#0" expanded="false" />
+            <element signature="e#4831#9065#0" expanded="false" />
+            <element signature="e#9067#10086#0" expanded="false" />
+            <element signature="e#10088#11799#0" expanded="false" />
+            <element signature="e#11801#16771#0" expanded="false" />
+            <element signature="e#16773#23237#0" expanded="false" />
+            <element signature="e#23239#24320#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1276,19 +1290,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BoardManager.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-840">
-          <caret line="480" column="164" lean-forward="false" selection-start-line="480" selection-start-column="164" selection-end-line="480" selection-end-column="164" />
-          <folding>
-            <element signature="e#181#1795#0" expanded="false" />
-            <element signature="e#1797#4401#0" expanded="false" />
-            <element signature="e#8639#9658#0" expanded="false" />
-            <element signature="e#9660#11371#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Gameplay.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="390">
@@ -1299,20 +1300,49 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cmake-build-debug/Player 4.tac">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="176" lean-forward="true" selection-start-line="0" selection-start-column="176" selection-end-line="0" selection-end-column="176" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Gameplay.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="241">
-          <caret line="30" column="42" lean-forward="true" selection-start-line="30" selection-start-column="42" selection-end-line="30" selection-end-column="42" />
+        <state relative-caret-position="171">
+          <caret line="72" column="119" lean-forward="true" selection-start-line="72" selection-start-column="119" selection-end-line="72" selection-end-column="119" />
           <folding>
             <element signature="e#38#57#0" expanded="true" />
-            <element signature="e#3572#3961#0" expanded="false" />
-            <element signature="e#9149#9457#0" expanded="false" />
-            <element signature="e#11628#11786#0" expanded="false" />
-            <element signature="e#11788#12375#0" expanded="false" />
-            <element signature="e#12377#12577#0" expanded="false" />
-            <element signature="e#12579#13627#0" expanded="false" />
-            <element signature="e#13629#14521#0" expanded="false" />
-            <element signature="e#14523#14806#0" expanded="false" />
+            <element signature="e#137#2095#0" expanded="false" />
+            <element signature="e#2574#3042#0" expanded="false" />
+            <element signature="e#3044#3705#0" expanded="false" />
+            <element signature="e#3707#4096#0" expanded="false" />
+            <element signature="e#4098#4314#0" expanded="false" />
+            <element signature="e#4316#9282#0" expanded="false" />
+            <element signature="e#9284#9592#0" expanded="false" />
+            <element signature="e#9594#11761#0" expanded="false" />
+            <element signature="e#11763#11921#0" expanded="false" />
+            <element signature="e#11923#12510#0" expanded="false" />
+            <element signature="e#12512#12712#0" expanded="false" />
+            <element signature="e#12714#13762#0" expanded="false" />
+            <element signature="e#13764#14656#0" expanded="false" />
+            <element signature="e#14658#14941#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BoardManager.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="31" column="33" lean-forward="false" selection-start-line="31" selection-start-column="33" selection-end-line="31" selection-end-column="33" />
+          <folding>
+            <element signature="e#4831#9065#0" expanded="false" />
+            <element signature="e#9067#10086#0" expanded="false" />
+            <element signature="e#10088#11799#0" expanded="false" />
+            <element signature="e#11801#16771#0" expanded="false" />
+            <element signature="e#16773#23237#0" expanded="false" />
+            <element signature="e#23239#24320#0" expanded="false" />
           </folding>
         </state>
       </provider>

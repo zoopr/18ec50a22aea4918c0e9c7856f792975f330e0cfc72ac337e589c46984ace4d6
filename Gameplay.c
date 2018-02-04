@@ -70,8 +70,10 @@ void wipeTac(char buf[STANDARD_STRLEN + 4]){
     FILE* tac;
 
     tac = fopen(buf, "wb"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
-    if (!tac) //Se pure la creazione automatica fallisce c'è chiaramente un errore di scala più grande del programma.
+    if (!tac) { //Se pure la creazione automatica fallisce c'è chiaramente un errore di scala più grande del programma.
+        printf("Errore nella creazione di un file taccuino al nome %s. Contiene caratteri non supportati per i file.\n", buf);
         exit(-2);
+    }
     fclose(tac);
 }
 

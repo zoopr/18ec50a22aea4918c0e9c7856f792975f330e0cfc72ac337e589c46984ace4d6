@@ -13,7 +13,7 @@
 Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i valori iniziali come la posizione.
     int i; // Nella verisone umana chiede anche un nome per i giocatori.
     Giocatore* listaGiocatori;
-    char buf[SBUF];
+    char buf[SBUF], *pos;
 
 
 
@@ -29,9 +29,13 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
         exit(-1);
     }
     if(!AI){
+        getchar(); // vuota stdin.
         for(i=0; i<*num; i++){
             printf("Inserire il nome del giocatore %d (max %d caratteri)\n", i+1, STANDARD_STRLEN - 1);
-            scanf("%23s", listaGiocatori[i].nome);
+            fgets(buf, STANDARD_STRLEN+1, stdin); // fgets permette di copiare whitespace non di fine linea e non è suscettibile all'overflow
+            if ((pos=strchr(buf, '\n')) != NULL)  // che invece rende gets (e scanf se si desidera mantenere whitespace) pericolosa.
+                *pos = '\0';                      // Include però il newline nella lettura della riga, al quale sostituiamo la terminazione qua.
+            strncpy(listaGiocatori[i].nome, buf, STANDARD_STRLEN-1); // Per cui abbiamo bisogno di un buffer di almeno 25 per il nome di 23.
             listaGiocatori[i].ipotesiEsatta = 0;
             listaGiocatori[i].mano.numCarte = 0;
             listaGiocatori[i].mano.cima = NULL;
@@ -107,10 +111,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
     for (i=0; i<numGiocatori; i++){ //inizializzazione taccuini
         strcpy(buffer, tavolo->giocatori[i].nome);
         strcat(buffer, ".tac");
-        tac = fopen(buffer, "wb"); //la tag w ci assicura che se esiste viene azzerato.
-        if(!tac)
-            exit(-2);
-        fclose(tac);
+        wipeTac(buffer);
     }
 
     statInit(tavolo);
