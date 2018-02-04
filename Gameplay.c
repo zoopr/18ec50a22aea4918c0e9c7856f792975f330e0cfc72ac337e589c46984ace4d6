@@ -35,11 +35,12 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
             errorChecking = fread(carta, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), tac);
             if(!errorChecking){ //Taccuino con informazioni parziali. Non può essere fidato di mostrare le informazion adeguate.
                 //Libera le carte caricate finora.
-                for(j=0; j<i; j++){
+                for(j=0; j<=i; j++){
                     carta = tacFile.cima;
                     tacFile.cima = carta->next;
                     free(carta);
                 }
+
                 wipeTac(buf); //Pulisce il file.
                 tacFile.numCarte = 0; // Reinizializza in caso di errore lettura parziale.
                 tacFile.cima = NULL;
