@@ -13,7 +13,7 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
     FILE* tac;
     char buf[STANDARD_STRLEN + 4];
     Taccuino tacFile = {0, NULL}; //il nostro file interno.
-    int i;
+    int i, j, errorChecking;
     Carta *carta, *coda;
 
     strcpy(buf, filename);
@@ -21,32 +21,57 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
 
     tac = fopen(buf, "rb");
     if(tac){
-        fread(&tacFile.numCarte, 1, sizeof(int), tac);
+        errorChecking = fread(&tacFile.numCarte, 1, sizeof(int), tac);
+        if(!errorChecking){ //Taccuino di formato diverso o corrotto.
+            wipeTac(buf);
+            tacFile.numCarte = 0; // Reinizializza in caso di errore lettura parziale.
+            return tacFile;
+        }
         tacFile.cima = NULL;
         for(i=0; i<tacFile.numCarte; i++){
             carta = (Carta*)malloc(sizeof(Carta));
             if(!carta)
                 exit(-1);
-            fread(carta, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), tac);
+            errorChecking = fread(carta, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), tac);
+            if(!errorChecking){ //Taccuino con informazioni parziali. Non può essere fidato di mostrare le informazion adeguate.
+                //Libera le carte caricate finora.
+                for(j=0; j<i; j++){
+                    carta = tacFile.cima;
+                    tacFile.cima = carta->next;
+                    free(carta);
+                }
+                wipeTac(buf); //Pulisce il file.
+                tacFile.numCarte = 0; // Reinizializza in caso di errore lettura parziale.
+                tacFile.cima = NULL;
+                return tacFile;
+            }
             carta->next = NULL;
             //Aggiungiamo in coda.
             coda = tacFile.cima;
             if(!coda){
                 tacFile.cima = carta;
-            }else{
-                while(coda->next){
+            }else {
+                while (coda->next) {
                     coda = coda->next;
                 }
                 coda->next = carta;
             }
         }
+        fclose(tac);
+        return tacFile;
     }else{
-        tac = fopen(buf, "wb"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
-        if (!tac) //Se pure la creazione automatica fallisce c'è chiaramente un errore di scala più grande del programma.
-            exit(-2);
+        wipeTac(buf);
+        return tacFile;
     }
+}
+
+void wipeTac(char buf[STANDARD_STRLEN + 4]){
+    FILE* tac;
+
+    tac = fopen(buf, "wb"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
+    if (!tac) //Se pure la creazione automatica fallisce c'è chiaramente un errore di scala più grande del programma.
+        exit(-2);
     fclose(tac);
-    return tacFile;
 }
 
 void aggiornaTaccuino(Taccuino* tac, Carta carta){ //Inserisamo una nuova carta in coda al taccuino.
@@ -397,10 +422,19 @@ void parseTac(Taccuino* tac){
     int i;
     char buf[STANDARD_STRLEN];
 
+    /*
+     * Il formato del taccuino è bloccki di 4 carte per ipotesi sbagliata + carta mostrata,
+     * più un eventuale blocco di 3 carte finale per l'ipotesi corretta.
+     */
+
     carta = tac->cima;
     while(carta && carta->next) { //Sia che il taccuino sia vuoto, sia che sia alla fine. Lo short circuit ci garantisce un controllo sicuro di carta->next.
         printf("\nHai compiuto questa ipotesi.\n");
         for (i = 0; i < CARD_TYPES; i++) {
+            if(!carta){
+                printf("Errore nella lettura di un taccuino esistente e formattato.\n");
+                exit(-5);
+            }
             printf("\t%-8s : %s\n", tipi(carta->tipo, buf), carta->desc);
             carta = carta->next;
         }

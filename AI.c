@@ -228,7 +228,7 @@ int SimpleGeometry(_Bool reachable[STANZE_N], int end, int layout[STANZE_N][STAN
     /* Tutti i nodi sono connessi tra loro con distanza ottimale. Ciò significa che se il collegamento in un passo non è disponibile
      * e la destinazione non è il nodo più vicino alla partenza, esiste almeno un altro percorso di distanza ottimale in 2 o più passi.
      * Non c'è bisogno di nessun pathing: si tratta solo di valutare quale offra i dadi più efficaci a raggiungere la destinazione al prossimo turno,
-     * cioè la distanza minima al prossimo turno: non necessariamente la distanza massima percorribile con i dadi di questo turno!
+     * cioè la distanza minima dal nodo prescelto.                                                                                                                                                                                                                    ...e io me ne sono accorto dopo aver scritto djikstra.
      */
     for(i=0; i<STANZE_N; i++){
         if(reachable[i]){

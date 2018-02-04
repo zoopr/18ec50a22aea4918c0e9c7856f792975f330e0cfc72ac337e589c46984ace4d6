@@ -30,6 +30,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
 int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* card);
 void saveState(char* filename, Tabellone* board);
 Taccuino leggiTaccuino(char* filename);
+void wipeTac(char buf[STANDARD_STRLEN + 4]);
 void aggiornaTaccuino(Taccuino* tac, Carta carta);
 void scriviTaccuino(char* filename, Taccuino* tacFile);
 void logger(char* message);
