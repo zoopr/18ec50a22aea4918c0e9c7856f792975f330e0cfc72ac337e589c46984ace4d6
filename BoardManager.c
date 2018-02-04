@@ -59,7 +59,6 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
 Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e distribuisce le carte.
     int numGiocatori, cartePerGiocatore, i;
     Mazzo *mainDeck, *second, *third;
-    FILE* tac;
     char buffer[STANDARD_STRLEN + 4];
 
     Tabellone* tavolo = (Tabellone*)malloc(sizeof(Tabellone));
@@ -93,8 +92,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
     printf("Omicidio eseguito. RIP Djanni.\n");
 
 
-    mainDeck = mergeDecks(mainDeck, mergeDecks(second, third)); //uniamo i tre mazzi in fila
-    second = third = NULL; //per sicurezza visto che abbiamo liberato i mazzi contenitore in mergeDecks().
+    mainDeck = mergeDecks(mainDeck, mergeDecks(second, third)); //uniamo i tre mazzi in fila. Liberiamo *second e *third.
     mainDeck = shuffleDeck_improved(mainDeck, mainDeck->numCarte); //mescoliamo un'altra volta.
 
     tavolo->carteScoperte.numCarte = mainDeck->numCarte%numGiocatori;
