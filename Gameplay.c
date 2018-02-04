@@ -197,7 +197,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             if (matching->next)
                 matching = matching->next;
         }
-        if (found>1){
+        if (found>1 && (i%tavolo->numGiocatori) != tavolo->turnoCorrente){ //Se più di una carta dell'ipotesi è un nostro bluff e le altre sono corrette non gli chiediamo di scegliere.
             printf("MESSAGGIO PRIVATO PER %s\n",  tavolo->giocatori[i%tavolo->numGiocatori].nome);
             printf("Più carte dell' ipotesi sono nella tua mano. Decidi quale mostrare.\n");
             for (j=0; j<found; j++){
@@ -216,9 +216,10 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
                 j = strtol(message, NULL, 10) - 1;
             }
             foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.
+
         }
         if(found>0){ //effettiva comunicazione ai giocatori. Registrazione nel taccuino.
-            if (AI && found == 1){//il giocatore che teneva una carta per fermare l'ipotesi aggiorna che carta ha dovuto mostrare al giocatore corrente.
+            if (AI && found == 1 && (i%tavolo->numGiocatori) != tavolo->turnoCorrente){ //il giocatore che teneva una carta per fermare l'ipotesi aggiorna che carta ha dovuto mostrare al giocatore corrente.
                 showingStrategy(&tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
             }
             printf("\nIpotesi errata.\n");

@@ -35,7 +35,7 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
             fgets(buf, STANDARD_STRLEN+1, stdin); // fgets permette di copiare whitespace non di fine linea e non è suscettibile all'overflow
             if ((pos=strchr(buf, '\n')) != NULL)  // che invece rende gets (e scanf se si desidera mantenere whitespace) pericolosa.
                 *pos = '\0';                      // Include però il newline nella lettura della riga, al quale sostituiamo la terminazione qua.
-            strncpy(listaGiocatori[i].nome, buf, STANDARD_STRLEN-1); // Per cui abbiamo bisogno di un buffer di almeno 25 per il nome di 23.
+            strncpy(listaGiocatori[i].nome, buf, STANDARD_STRLEN); // Per cui abbiamo bisogno di un buffer di almeno 25 per il nome di 23+1.
             listaGiocatori[i].ipotesiEsatta = 0;
             listaGiocatori[i].mano.numCarte = 0;
             listaGiocatori[i].mano.cima = NULL;
@@ -107,7 +107,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
         printf("Carte distribuite correttamente. Tavolo pronto.\n");
 
     for (i=0; i<numGiocatori; i++){ //inizializzazione taccuini
-        strcpy(buffer, tavolo->giocatori[i].nome);
+        strncpy(buffer, tavolo->giocatori[i].nome, STANDARD_STRLEN);
         strcat(buffer, ".tac");
         wipeTac(buffer);
     }
@@ -268,7 +268,7 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
 
         winner = turnType(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
     }
-    strcpy(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);
+    strncpy(buf, tavolo->giocatori[tavolo->turnoCorrente].nome, STANDARD_STRLEN);
     strcat(buf, " ha vinto.\n");
     logger(buf);
     printf("                                 _         _           _             _ _ \n"
@@ -540,7 +540,7 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
     char buf[SBUF], turnobuf[STANDARD_STRLEN];
     Taccuino tac;
 
-    strcpy(buf, "\nTURNO ");
+    strcpy(buf, "\nTURNO "); // strcpy usato per un string literal è completamente sicuro.
     strcat(buf,  dtoc(tavolo->numeroTurni, turnobuf));
     strcat(buf, " - Giocatore: ");
     strcat(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);

@@ -52,7 +52,7 @@ void printTableStatus (Tabellone* tavolo, _Bool AI){ //Usato a inizio turno,  an
 
 void readInterest(Tabellone* tavolo, Giocatore* giocatore, float loadArea[CARD_TYPES][STANZE_N]){ //Legge (o inizializza se mancante/danneggiato a metà partita) la matrice d'interesse del giocatore.
     char buf[SBUF];
-    strcpy(buf, giocatore->nome);
+    strncpy(buf, giocatore->nome, STANDARD_STRLEN);
     strcat(buf, ".ai");
     FILE* interest = fopen(buf, "r+");
     if(interest && !feof(interest)){ // Ci assicura che al primo turno sia generato correttamente.
@@ -66,7 +66,7 @@ void readInterest(Tabellone* tavolo, Giocatore* giocatore, float loadArea[CARD_T
 
 void saveInterest(Giocatore* giocatore, float loadArea[CARD_TYPES][STANZE_N]){ //salva la nostra matrice di nodi d'interesse su un file specifico al giocatore.
     char buf[SBUF];
-    strcpy(buf, giocatore->nome);
+    strncpy(buf, giocatore->nome, STANDARD_STRLEN);
     strcat(buf, ".ai");
     FILE* interest = fopen(buf, "w");
     if(!interest){
@@ -196,7 +196,7 @@ int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide
     int i;
     FILE* shownMem;
 
-    strcpy(buf, giocatore->nome);
+    strncpy(buf, giocatore->nome, STANDARD_STRLEN);
     strcat(buf, "_hold.ai");
     shownMem = fopen(buf, "w+");
     if (!shownMem) //Problema di generazione file.

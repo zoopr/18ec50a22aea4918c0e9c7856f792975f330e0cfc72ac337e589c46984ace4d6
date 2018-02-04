@@ -9,7 +9,7 @@
 char* tipi(int index, char* copyArea) {
     char tipi[CARD_TYPES][STANDARD_STRLEN] = {"Arma", "Sospetto", "Stanza"};
     if(index <CARD_TYPES && index>-1) { // assicuriamoci che non stiamo chiamando parti di memoria a caso per errore
-        strcpy(copyArea, tipi[index]);
+        strncpy(copyArea, tipi[index], STANDARD_STRLEN);
         return copyArea;
     }else{
         printf("Errore nell'offset di ingresso!\n");
@@ -21,7 +21,7 @@ char* stanze(int index, char* copyArea) {
     char stanze[STANZE_N][STANDARD_STRLEN] = {"Laboratorio T", "Laboratorio M", "Bagno", "Aula Costa",
                                                            "Giardino", "Entrata", "Parcheggio", "Simaz", "Batcaverna"};
     if(index <STANZE_N && index>-1) {
-        strcpy(copyArea,stanze[index]);
+        strncpy(copyArea,stanze[index], STANDARD_STRLEN);
         return copyArea;
     }else{
         printf("Errore nell'offset di ingresso!\n");
@@ -32,7 +32,7 @@ char* armi(int index, char* copyArea){
     char armi [ARMI_N][STANDARD_STRLEN] = {"Cavo di rete", "Sparacoriandoli", "Calcinaccio", "Tastiera USB",
                                                     "Fumo caldaia", "Floppy disk 3.5"};
     if(index <ARMI_N && index>-1) {
-        strcpy(copyArea,armi[index]);
+        strncpy(copyArea, armi[index], STANDARD_STRLEN);
         return copyArea;
     }else{
         printf("Errore nell'offset di ingresso!\n");
@@ -44,7 +44,7 @@ char* sospetti(int index, char* copyArea) {
     char sospetti[SOSPETTI_N][STANDARD_STRLEN] = {"Alan Turing", "G. M. Hopper", "Edsger Dijkstra", "G. F. Voronoj",
                                                            "J. V. Neumann", "M. Hamilton"};
     if(index <SOSPETTI_N && index>-1) {
-        strcpy(copyArea,sospetti[index]);
+        strncpy(copyArea, sospetti[index], STANDARD_STRLEN);
         return copyArea;
     }else{
         printf("Errore nell'offset di ingresso!\n");
