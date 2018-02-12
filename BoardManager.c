@@ -30,11 +30,18 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
     }
     if(!AI){
         for(i=0; i<*num; i++){
-            while(getchar()!='\n'); // vuota stdin.
+            while(getchar() != '\n'); // Liberiamo qualsiasi cosa rimanga dell'input precedente.
             printf("Inserire il nome del giocatore %d (max %d caratteri)\n", i+1, STANDARD_STRLEN - 1);
             fgets(buf, STANDARD_STRLEN, stdin); // fgets permette di copiare whitespace non di fine linea e non è suscettibile all'overflow
-            if ((pos=strchr(buf, '\n')) != NULL)  // che invece rende gets (e scanf se si desidera mantenere whitespace) pericolosa.
-                *pos = '\0';                      // Include però il newline nella lettura della riga, al quale sostituiamo la terminazione qua.
+            if ((pos=strchr(buf, '\n')) != NULL) {  // che invece rende gets (e scanf se si desidera mantenere whitespace) pericolosa.
+                *pos = '\0';                        // Include però il newline nella lettura della riga, al quale sostituiamo la terminazione qua.
+                ungetc('\n', stdin);                // NL per il flush corretto all'inizio di questo loop.
+            }
+            if(!strlen(buf)){
+                printf("Errore: campo nome vuoto.\n");
+                i--;
+                continue;
+            }
             strncpy(listaGiocatori[i].nome, buf, STANDARD_STRLEN);
             listaGiocatori[i].ipotesiEsatta = 0;
             listaGiocatori[i].mano.numCarte = 0;
@@ -332,7 +339,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             printf("Movimenti validi:\n");
             for(dice[0] = 0, dice[1] = 0; dice[0] < STANZE_N; dice[0]++){
                 if(reachable[dice[0]]){
-                    printf("%d - %s\n", dice[0] + 1, stanze(dice[0], ipotesi[STANZA].desc));
+                    printf("%d - %s(%d passi)\n", dice[0] + 1, stanze(dice[0], ipotesi[STANZA].desc), tavolo->layout[giocatore->stanza][dice[0]]);
                     dice[1]++;
                 }
             }
@@ -420,9 +427,8 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     tac = IntroLines(tavolo, 1); //Inizializzazione taccuino temporaneo.
 
     if (giocatore->ipotesiEsatta){ //Non c'è interazione in questa branch. Rimane identica alla versione umana.
-        printf("Hai già compiuto l'ipotesi esatta.\n"
-                       "Procedi direttamente al lancio dei dadi.\n");
         strcpy(buf, "Il giocatore sta cercando di fare dadi doppi.\n");
+        printf("%s", buf);
         logger(buf);
         rollDice(dice);
         if (dice[0] == dice[1]){
@@ -436,21 +442,19 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
     }
     else{
         printf("Posizione attuale: %s\n", stanze(giocatore->stanza, ipotesi[STANZA].desc));
-        printf("Procedere al lancio dei dadi.\n");
-        //La scelta ottimale per l'AI (ma anche per i giocatori umani) è sempre di valutare le opzioni di spostamento ed eventualmente stare fermi.
+        printf("Procedere al lancio dei dadi.\n"); //La scelta ottimale per l'AI (ma anche per i giocatori umani) è sempre di valutare le opzioni di spostamento ed eventualmente stare fermi.
         rollDice(dice);
         dice[0] = dice[0] + dice[1]; //non abbiamo bisogno di conservare il valore dei singoli dadi.
         validPaths(tavolo->layout[giocatore->stanza], dice[0], reachable);
         printf("Movimenti validi:\n");
         for(dice[0] = 0, dice[1] = 0; dice[0] < STANZE_N; dice[0]++){
             if(reachable[dice[0]]){
-                printf("%d - %s\n", dice[0] + 1, stanze(dice[0], ipotesi[STANZA].desc));
+                printf("%d - %s(%d passi)\n", dice[0] + 1, stanze(dice[0], ipotesi[STANZA].desc), tavolo->layout[giocatore->stanza][dice[0]]);
                 dice[1]++;
             }
         }
         //Decisione spostamento se disponibile
         if(dice[1] > 1){
-            printf("\nIn quale stanza desideri muoverti?\n");
             dice[1] = movementStrategy(interest[2], reachable, tavolo->layout);
             printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
             if(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
@@ -540,7 +544,7 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
     char buf[SBUF], turnobuf[STANDARD_STRLEN];
     Taccuino tac;
 
-    strcpy(buf, "\nTURNO "); // strcpy usato per un string literal è completamente sicuro.
+    strcpy(buf, "\nTURNO ");
     strcat(buf,  dtoc(tavolo->numeroTurni, turnobuf));
     strcat(buf, " - Giocatore: ");
     strcat(buf, tavolo->giocatori[tavolo->turnoCorrente].nome);

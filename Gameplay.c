@@ -130,11 +130,12 @@ void rollDice(int dice[D_N]){ // D_N rand() salvati nella memoria a parametro d'
         dtoc(dice[i], msgbuf[i]);
     }
 
-    printf("Hai fatto %d + %d\n", dice[0], dice[1]);
+
     strcat(msgbuf[0], " + ");
     strcat(msgbuf[0], msgbuf[1]);
     strcat(msgbuf[0], "\n");
     logger(msgbuf[0]);
+    printf("Hai fatto %s\n", msgbuf[0]); // Standard per 2 dadi.
 }
 
 void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){ // trova le stanze ragguingibili dalla riga di layout[][] data in ingresso.

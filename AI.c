@@ -81,7 +81,7 @@ void initInterest(Tabellone* tavolo, Giocatore* giocatore, float loadArea[CARD_T
     Carta* carta;
     for (i[0] = 0; i[0] < CARD_TYPES; i[0]++) {
         for (i[1]=0; i[1]<STANZE_N; i[1]++){
-            if(i[0]<=1 && i[1]>=ARMI_N){ //azzerare le opzioni ARMI e SOSPETTI che non possiamo selezionare. L'algoritmo di selezione le restringe comunque.
+            if(i[0]!=STANZA && i[1]>=ARMI_N){ //azzerare le opzioni ARMI e SOSPETTI che non possiamo selezionare. L'algoritmo di selezione le restringe comunque.
                 loadArea[i[0]][i[1]] = 0.0f;
             }else{
                 loadArea[i[0]][i[1]] = 1.0f;
