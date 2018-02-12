@@ -13,9 +13,7 @@ Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*) ){ //Co
     
     for (i=0; i<numCarte; i++){
         vettore[i].tipo = tipo;
-        func(i, vettore[i].desc); //copia il valore nella memoria dele parametro 2. vedi funzioni in standards.h
-        //A questo punto abbiamo un vettore di carte dello stesso tipo.
-
+        func(i, vettore[i].desc); //copia il valore nella memoria del parametro 2. vedi funzioni in standards.h
     }
 
     Mazzo* mazzo = (Mazzo*)malloc(sizeof(Mazzo));
@@ -28,7 +26,6 @@ Mazzo* buildDeck(tipoCarta tipo, int numCarte, char* (*func)(int, char*) ){ //Co
     if (!newElem) {
         exit(-1);
     }
-
     for (i=0; i<numCarte; i++){
         *newElem = vettore[i];
         if(i<numCarte-1) {
@@ -57,7 +54,7 @@ Mazzo* mergeDecks(Mazzo* m1, Mazzo* m2){
     scroll->next = m2->cima;
     m1->numCarte = m1->numCarte + m2->numCarte;
 
-    free(m2); //abbiamo unito i due mazzi ed estratto tutte le informazioni dal secondo contenitore di lista
+    free(m2); //abbiamo unito i due mazzi ed estratto tutte le informazioni dal secondo contenitore di lista.
     return m1;
 }
 

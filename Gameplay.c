@@ -24,7 +24,7 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
         errorChecking = fread(&tacFile.numCarte, 1, sizeof(int), tac);
         if(!errorChecking){ //Taccuino di formato diverso o corrotto.
             wipeTac(buf);
-            tacFile.numCarte = 0; // Reinizializza in caso di errore lettura parziale.
+            tacFile.numCarte = 0; // Reinizializza in caso di errore lettura parziale(numero di byte già letti e copiati < sizeof(int) prima di eof).
             return tacFile;
         }
         tacFile.cima = NULL;
@@ -40,7 +40,6 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
                     tacFile.cima = carta->next;
                     free(carta);
                 }
-
                 wipeTac(buf); //Pulisce il file.
                 tacFile.numCarte = 0; // Reinizializza in caso di errore lettura parziale.
                 tacFile.cima = NULL;
@@ -71,7 +70,7 @@ void wipeTac(char buf[STANDARD_STRLEN + 4]){
 
     tac = fopen(buf, "wb"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
     if (!tac) { //Se pure la creazione automatica fallisce c'è chiaramente un errore di scala più grande del programma.
-        printf("Errore nella creazione di un file taccuino al nome %s. Contiene caratteri non supportati per i file.\n", buf);
+        fprintf(stderr, "Errore nella creazione di un file taccuino al nome %s. (Caratteri non supportati?)\n", buf);
         exit(-2);
     }
     fclose(tac);
@@ -121,7 +120,7 @@ void scriviTaccuino(char* filename, Taccuino* tacFile){ //Salviamo il contenuto 
     fclose(tac);
 }
 
-void rollDice(int dice[D_N]){
+void rollDice(int dice[D_N]){ // D_N rand() salvati nella memoria a parametro d'ingresso.
     char msgbuf[D_N][STANDARD_STRLEN];
     int i;
 
@@ -138,7 +137,7 @@ void rollDice(int dice[D_N]){
     logger(msgbuf[0]);
 }
 
-void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){
+void validPaths(const int layout[STANZE_N], int val, _Bool out[STANZE_N]){ // trova le stanze ragguingibili dalla riga di layout[][] data in ingresso.
     int i;
     for (i=0; i<STANZE_N; i++){
         if (layout[i] <= val)
@@ -197,11 +196,11 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             if (matching->next)
                 matching = matching->next;
         }
-        if (found>1 && (i%tavolo->numGiocatori) != tavolo->turnoCorrente){ //Se più di una carta dell'ipotesi è un nostro bluff e le altre sono corrette non gli chiediamo di scegliere.
+        if (found>1 && (i%tavolo->numGiocatori) != tavolo->turnoCorrente){ //Se più di una carta dell'ipotesi è un nostro bluff e le altre sono corrette non ci chiediamo di scegliere.
             printf("MESSAGGIO PRIVATO PER %s\n",  tavolo->giocatori[i%tavolo->numGiocatori].nome);
             printf("Più carte dell' ipotesi sono nella tua mano. Decidi quale mostrare.\n");
             for (j=0; j<found; j++){
-                printf("%d: %s - %s\n", j + 1, tipi(foundData[j].tipo, message), foundData[j].desc); //usiamo message come buffer temporaneo per la stringa di ritorno.
+                printf("%d: %s - %s\n", j + 1, tipi(foundData[j].tipo, message), foundData[j].desc);
             }
             if (AI){
                 j = showingStrategy(&tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
@@ -230,7 +229,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             logger(message);
             printf(message);
 
-            if(AI){
+            if(AI){ //Registriamo che carta ci sia stata mostrata e facciamo in modo di non sceglierla mai più.
                 generateCoordinates(foundData, coords);
                 interestFile[coords[0]][coords[1]] = 0.0f;
             }
@@ -253,15 +252,15 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
 
 }
 
-int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* card){
+int checkCard(const char* stanza,const char* arma,const char* sospetto, Carta* card){ // Riporta coincidenza tra carta e ipotesi e il suo tipo.
     if (strcmp(stanza, card->desc) == 0){
-        return 1;
+        return STANZA;
     }
     else if(strcmp(arma, card->desc) == 0){
-        return 2;
+        return ARMA;
     }
     else if(strcmp(sospetto, card->desc) == 0){
-        return 3;
+        return SOSPETTO;
     }
     return -1;
 }
@@ -273,7 +272,6 @@ void saveState(char* filename, Tabellone* board){
     FILE* save = fopen(filename, "wb"); //qualunque cosa ci sia la sovrascrive.
     if (!save)
         exit(-2);
-
 
     fwrite(&board->turnoCorrente, 1, sizeof(int), save); //scrive turnoCorrente, numeroTurni, numeroGiocatori.
     fwrite(&board->numeroTurni, 1, sizeof(int), save);
@@ -312,7 +310,7 @@ void saveState(char* filename, Tabellone* board){
     logger(msgbuf);
 }
 
-void logger(char* message){
+void logger(char* message){ // Scrive la stringa in ingresso sul logger. Estremamente general purpose.
     FILE* logger = fopen(LOG_DEFAULT, "a");
     if(!logger)
         exit(-2);
@@ -337,18 +335,18 @@ void statInit(Tabellone* tavolo){ //carica o eventualmente crea il file di stati
     }
 }
 
-void statSave(Tabellone* tavolo){
-    FILE* tac;
+void statSave(Tabellone* tavolo){ // Scrive le nuove statistiche a fine partita.
+    FILE* stat;
 
-    tac = fopen(STAT_DEFAULT, "wb");
-    if(!tac) {
+    stat = fopen(STAT_DEFAULT, "wb");
+    if(!stat) {
         exit(-2);
     }
-    fwrite(tavolo->stats, 3, STANZE_N*sizeof(int), tac);
-    fclose(tac);
+    fwrite(tavolo->stats, 3, STANZE_N*sizeof(int), stat);
+    fclose(stat);
 }
 
-void statTrack(Tabellone* tavolo){
+void statTrack(Tabellone* tavolo){ // Aggiorna le statistiche precedentemente caricate da file.
     Carta daValutare[CARD_TYPES];
     int valSoluzioni[CARD_TYPES];
     Carta* scroll = tavolo->soluzione.cima;
@@ -382,11 +380,11 @@ void statTrack(Tabellone* tavolo){
     }
 }
 
-void statShow(){
+void statShow(){ // Parsing dei dati statistiche da un eventuale file sul pc. Il file è automaticamente generato a inizio partita se non esistente.
     char buf[STANDARD_STRLEN];
     int statsArr[CARD_TYPES][STANZE_N], i;
-    FILE* stats = fopen(STAT_DEFAULT, "r");
-    if(!stats){
+    FILE* stats = fopen(STAT_DEFAULT, "rb");
+    if(!stats){ // Se non è mai stata neanche cominciata una partita, o per un errore momentaneo errore di accesso.
         printf("Nessun file di statistiche rilevato. Hai giocato ad almeno una partita?\n");
         return;
     }
@@ -421,23 +419,23 @@ int checkCard_Archive(char* (*func)(int, char*), Carta* card, int len){ //riport
     return -1;
 }
 
-void parseTac(Taccuino* tac){
+void parseTac(Taccuino* tac){ // Stampa le informazioni contenute nel taccuino caricato da binario.
     Carta* carta;
-    int i;
+    int carte, i;
     char buf[STANDARD_STRLEN];
 
     /*
-     * Il formato del taccuino è bloccki di 4 carte per ipotesi sbagliata + carta mostrata,
+     * Il formato del taccuino è blocchi di 4 carte per ipotesi sbagliata + carta mostrata,
      * più un eventuale blocco di 3 carte finale per l'ipotesi corretta.
      */
 
     carta = tac->cima;
-    while(carta && carta->next) { //Sia che il taccuino sia vuoto, sia che sia alla fine. Lo short circuit ci garantisce un controllo sicuro di carta->next.
+    for(carte=0; carte < tac->numCarte/4; carte++) {
         printf("\nHai compiuto questa ipotesi.\n");
         for (i = 0; i < CARD_TYPES; i++) {
             if(!carta){
-                printf("Errore nella lettura di un taccuino esistente e formattato.\n");
-                exit(-5);
+                fprintf(stderr, "Errore nella lettura di un taccuino esistente e formattato.\n");
+                exit(-1);
             }
             printf("\t%-8s : %s\n", tipi(carta->tipo, buf), carta->desc);
             carta = carta->next;

@@ -144,7 +144,7 @@ int movementStrategy(float interesseStanze[STANZE_N], _Bool reachable[STANZE_N],
             }
         }
     } else { // Se nessuna delle stanze di cui abbia effetivo interesse è raggiungibile, l'AI si muove secondo un pathing più ottimale possibile verso un punto di interesse.
-        for(i=0, j=0; i<STANZE_N; i++){ // Incluso stare fermo se possibile.
+        for(i=0, j=0; i<STANZE_N; i++){ // Incluso stare ferma se possibile.
             if(interesseStanze[i]>0.0f){ // Controlliamo se aveva una specifica destinazione in mente o se voleva investigare più di una stanza.
                 j++;
                 lastIndex = i;
@@ -153,14 +153,14 @@ int movementStrategy(float interesseStanze[STANZE_N], _Bool reachable[STANZE_N],
             newMask[i] = 1;
         }
         // Se aveva una singola destinazione in mente, massimizziamo il movimento per quel punto.
-        // Altrimenti massimizziamo la distanza verso almeno uno dei punti di interesse decisi a caso.
+        // Altrimenti massimizziamo la distanza verso almeno uno dei punti di interesse deciso a caso (sempre con probabilità direttamente proporzionale).
         if(j == 1){ // j è almeno 1 e lastIndex è sempre inzializzato, a meno di errori nel R/W della matrice di interesse che sono catturati nello scopo superiore con uscita -3.
-            return SimpleGeometry(reachable, lastIndex, layout);
+            return BestPath(reachable, lastIndex, layout);
         } else {
             lastIndex = movementStrategy(interesseCorretto,
                                     newMask, layout); //In questa iterazione la maschera sono i float e il peso sono i bool, tutti uguali e positivi.
                                                       // Dunque ha sempre soluzione casuale tra le stanze raggiungibili e non raggiunge mai questo branch ricorsivamente.
-            return SimpleGeometry(reachable, lastIndex, layout);
+            return BestPath(reachable, lastIndex, layout);
         }
     }
 }
@@ -191,7 +191,7 @@ int suspectStrategy(float interesse_AoS[ARMI_N]){ //Decisione per sospetti e arm
 }
 
 int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide quali carte mostrare e aggiorna quelle mostrate.
-    _Bool shown[6] = {0, 0, 0, 0, 0, 0}; //c89 non permette l'inizializzazione parziale.
+    _Bool shown[6] = {0, 0, 0, 0, 0, 0};
     char buf[SBUF];
     int i;
     FILE* shownMem;
@@ -222,13 +222,13 @@ int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide
     return 0;
 }
 
-int SimpleGeometry(_Bool reachable[STANZE_N], int end, int layout[STANZE_N][STANZE_N]){
-    int i, minIndex, minDist = 999; // MinDist ci permette di non dover inizializzare minIndex con un'iterazione inutile lungo reachable.
+int BestPath(_Bool reachable[STANZE_N], int end, int layout[STANZE_N][STANZE_N]){ // Ritorna il nodo più vicino alla destinazione tra quelli raggiungibili.
+    int i, minIndex, minDist = 99; // MinDist ci permette di non dover inizializzare minIndex con un'iterazione inutile lungo reachable.
 
     /* Tutti i nodi sono connessi tra loro con distanza ottimale. Ciò significa che se il collegamento in un passo non è disponibile
      * e la destinazione non è il nodo più vicino alla partenza, esiste almeno un altro percorso di distanza ottimale in 2 o più passi.
      * Non c'è bisogno di nessun pathing: si tratta solo di valutare quale offra i dadi più efficaci a raggiungere la destinazione al prossimo turno,
-     * cioè la distanza minima dal nodo prescelto.                                                                                                                                                                                                                    ...e io me ne sono accorto dopo aver scritto djikstra.
+     * cioè la distanza minima dal nodo prescelto.
      */
     for(i=0; i<STANZE_N; i++){
         if(reachable[i]){
@@ -239,7 +239,5 @@ int SimpleGeometry(_Bool reachable[STANZE_N], int end, int layout[STANZE_N][STAN
         }
     }
     return minIndex; // MinDist, e per estensione minIndex, è sempre inizializzato dato che reachable contiene sempre la partenza
-                     // e ogni nodo è connesso tra loro con distanza tra 0 e 16 (MinDist è settato a 999).
+                     // e ogni nodo è connesso a ognuno degli altri con distanza tra 0 e 16 (MinDist è settato a 99).
 }
-
-

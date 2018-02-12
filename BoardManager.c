@@ -29,13 +29,13 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
         exit(-1);
     }
     if(!AI){
-        getchar(); // vuota stdin.
         for(i=0; i<*num; i++){
+            while(getchar()!='\n'); // vuota stdin.
             printf("Inserire il nome del giocatore %d (max %d caratteri)\n", i+1, STANDARD_STRLEN - 1);
-            fgets(buf, STANDARD_STRLEN+1, stdin); // fgets permette di copiare whitespace non di fine linea e non è suscettibile all'overflow
+            fgets(buf, STANDARD_STRLEN, stdin); // fgets permette di copiare whitespace non di fine linea e non è suscettibile all'overflow
             if ((pos=strchr(buf, '\n')) != NULL)  // che invece rende gets (e scanf se si desidera mantenere whitespace) pericolosa.
                 *pos = '\0';                      // Include però il newline nella lettura della riga, al quale sostituiamo la terminazione qua.
-            strncpy(listaGiocatori[i].nome, buf, STANDARD_STRLEN); // Per cui abbiamo bisogno di un buffer di almeno 25 per il nome di 23+1.
+            strncpy(listaGiocatori[i].nome, buf, STANDARD_STRLEN);
             listaGiocatori[i].ipotesiEsatta = 0;
             listaGiocatori[i].mano.numCarte = 0;
             listaGiocatori[i].mano.cima = NULL;
@@ -559,6 +559,12 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
         saveState(buf, tavolo);
         tavolo->turnoCorrente  = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
         tavolo->numeroTurni += 1;
+
+        printf("Vuoi uscire dalla partita? S/N\n");
+        scanf("%s", buf);
+        if(tolower(buf[0]) == 's'){
+            exit(0);
+        }
     }
     printTableStatus(tavolo, AI);
     tac = leggiTaccuino(tavolo->giocatori[tavolo->turnoCorrente].nome);

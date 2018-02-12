@@ -23,6 +23,6 @@ void generateCoordinates(Carta* carta, int coords[2]);
 int movementStrategy(float interesseStanze[STANZE_N],_Bool reachable[STANZE_N], int layout[STANZE_N][STANZE_N]);
 int suspectStrategy(float interesse_AoS[ARMI_N]);
 int showingStrategy(Giocatore* giocatore, const int coords[], int len);
-int SimpleGeometry(_Bool reachable[STANZE_N], int end, int layout[STANZE_N][STANZE_N]);
+int BestPath(_Bool reachable[STANZE_N], int end, int layout[STANZE_N][STANZE_N]);
 
 #endif //CLUEDO_AI_H
