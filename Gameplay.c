@@ -231,7 +231,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
             printf(message);
 
             if(AI){ //Registriamo che carta ci sia stata mostrata e facciamo in modo di non sceglierla mai più.
-                generateCoordinates(foundData, coords);
+                generateCoordinates(tavolo, foundData, coords);
                 interestFile[coords[0]][coords[1]] = 0.0f;
             }
 
@@ -351,7 +351,24 @@ void statTrack(Tabellone* tavolo){ // Aggiorna le statistiche precedentemente ca
     Carta daValutare[CARD_TYPES];
     int valSoluzioni[CARD_TYPES];
     Carta* scroll = tavolo->soluzione.cima;
-    int i;
+    int i, j;
+    char ourIndexes[CARD_TYPES][STANZE_N][STANDARD_STRLEN];
+
+    for(i=0; i<CARD_TYPES; i++){ //Generiamo l' ordine delle carte per rimapparle correttamente.
+        for (j = 0; j< (i==STANZA?STANZE_N:ARMI_N); j++){
+            switch(i){
+                case STANZA:
+                    stanze(j, ourIndexes[i][j]);
+                    break;
+                case ARMA:
+                    armi(j, ourIndexes[i][j]);
+                    break;
+                case SOSPETTO:
+                    sospetti(j, ourIndexes[i][j]);
+                    break;
+            }
+        }
+    }
 
     //salviamo le carte in ordine.
     for (i=0; i<CARD_TYPES; i++){
@@ -371,9 +388,9 @@ void statTrack(Tabellone* tavolo){ // Aggiorna le statistiche precedentemente ca
         }
     }
     // Estrapoliamo gli indici.
-    valSoluzioni[STANZA] = checkCard_Archive(stanze, &daValutare[STANZA], STANZE_N);
-    valSoluzioni[ARMA] = checkCard_Archive(armi, &daValutare[ARMA], ARMI_N);
-    valSoluzioni[SOSPETTO] = checkCard_Archive(sospetti, &daValutare[SOSPETTO], SOSPETTI_N);
+    valSoluzioni[STANZA] = checkCard_Archive(ourIndexes, &daValutare[STANZA], STANZE_N);
+    valSoluzioni[ARMA] = checkCard_Archive(ourIndexes, &daValutare[ARMA], ARMI_N);
+    valSoluzioni[SOSPETTO] = checkCard_Archive(ourIndexes, &daValutare[SOSPETTO], SOSPETTI_N);
 
     //Aggiorniamo le statistiche caricate nel tavolo.
     for(i=0; i<CARD_TYPES; i++){
@@ -409,11 +426,10 @@ void statShow(){ // Parsing dei dati statistiche da un eventuale file sul pc. Il
     }
 }
 
-int checkCard_Archive(char* (*func)(int, char*), Carta* card, int len){ //riporta l'indice dell'elemento nel vettore.
+int checkCard_Archive(char archive[CARD_TYPES][STANZE_N][STANDARD_STRLEN], Carta* card, int len){ //riporta l'indice dell'elemento nel vettore.
     int i;
-    char buf[SBUF];
     for(i=0; i<len; i++) {
-        if (strcmp(func(i, buf), card->desc) == 0) {
+        if (strcmp(archive[card->tipo][i], card->desc) == 0) {
             return i;
         }
     }

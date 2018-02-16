@@ -37,7 +37,8 @@ typedef struct board{
     Mazzo carteScoperte;
     Mazzo soluzione;
     int layout[STANZE_N][STANZE_N];
-    int stats[3][STANZE_N];
+    int stats[CARD_TYPES][STANZE_N];
+    char stringhe[CARD_TYPES][STANZE_N][STANDARD_STRLEN];
 } Tabellone;
 
 typedef struct deck Taccuino;

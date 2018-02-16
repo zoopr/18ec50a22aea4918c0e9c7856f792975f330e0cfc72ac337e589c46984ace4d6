@@ -64,7 +64,7 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
 }
 
 Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e distribuisce le carte.
-    int numGiocatori, cartePerGiocatore, i;
+    int numGiocatori, cartePerGiocatore, i, j;
     Mazzo *mainDeck, *second, *third;
     char buffer[STANDARD_STRLEN + 4];
 
@@ -119,6 +119,22 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
         wipeTac(buffer);
     }
 
+    for(i=0; i<CARD_TYPES; i++){ //Indicizziamo le stringhe in un ordine preciso. Usato nella formulazione dell'ipotesi.
+        for (j = 0; j< (i==STANZA?STANZE_N:ARMI_N); j++){
+            switch(i){
+                case STANZA:
+                    stanze(j, tavolo->stringhe[i][j]);
+                    break;
+                case ARMA:
+                    armi(j, tavolo->stringhe[i][j]);
+                    break;
+               default:
+                    sospetti(j, tavolo->stringhe[i][j]);
+                    break;
+            }
+        }
+    }
+
     statInit(tavolo);
     logger("\nCominciata nuova partita.\n");
 
@@ -128,6 +144,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
 
 Tabellone* LoadBoard(char* filename){
     int i, j;
+    int stanzaIndex, sospIndex, armaIndex;
     Giocatore *ultimoG;
     Carta *ultimaC, *codaC;
     char msgbuf[SBUF] = "\nCaricata partita da ";
@@ -139,6 +156,7 @@ Tabellone* LoadBoard(char* filename){
         return NULL;
     }
     else {
+        stanzaIndex = sospIndex = armaIndex = 0;
         Tabellone *table = (Tabellone *) malloc(sizeof(Tabellone)); //seguendo il formato byte a byte delle specifiche.
         if (!table)
             exit(-1);
@@ -158,6 +176,18 @@ Tabellone* LoadBoard(char* filename){
                 if (!ultimaC)
                     exit(-1);
                 fread(&ultimaC->tipo, 1, sizeof(tipoCarta) + STANDARD_STRLEN*sizeof(char), save); //Il salvataggio contiene l'ordine e i valori non di link.
+                switch(ultimaC->tipo){ // Generiamo l'indicizzazione delle stringhe dalle stringhe del file di ingresso.
+                    case ARMA:
+                        strcpy(table->stringhe[ARMA][armaIndex], ultimaC->desc);
+                        armaIndex++;
+                        break;
+                    case SOSPETTO:
+                        strcpy(table->stringhe[SOSPETTO][sospIndex], ultimaC->desc);
+                        sospIndex++;
+                        break;
+                    default:
+                        break;
+                }
                 ultimaC->next = NULL;
                 if (!ultimoG->mano.cima) {                                                        //Costruiamo i link della lista.
                     ultimoG->mano.cima = ultimaC;
@@ -178,6 +208,18 @@ Tabellone* LoadBoard(char* filename){
             if (!ultimaC)
                 exit(-1);
             fread(ultimaC, 1, sizeof(tipoCarta) + STANDARD_STRLEN * sizeof(char), save);
+            switch(ultimaC->tipo){ // Importante che l'accodamento delle stringhe sia consecutivo tra i vari dati. L'ordine lo è di meno.
+                case ARMA:
+                    strcpy(table->stringhe[ARMA][armaIndex], ultimaC->desc);
+                    armaIndex++;
+                    break;
+                case SOSPETTO:
+                    strcpy(table->stringhe[SOSPETTO][sospIndex], ultimaC->desc);
+                    sospIndex++;
+                    break;
+                default:
+                    break;
+            }
             if (!table->carteScoperte.cima) {
                 table->carteScoperte.cima = ultimaC;
                 ultimaC->next = NULL;
@@ -197,6 +239,18 @@ Tabellone* LoadBoard(char* filename){
             if (!ultimaC)
                 exit(-1);
             fread(ultimaC, 1, sizeof(tipoCarta) + STANDARD_STRLEN * sizeof(char), save);
+            switch(ultimaC->tipo){
+                case ARMA:
+                    strcpy(table->stringhe[ARMA][armaIndex], ultimaC->desc);
+                    armaIndex++;
+                    break;
+                case SOSPETTO:
+                    strcpy(table->stringhe[SOSPETTO][sospIndex], ultimaC->desc);
+                    sospIndex++;
+                    break;
+                default:
+                    break;
+            }
             if (!table->soluzione.cima) {
                 table->soluzione.cima = ultimaC;
                 ultimaC->next = NULL;
@@ -210,7 +264,11 @@ Tabellone* LoadBoard(char* filename){
         }
         fclose(save);
 
-        statInit(table); // Carichiamo le statistiche da un secondo file.
+        for(; stanzaIndex< STANZE_N; stanzaIndex++){
+            stanze(stanzaIndex, table->stringhe[STANZA][stanzaIndex]); // E' importante che l'indice delle stanze sia consistente. Le stringhe devono essere consistenti da specifiche.
+        }
+
+        statInit(table); // Carichiamo le statistiche da file.
 
         strcat(msgbuf, filename);
         strcat(msgbuf, "\n");
@@ -266,6 +324,7 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
             saveInterest(&tavolo->giocatori[i], loadArea);
             showingStrategy(&tavolo->giocatori[i], NULL, 0);
         }
+        statShow();
     }
 
 
@@ -339,7 +398,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             printf("Movimenti validi:\n");
             for(dice[0] = 0, dice[1] = 0; dice[0] < STANZE_N; dice[0]++){
                 if(reachable[dice[0]]){
-                    printf("%d - %s(%d passi)\n", dice[0] + 1, stanze(dice[0], ipotesi[STANZA].desc), tavolo->layout[giocatore->stanza][dice[0]]);
+                    printf("%d - %s(%d passi)\n", dice[0] + 1, tavolo->stringhe[STANZA][dice[0]], tavolo->layout[giocatore->stanza][dice[0]]);
                     dice[1]++;
                 }
             }
@@ -353,15 +412,17 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
                     scanf("%s", buf);
                     dice[1] = strtol(buf, NULL, 10) - 1;
                 }
+                strcpy(ipotesi[STANZA].desc, tavolo->stringhe[STANZA][dice[1]]);
                 giocatore->stanza = dice[1];
+
                 strcpy(buf, "Giocatore spostato in ");
-                strcat (buf, stanze(dice[1], ipotesi[STANZA].desc));
+                strcat (buf,  ipotesi[STANZA].desc);
                 strcat(buf, "\n");
                 printf(buf);
                 logger(buf);
-
             }else {
-                printf("Giocatore obbligato a rimanere in %s\n", stanze(giocatore->stanza, ipotesi[STANZA].desc));
+                strcpy(ipotesi[STANZA].desc, tavolo->stringhe[STANZA][giocatore->stanza]);
+                printf("Giocatore obbligato a rimanere in %s\n", ipotesi[STANZA].desc);
             }
         }
         //Formulazione ipotesi
@@ -370,7 +431,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
 
         printf("Con quale arma si è compiuto il delitto?\n");
         for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
-            printf("%d - %s\n", dice[0] + 1, armi(dice[0], ipotesi[ARMA].desc));
+            printf("%d - %s\n", dice[0] + 1, tavolo->stringhe[ARMA][dice[0]]);
         }
         scanf("%s", buf);
         dice[0] = strtol(buf, NULL, 10) - 1;
@@ -379,11 +440,11 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             scanf("%s", buf);
             dice[0] = strtol(buf, NULL, 10) - 1;
         }
-        armi(dice[0], ipotesi[ARMA].desc);
+        strcpy(ipotesi[ARMA].desc, tavolo->stringhe[ARMA][dice[0]]);
 
         printf("Quale sospetto ha compiuto il delitto?\n");
         for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
-            printf("%d - %s\n", dice[1] + 1, sospetti(dice[1], ipotesi[SOSPETTO].desc));
+            printf("%d - %s\n", dice[1] + 1, tavolo->stringhe[SOSPETTO][dice[1]]);
         }
         scanf("%s", buf);
         dice[1] = strtol(buf, NULL, 10) - 1;
@@ -392,19 +453,20 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             scanf("%s", buf);
             dice[1] = strtol(buf, NULL, 10) - 1;
         }
-        sospetti(dice[1], ipotesi[SOSPETTO].desc);
+        strcpy(ipotesi[SOSPETTO].desc, tavolo->stringhe[SOSPETTO][dice[1]]);
 
         for(i = 0; i<CARD_TYPES; i++){ //Aggiungiamo l'ipotesi al taccuino di questo turno.
             aggiornaTaccuino(&tac, ipotesi[i]);
         }
         giocatore->ipotesiEsatta = checkSolution(ipotesi[STANZA].desc, ipotesi[ARMA].desc, ipotesi[SOSPETTO].desc, tavolo, 0, NULL, &tac); //Controllo ipotesi. Ritorna int 0 - 1.
 
-
         if(giocatore->ipotesiEsatta){
             printf("Ipotesi esatta!\n"
                            "Per vincere, ottieni dadi doppi in uno dei prossimi turni.\n");
         }
-        printf("Turno finito.\n\n");
+        strcpy(buf, "Turno finito.\n\n");
+        printf(buf);
+        logger(buf);
         scriviTaccuino(giocatore->nome, &tac); //Il file di taccuino è salvato, le carte deallocate e il taccuino stesso deallocato alla fine dello scope.
         return 0;
     }
@@ -449,7 +511,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         printf("Movimenti validi:\n");
         for(dice[0] = 0, dice[1] = 0; dice[0] < STANZE_N; dice[0]++){
             if(reachable[dice[0]]){
-                printf("%d - %s(%d passi)\n", dice[0] + 1, stanze(dice[0], ipotesi[STANZA].desc), tavolo->layout[giocatore->stanza][dice[0]]);
+                printf("%d - %s(%d passi)\n", dice[0] + 1, tavolo->stringhe[STANZA][dice[0]], tavolo->layout[giocatore->stanza][dice[0]]);
                 dice[1]++;
             }
         }
@@ -461,15 +523,18 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
                 fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]); //L'AI non sbaglia, specie con l'accesso alla mask reachable. se atterriamo qua c'è da fare debugging.
                 exit(-3);
             }
+            strcpy(ipotesi[STANZA].desc, tavolo->stringhe[STANZA][dice[1]]);
             giocatore->stanza = dice[1];
+
             strcpy(buf, "Giocatore spostato in ");
-            strcat (buf, stanze(giocatore->stanza, ipotesi[STANZA].desc));
+            strcat (buf, ipotesi[STANZA].desc);
             strcat(buf, "\n");
             printf(buf);
             logger(buf);
 
         }else {
-            printf("Giocatore obbligato a rimanere in %s\n", stanze(giocatore->stanza, ipotesi[STANZA].desc));
+            strcpy(ipotesi[STANZA].desc, tavolo->stringhe[STANZA][giocatore->stanza]);
+            printf("Giocatore obbligato a rimanere in %s\n", ipotesi[STANZA].desc);
         }
 
         //Formulazione ipotesi
@@ -477,7 +542,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
 
         printf("Con quale arma si è compiuto il delitto?\n");
         for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
-            printf("%d - %s\n", dice[0] + 1, armi(dice[0], ipotesi[ARMA].desc));
+            printf("%d - %s\n", dice[0] + 1, tavolo->stringhe[ARMA][dice[0]]);
         }
         dice[0] = suspectStrategy(interest[ARMA]);
         printf("L'AI ha scelto l'opzione %d\n", dice[0] + 1);
@@ -485,11 +550,11 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
             exit(-3);
         }
-        armi(dice[0], ipotesi[ARMA].desc);
+        strcpy(ipotesi[ARMA].desc, tavolo->stringhe[ARMA][dice[0]]);
 
         printf("Quale sospetto ha compiuto il delitto?\n");
         for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
-            printf("%d - %s\n", dice[1] + 1, sospetti(dice[1], ipotesi[SOSPETTO].desc));
+            printf("%d - %s\n", dice[1] + 1, tavolo->stringhe[SOSPETTO][dice[1]]);
         }
         dice[1] = suspectStrategy(interest[SOSPETTO]);
         printf("L'AI ha scelto l'opzione %d\n", dice[1] + 1);
@@ -497,7 +562,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             fprintf(stderr, "%d: OUT OF INDEX\n", dice[1]);
             exit(-3);
         }
-        sospetti(dice[1], ipotesi[SOSPETTO].desc);
+        strcpy(ipotesi[SOSPETTO].desc, tavolo->stringhe[SOSPETTO][dice[1]]);
 
         // Salviamo le carte ipotesi in coda sul taccuino.
         for(i = 0; i<CARD_TYPES; i++){

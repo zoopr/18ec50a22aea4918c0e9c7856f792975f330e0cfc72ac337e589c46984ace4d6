@@ -19,7 +19,7 @@ char* tipi(int index, char* copyArea) {
 
 char* stanze(int index, char* copyArea) {
     char stanze[STANZE_N][STANDARD_STRLEN] = {"Laboratorio T", "Laboratorio M", "Bagno", "Aula Costa",
-                                                           "Giardino", "Entrata", "Parcheggio", "Simaz", "Batcaverna"};
+                                                           "Giardino", "Entrata", "Parcheggio", "Simaz", "BatCaverna"};
     if(index <STANZE_N && index>-1) {
         strncpy(copyArea,stanze[index], STANDARD_STRLEN);
         return copyArea;
@@ -29,8 +29,8 @@ char* stanze(int index, char* copyArea) {
     }
 }
 char* armi(int index, char* copyArea){
-    char armi [ARMI_N][STANDARD_STRLEN] = {"Cavo di rete", "Sparacoriandoli", "Calcinaccio", "Tastiera USB",
-                                                    "Fumo caldaia", "Floppy disk 3.5"};
+    char armi [ARMI_N][STANDARD_STRLEN] = {"Cavo di Rete", "Sparacoriandoli", "Tastiera USB",
+                                                    "Fumo Caldaia", "Floppy Disk 3.5", "Calcinaccio"};
     if(index <ARMI_N && index>-1) {
         strncpy(copyArea, armi[index], STANDARD_STRLEN);
         return copyArea;
@@ -41,8 +41,8 @@ char* armi(int index, char* copyArea){
 }
 
 char* sospetti(int index, char* copyArea) {
-    char sospetti[SOSPETTI_N][STANDARD_STRLEN] = {"Alan Turing", "G. M. Hopper", "Edsger Dijkstra", "G. F. Voronoj",
-                                                           "J. V. Neumann", "M. Hamilton"};
+    char sospetti[SOSPETTI_N][STANDARD_STRLEN] = {"Alan Turing", "G.F. Voronoj", "J.V. Neumann", "Edsger Dijkstra",
+                                                    "M. Hamilton", "G.M. Hopper"};
     if(index <SOSPETTI_N && index>-1) {
         strncpy(copyArea, sospetti[index], STANDARD_STRLEN);
         return copyArea;

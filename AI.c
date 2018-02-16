@@ -91,30 +91,30 @@ void initInterest(Tabellone* tavolo, Giocatore* giocatore, float loadArea[CARD_T
     //Eliminiamo le carte sul tavolo.
     carta = tavolo->carteScoperte.cima;
     for(j=0; j<tavolo->carteScoperte.numCarte; j++){
-        generateCoordinates(carta, i);
+        generateCoordinates(tavolo, carta, i);
         loadArea[i[0]][i[1]] = 0.0f;
         carta = carta->next;
     }
     //Eliminiamo le carte in mano al giocatore.
     carta = giocatore->mano.cima;
     for(j=0; j<giocatore->mano.numCarte; j++){
-        generateCoordinates(carta, i);
+        generateCoordinates(tavolo, carta, i);
         loadArea[i[0]][i[1]] = 0.0f;
         carta = carta->next;
     }
 }
 
-void generateCoordinates(Carta* carta, int coords[2]){ // Genera le coordinate spaziali nella matrice dell'interesse per una carta.
+void generateCoordinates(Tabellone* tavolo, Carta* carta, int coords[2]){ // Genera le coordinate spaziali nella matrice dell'interesse per una carta.
     coords[0] = carta->tipo;
     switch(coords[0]){
         case STANZA:
-            coords[1] = checkCard_Archive(stanze, carta, STANZE_N);
+            coords[1] = checkCard_Archive(tavolo->stringhe, carta, STANZE_N);
             break;
         case ARMA:
-            coords[1] = checkCard_Archive(armi, carta, ARMI_N);
+            coords[1] = checkCard_Archive(tavolo->stringhe, carta, ARMI_N);
             break;
         default:
-            coords[1] = checkCard_Archive(sospetti, carta, SOSPETTI_N);
+            coords[1] = checkCard_Archive(tavolo->stringhe, carta, SOSPETTI_N);
             break;
     }
 }
