@@ -74,7 +74,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
     }
     copiaMoveset(tavolo->layout); //copia il layout.
     tavolo->giocatori = playerInit(&numGiocatori, AI); //salviamo il numero all'interno di numGiocatori per le funzioni successive.
-    tavolo->numeroTurni = 0;
+    tavolo->numeroTurni = 1;
     tavolo->numGiocatori = numGiocatori;
     tavolo->turnoCorrente = rand()%numGiocatori;
 
@@ -329,10 +329,9 @@ void MainGame(Tabellone* tavolo, _Bool(*turnType)(Tabellone*, Giocatore*), _Bool
 
 
     while(!winner){
+        winner = turnType(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
         tavolo->turnoCorrente = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
         tavolo->numeroTurni +=1;
-
-        winner = turnType(tavolo, &tavolo->giocatori[tavolo->turnoCorrente]);
     }
     strncpy(buf, tavolo->giocatori[tavolo->turnoCorrente].nome, STANDARD_STRLEN);
     strcat(buf, " ha vinto.\n");
@@ -624,13 +623,7 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
     if(tolower(buf[0]) == 's'){
         printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
         scanf("%s", buf);
-        //Facciamo un breve rewind alla fine del turno precedente.
-        tavolo->turnoCorrente  = (tavolo->turnoCorrente+ tavolo->numGiocatori - 1)%tavolo->numGiocatori;
-        tavolo->numeroTurni -= 1;
         saveState(buf, tavolo);
-        tavolo->turnoCorrente  = (tavolo->turnoCorrente+1)%tavolo->numGiocatori;
-        tavolo->numeroTurni += 1;
-
         printf("Vuoi uscire dalla partita? S/N\n");
         scanf("%s", buf);
         if(tolower(buf[0]) == 's'){

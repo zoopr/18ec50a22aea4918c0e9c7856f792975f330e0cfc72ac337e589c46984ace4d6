@@ -197,7 +197,7 @@ int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide
     FILE* shownMem;
 
     strncpy(buf, giocatore->nome, STANDARD_STRLEN);
-    strcat(buf, "_hold.ai");
+    strcat(buf, "_hold.ait");
     shownMem = fopen(buf, "w+");
     if (!shownMem) //Problema di generazione file.
         exit(-2);
