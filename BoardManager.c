@@ -593,13 +593,15 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
              * trovate nella mano di nessuno possano non essere state chiamate perchè tra le carte segrete.
              * Questa sezione aggiusta un bias per le carte chiamate più volte e mai contestate.
              * La carta trovata è stata in precedenza azzerata.
+             * Non c'è pericolo di overflow perchè 1.5^(STANZE_N*ARMI_N) ~ 3e+9 << FLT_MAX.
              */
             interest[STANZA][giocatore->stanza]*=INTEREST_FACTOR;
             interest[ARMA][dice[0]]*=INTEREST_FACTOR;
             interest[SOSPETTO][dice[1]]*=INTEREST_FACTOR;
+            saveInterest(giocatore, interest);
+
         }
         printf("Turno finito.\n\n");
-        saveInterest(giocatore, interest);
         scriviTaccuino(giocatore->nome, &tac); //Salvataggio taccuino su disco. Deallocazione delle carte taccuino di questo turno.
         return 0;
     }

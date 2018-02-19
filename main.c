@@ -14,7 +14,6 @@
 #include "Gameplay.h"
 
 int main() {
-
     int option;
     char buffer[SBUF];
     _Bool next_phase, AI_mode, exit_flag = false;
