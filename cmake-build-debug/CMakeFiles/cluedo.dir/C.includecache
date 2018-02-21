@@ -89,6 +89,8 @@ stdbool.h
 -
 stdlib.h
 -
+string.h
+-
 time.h
 -
 ctype.h

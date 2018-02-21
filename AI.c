@@ -201,10 +201,7 @@ int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide
     shownMem = fopen(buf, "w+");
     if (!shownMem) //Problema di generazione file.
         exit(-2);
-    if(len == 0){ //usato per l'inizializzazione a 0 al primo turno.
-        fwrite(shown, 6, sizeof(_Bool), shownMem);
-        fclose(shownMem);
-    }else {
+    if(len != 0){
         fread(shown, 6, sizeof(_Bool), shownMem);// Carichiamo i dati nel vettore.
 
         for (i = 0; i <
@@ -216,9 +213,9 @@ int showingStrategy(Giocatore* giocatore, const int coords[], int len){ //Decide
         //Se siamo qua, nessuna carta che abbiamo già mostrato può essere mostrata.
         //Se nessuna delle carte da mostrare era stata mostrata prima, prendiamo la prima e registriamo che sia stata mostrata.
         shown[coords[0]] = 1;
-        fwrite(shown, 6, sizeof(_Bool), shownMem);
-        fclose(shownMem);
     }
+    fwrite(shown, 6, sizeof(_Bool), shownMem);
+    fclose(shownMem);
     return 0;
 }
 

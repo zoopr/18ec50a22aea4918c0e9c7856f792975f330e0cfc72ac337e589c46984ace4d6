@@ -380,8 +380,7 @@ void statTrack(Tabellone* tavolo){ // Aggiorna le statistiche precedentemente ca
             }
         }
     }
-
-    //salviamo le carte in ordine.
+    // Salviamo le carte in ordine.
     for (i=0; i<CARD_TYPES; i++){
         switch(scroll->tipo){
             case STANZA:
@@ -402,8 +401,7 @@ void statTrack(Tabellone* tavolo){ // Aggiorna le statistiche precedentemente ca
     valSoluzioni[STANZA] = checkCard_Archive(ourIndexes, &daValutare[STANZA], STANZE_N);
     valSoluzioni[ARMA] = checkCard_Archive(ourIndexes, &daValutare[ARMA], ARMI_N);
     valSoluzioni[SOSPETTO] = checkCard_Archive(ourIndexes, &daValutare[SOSPETTO], SOSPETTI_N);
-
-    //Aggiorniamo le statistiche caricate nel tavolo.
+    // Aggiorniamo le statistiche caricate nel tavolo.
     for(i=0; i<CARD_TYPES; i++){
         tavolo->stats[i][valSoluzioni[i]]++;
     }
@@ -422,15 +420,15 @@ void statShow(){ // Parsing dei dati statistiche da un eventuale file sul pc. Il
         printf("\nStatistiche del crimine:\n\n");
         printf("STANZE\n");
         for(i=0;i<STANZE_N; i++){
-            printf("%s - %d volte\n", stanze(i, buf), statsArr[STANZA][i]);
+            printf("%-16s - %d volte\n", stanze(i, buf), statsArr[STANZA][i]);
         }
         printf("\nARMI\n");
         for(i=0;i<ARMI_N; i++){
-            printf("%s - %d volte\n", armi(i, buf), statsArr[ARMA][i]);
+            printf("%-16s - %d volte\n", armi(i, buf), statsArr[ARMA][i]);
         }
         printf("\nSOSPETTI\n");
         for(i=0;i<SOSPETTI_N; i++){
-            printf("%s - %d volte\n", sospetti(i, buf), statsArr[SOSPETTO][i]);
+            printf("%-16s - %d volte\n", sospetti(i, buf), statsArr[SOSPETTO][i]);
         }
         printf("\n");
         fclose(stats);
@@ -451,12 +449,10 @@ void parseTac(Taccuino* tac){ // Stampa le informazioni contenute nel taccuino c
     Carta* carta;
     int carte, i;
     char buf[STANDARD_STRLEN];
-
     /*
      * Il formato del taccuino è blocchi di 4 carte per ipotesi sbagliata + carta mostrata,
      * più un eventuale blocco di 3 carte finale per l'ipotesi corretta.
      */
-
     carta = tac->cima;
     for(carte=0; carte < tac->numCarte/4; carte++) {
         printf("\nHai compiuto questa ipotesi.\n");
