@@ -154,6 +154,7 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
     int i, j, coords[CARD_TYPES]; //Usiamo i campi per l'indice nella lista di chi ha le carte, ed i primi due campi per generare coordinate per chi has sbagliato.
     int found = 0;
     char message[SBUF] ="L'ipotesi del giocatore è:\t";
+    char buf[SBUF], *pos;
 
 
     strncat(message, stanza, strlen(stanza));
@@ -207,12 +208,22 @@ int checkSolution(const char* stanza,const char* arma,const char* sospetto, Tabe
                 j = showingStrategy(&tavolo->giocatori[i%tavolo->numGiocatori], coords, found);
                 printf("L'AI ha scelto l'opzione %d\n", j + 1);
             }else{
-                scanf("%s", message);
+                fgets(buf, STANDARD_STRLEN, stdin);
+            if ((pos = strchr(buf, '\n')) != NULL) {
+                *pos = '\0';
+                ungetc('\n', stdin);
+            }
+            while(getchar() != '\n');
                 j = strtol(message, NULL, 10) - 1;
             }
             while(j<0 || j>=found){ //Con la flag AI non dovrebbe mai entrare in questo branch.
                 printf("Numero invalido. Reinserire.\n");
-                scanf("%s", message);
+                fgets(buf, STANDARD_STRLEN, stdin);
+            if ((pos = strchr(buf, '\n')) != NULL) {
+                *pos = '\0';
+                ungetc('\n', stdin);
+            }
+            while(getchar() != '\n');
                 j = strtol(message, NULL, 10) - 1;
             }
             foundData[0] = foundData[j]; //sovrascriviamo e stampiamo solo il primo elemento.

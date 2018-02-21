@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <ctype.h>
 #include "BoardManager.h"
@@ -15,7 +16,7 @@
 
 int main() {
     int option;
-    char buffer[SBUF];
+    char buffer[SBUF], *pos;
     _Bool next_phase, AI_mode, exit_flag = false;
     Tabellone* tavolo;
 
@@ -44,7 +45,13 @@ int main() {
                            "2 - AI mode\n"
                            "3 - Statistiche\n"
                            "4 - Esci\n");
-            scanf("%s", buffer);
+            fgets(buffer, STANDARD_STRLEN, stdin);
+            if ((pos = strchr(buffer, '\n')) != NULL) {
+                *pos = '\0';
+                ungetc('\n', stdin);
+            }
+            while(getchar() != '\n');
+
             option = strtol(buffer,NULL, 10);
             switch (option) {
                 case 1:
@@ -78,7 +85,14 @@ int main() {
             printf("Selezionare un'opzione.\n"
                            "1 - Comincia partita\n"
                            "2 - Carica partita\n");
-            scanf("%s", buffer);
+
+            fgets(buffer, STANDARD_STRLEN, stdin);
+            if ((pos = strchr(buffer, '\n')) != NULL) {
+                *pos = '\0';
+                ungetc('\n', stdin);
+            }
+            while(getchar() != '\n');
+
             option = strtol(buffer,NULL, 10);
             switch (option) {
                 case 1:
@@ -108,7 +122,13 @@ int main() {
         next_phase = false;
         printf("\nProcedere con un'altra partita? S/N\n");
         do{
-            scanf("%s", buffer);
+            fgets(buffer, STANDARD_STRLEN, stdin);
+            if ((pos = strchr(buffer, '\n')) != NULL) {
+                *pos = '\0';
+                ungetc('\n', stdin);
+            }
+            while(getchar() != '\n');
+
             switch (tolower(buffer[0])) {
                 case 's':
                     exit_flag = false;
