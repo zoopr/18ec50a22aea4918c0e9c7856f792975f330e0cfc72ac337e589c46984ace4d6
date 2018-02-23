@@ -77,8 +77,8 @@ Carta* DealCards(Mazzo* mazzo, int numCarte){ //ritorna numCarte carte, aggiorna
     return testa;
 }
 
-Mazzo* shuffleDeck_improved(Mazzo* mazzo, int numCarte){ //Fisher-Yates in-place. Matematicamente ottimale, anche se con piccoli problemi
-    int i, j, k;                                         // a garantire completa casualità con seed generati da operazioni di modulo.
+Mazzo* shuffleDeck_improved(Mazzo* mazzo, int numCarte){ //Fisher-Yates in-place.
+    int i, j, k;
     Carta *ph1, *ph2;
     Carta *ref1, *ref2;
 

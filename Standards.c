@@ -87,4 +87,12 @@ char* dtoc(int decimal, char copyArea[STANDARD_STRLEN]){ //Da decimale a stringa
     return copyArea;
 }
 
+void inputWrapper(char buf[SBUF], char** p){ // Legge un messsaggio di lunghezza <=24 caratteri e vuota qualsiasi buffer in attesa. Accetta input limitato senza usare librerie OS-specifiche per il controllo del buffer.
+    fgets(buf, STANDARD_STRLEN, stdin);
+    if ((*p = strchr(buf, '\n')) != NULL) {
+        **p = '\0';
+        ungetc('\n', stdin);
+    }
+    while(getchar() != '\n');
+}
 

@@ -154,14 +154,12 @@ int movementStrategy(float interesseStanze[STANZE_N], _Bool reachable[STANZE_N],
         }
         // Se aveva una singola destinazione in mente, massimizziamo il movimento per quel punto.
         // Altrimenti massimizziamo la distanza verso almeno uno dei punti di interesse deciso a caso (sempre con probabilità direttamente proporzionale).
-        if(j == 1){ // j è almeno 1 e lastIndex è sempre inzializzato, a meno di errori nel R/W della matrice di interesse che sono catturati nello scopo superiore con uscita -3.
-            return BestPath(reachable, lastIndex, layout);
-        } else {
+        if(j > 1) { // j è almeno 1 e lastIndex è sempre inzializzato, a meno di errori nel R/W della matrice di interesse che sono catturati nello scopo superiore con uscita -3.
             lastIndex = movementStrategy(interesseCorretto,
-                                    newMask, layout); //In questa iterazione la maschera sono i float e il peso sono i bool, tutti uguali e positivi.
-                                                      // Dunque ha sempre soluzione casuale tra le stanze raggiungibili e non raggiunge mai questo branch ricorsivamente.
-            return BestPath(reachable, lastIndex, layout);
-        }
+                                         newMask, layout); //In questa iterazione la maschera sono i float e il peso sono i bool, tutti uguali e positivi.
+        }                                        // Dunque ha sempre soluzione casuale tra le stanze raggiungibili e non raggiunge mai questo branch ricorsivamente
+        return BestPath(reachable, lastIndex, layout);
+
     }
 }
 

@@ -19,13 +19,7 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
 
     do{
         printf("inserire il numero di giocatori (da %d a %d)\n", GIOCATORI_MIN, GIOCATORI_MAX);
-        fgets(buf, STANDARD_STRLEN, stdin);
-        if ((pos = strchr(buf, '\n')) != NULL) {
-            *pos = '\0';
-            ungetc('\n', stdin);
-        }
-        while(getchar() != '\n');
-
+        inputWrapper(buf, &pos);
         *num = strtol(buf, NULL, 10);
     }while(*num>GIOCATORI_MAX || *num <GIOCATORI_MIN );
 
@@ -38,23 +32,12 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
         for(i=0; i<*num; i++){
 
             printf("Inserire il nome del giocatore %d (max %d caratteri)\n", i+1, STANDARD_STRLEN - 1);
-            fgets(buf, STANDARD_STRLEN, stdin); // fgets permette di copiare whitespace non di fine linea e non è suscettibile all'overflow
-            if ((pos=strchr(buf, '\n')) != NULL) {  // che invece rende gets (e fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
-                *pos = '\0';                        // Include però il newline nella lettura della riga, al quale sostituiamo la terminazione qua.
-                ungetc('\n', stdin);                // NL per il flush corretto all'inizio di questo loop.
-            }
+            inputWrapper(buf, &pos);
             if(!strlen(buf)){
                 printf("Errore: campo nome vuoto.\n");
                 i--;
                 continue;
             }
-            while(getchar() != '\n'); // Liberiamo qualsiasi cosa rimanga dell'input precedente.
-
             strncpy(listaGiocatori[i].nome, buf, STANDARD_STRLEN);
             listaGiocatori[i].ipotesiEsatta = 0;
             listaGiocatori[i].mano.numCarte = 0;
@@ -400,12 +383,7 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
         do{
             printf("1 - Lancio dadi\n"
                            "2 - Ipotesi diretta\n ");
-            fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+            inputWrapper(buf, &pos);
             dice[0] = strtol(buf, NULL, 10); //La variabile non è stata ancora usata in questo scopo.
         }while(dice[0] !=1 && dice[0] !=2);
         if (dice[0] == 1){
@@ -422,21 +400,11 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
             //Decisione spostamento se disponibile
             if(dice[1] > 1){
                 printf("\nIn quale stanza desideri muoverti?\n");
-                fgets(buf, STANDARD_STRLEN, stdin);
-                if ((pos = strchr(buf, '\n')) != NULL) {
-                    *pos = '\0';
-                    ungetc('\n', stdin);
-                }
-                while(getchar() != '\n');
+                inputWrapper(buf, &pos);
                 dice[1] = strtol(buf, NULL, 10) - 1;
                 while(dice[1] >= STANZE_N || dice[1] < 0 ||!reachable[dice[1]]){ //short circuit ci permette di mettere la terza cond.
                     printf("Posizione non raggiungibile. Inserire stanza ammessa.\n");
-                    fgets(buf, STANDARD_STRLEN, stdin);
-                    if ((pos = strchr(buf, '\n')) != NULL) {
-                        *pos = '\0';
-                        ungetc('\n', stdin);
-                    }
-                    while(getchar() != '\n');
+                    inputWrapper(buf, &pos);
                     dice[1] = strtol(buf, NULL, 10) - 1;
                 }
                 strcpy(ipotesi[STANZA].desc, tavolo->stringhe[STANZA][dice[1]]);
@@ -460,21 +428,11 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
         for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
             printf("%d - %s\n", dice[0] + 1, tavolo->stringhe[ARMA][dice[0]]);
         }
-        fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+        inputWrapper(buf, &pos);
         dice[0] = strtol(buf, NULL, 10) - 1;
         while(dice[0] >= ARMI_N || dice[0] < 0 ){
             printf("Valore non ammesso. Inserire un numero adeguato.\n");
-            fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+            inputWrapper(buf, &pos);
             dice[0] = strtol(buf, NULL, 10) - 1;
         }
         strcpy(ipotesi[ARMA].desc, tavolo->stringhe[ARMA][dice[0]]);
@@ -483,21 +441,11 @@ _Bool Turn(Tabellone* tavolo, Giocatore* giocatore){
         for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
             printf("%d - %s\n", dice[1] + 1, tavolo->stringhe[SOSPETTO][dice[1]]);
         }
-        fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+        inputWrapper(buf, &pos);
         dice[1] = strtol(buf, NULL, 10) - 1;
         while(dice[1] >= SOSPETTI_N || dice[1] < 0 ){
             printf("Valore non ammesso. Inserire un numero adeguato.\n");
-            fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+            inputWrapper(buf, &pos);
             dice[1] = strtol(buf, NULL, 10) - 1;
         }
         strcpy(ipotesi[SOSPETTO].desc, tavolo->stringhe[SOSPETTO][dice[1]]);
@@ -587,7 +535,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         //Formulazione ipotesi
         printf("L'ipotesi è obbligata a svolgersi nella tua stanza attuale(%s).\n", ipotesi[STANZA].desc);
 
-        printf("Con quale arma si è compiuto il delitto?\n");
+        printf("Armi disponibili per l'ipotesi:\n");
         for(dice[0] = 0; dice[0]<ARMI_N; dice[0]++){
             printf("%d - %s\n", dice[0] + 1, tavolo->stringhe[ARMA][dice[0]]);
         }
@@ -599,7 +547,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
         }
         strcpy(ipotesi[ARMA].desc, tavolo->stringhe[ARMA][dice[0]]);
 
-        printf("Quale sospetto ha compiuto il delitto?\n");
+        printf("Sospetti disponibili per l'ipotesi:\n");
         for(dice[1] = 0; dice[1]<ARMI_N; dice[1]++){
             printf("%d - %s\n", dice[1] + 1, tavolo->stringhe[SOSPETTO][dice[1]]);
         }
@@ -610,7 +558,6 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
             exit(-3);
         }
         strcpy(ipotesi[SOSPETTO].desc, tavolo->stringhe[SOSPETTO][dice[1]]);
-
         // Salviamo le carte ipotesi in coda sul taccuino.
         for(i = 0; i<CARD_TYPES; i++){
             aggiornaTaccuino(&tac, ipotesi[i]);
@@ -627,7 +574,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
                     interest[j][k] = 0.0f;
                 }
             }
-            interest[STANZA][giocatore->stanza] = 1.0f; //giocatore è il vero riferimento al personaggio giocante di questo turno.
+            interest[STANZA][giocatore->stanza] = 1.0f;
             interest[ARMA][dice[0]] = 1.0f;
             interest[SOSPETTO][dice[1]] = 1.0f;
             // Sovrascrive le matrici dei giocatori.
@@ -667,29 +614,20 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
     logger(buf);
 
     printf("\nVuoi salvare lo stato attuale della partita? S/N\n");
-    fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+    inputWrapper(buf, &pos);
     if(tolower(buf[0]) == 's'){
         printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
-        fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+        inputWrapper(buf, &pos);
         saveState(buf, tavolo);
+
+        logger("Partita salvata in ");
+        logger(buf);
+        logger("\n");
+
         printf("Vuoi uscire dalla partita? S/N\n");
-        fgets(buf, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buf, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+        inputWrapper(buf, &pos);
         if(tolower(buf[0]) == 's'){
+            logger("Programma terminato.\n");
             exit(0);
         }
     }

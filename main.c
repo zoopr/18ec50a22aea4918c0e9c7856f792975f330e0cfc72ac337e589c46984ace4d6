@@ -1,14 +1,22 @@
 //
 // Created by Mat on 18/01/30.
 //
-// Interfaccia di inizializzazione e setup del tavolo da gioco.
-// Selettore AI mode e visualizzatore statistiche.
+// Funzioni base, intermedie e avanzate del gioco.
+// Filename completamente personalizzabile e caricabile, taccuino contenente ipotesi passate e carte mostrateci, e logger.
+// Supporto per il caricamento di salvataggi con nomi sospetti e carte custom (non estendibile alle stanze a causa della
+// necessaria ed esclusivamente implicita corrispondenza stringa-id numerica delle specifiche).
+// AI di gioco basata su scelta casuale pesata da pseudo-training con supervisione dei turni precedenti.
+// Gestisce la scelta dell'ipotesi (incluso il movimento in condizioni non ottimali) e quali carte mostrare.
+// Reagisce a ipotesi sbagliate e corrette.
+// Modulo di statistiche permanenti richiamabile dal menu principale e mostrato all'inizio della modalità AI (Supporta
+// salvataggi di terze parti ma non stringhe custom).
+//
+// Il modulo main contiene il menu principale e il livello più alto della gestione delle opzioni di partenza del gameplay.
 //
 
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <ctype.h>
 #include "BoardManager.h"
@@ -21,6 +29,7 @@ int main() {
     Tabellone* tavolo;
 
     srand((unsigned int)time(NULL)); //inizializziamo il seed per tutte le operazioni di partita.
+    logger("\nProgramma avviato.\n");
 
     printf("\n"
            " .d8888b.  888      88888     888 8888888888 8888888b.   .d88888b.  \n"
@@ -45,12 +54,7 @@ int main() {
                            "2 - AI mode\n"
                            "3 - Statistiche\n"
                            "4 - Esci\n");
-            fgets(buffer, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buffer, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+            inputWrapper(buffer, &pos);
 
             option = strtol(buffer,NULL, 10);
             switch (option) {
@@ -75,33 +79,26 @@ int main() {
         } while (!next_phase);
 
         //Usciamo dal programma se riceviamo il prompt adeguato.
-        //Mantiene qualsiasi parte di codice abbiamo prima dell'effettiva uscita (in questo caso solo il messaggio di chiusura).
         if(exit_flag){
             continue;
         }
-
         next_phase = false;
         do { //secondo menu. Inizializzazione tavolo da gioco.
             printf("Selezionare un'opzione.\n"
                            "1 - Comincia partita\n"
                            "2 - Carica partita\n");
-
-            fgets(buffer, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buffer, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
+            inputWrapper(buffer, &pos);
 
             option = strtol(buffer,NULL, 10);
             switch (option) {
                 case 1:
                     tavolo = FreshStart(AI_mode);
-                    next_phase = true;
+                    if(tavolo)
+                        next_phase = true;
                     break;
                 case 2:
                     printf("Inserire il nome del file di salvataggio da caricare\n");
-                    scanf("%s", buffer);
+                    inputWrapper(buffer, &pos);
                     tavolo = LoadBoard(buffer);
                     if (tavolo)
                         next_phase = true;
@@ -122,13 +119,7 @@ int main() {
         next_phase = false;
         printf("\nProcedere con un'altra partita? S/N\n");
         do{
-            fgets(buffer, STANDARD_STRLEN, stdin);
-            if ((pos = strchr(buffer, '\n')) != NULL) {
-                *pos = '\0';
-                ungetc('\n', stdin);
-            }
-            while(getchar() != '\n');
-
+            inputWrapper(buffer, &pos);
             switch (tolower(buffer[0])) {
                 case 's':
                     exit_flag = false;
@@ -145,5 +136,6 @@ int main() {
         }while(!next_phase);
     }while(!exit_flag);
     printf("\nArrivederci!\n");
+    logger("Programma terminato.\n");
     return 0;
 }

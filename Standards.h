@@ -28,5 +28,6 @@ char* armi(int index, char* copyArea);
 char* sospetti(int index, char* copyArea);
 void copiaMoveset(int copyArea[STANZE_N][STANZE_N]);
 char* dtoc(int decimal, char copyArea[STANDARD_STRLEN]);
+void inputWrapper(char buf[SBUF], char** p);
 
 #endif //CLUEDO_STANDARDS_H
