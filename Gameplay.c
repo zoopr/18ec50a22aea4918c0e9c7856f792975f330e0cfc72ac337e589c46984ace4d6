@@ -65,15 +65,16 @@ Taccuino leggiTaccuino(char* filename){ //Legge il taccuino da disco, alloca le 
     }
 }
 
-void wipeTac(char buf[STANDARD_STRLEN + 4]){
+int wipeTac(char buf[STANDARD_STRLEN + 4]){
     FILE* tac;
 
     tac = fopen(buf, "wb"); // Crea un taccuino se non lo trova. Utile caricando salvataggi con nomi giocatore non presenti.
     if (!tac) { //Se pure la creazione automatica fallisce c'è chiaramente un errore di scala più grande del programma.
-        fprintf(stderr, "Errore nella creazione di un file taccuino al nome %s. (Caratteri non supportati?)\n", buf);
-        exit(-2);
+        fprintf(stderr, "Errore nella creazione di un file taccuino al nome %s. (Caratteri non supportati)\n", buf);
+        return -2;
     }
     fclose(tac);
+    return 0;
 }
 
 void aggiornaTaccuino(Taccuino* tac, Carta carta){ //Inserisamo una nuova carta in coda al taccuino.
@@ -325,10 +326,10 @@ void statInit(Tabellone* tavolo){ //carica o eventualmente crea il file di stati
 
     stat = fopen(STAT_DEFAULT, "rb");
     if(stat && !feof(stat)){ // Ci assicura che nella prima partita del sistema sia gestito correttamente.
-        fread(tavolo->stats, 3, STANZE_N*sizeof(int), stat);
+        fread(tavolo->stats, CARD_TYPES, STANZE_N*sizeof(int), stat);
         fclose(stat);
     }else{
-        for(i=0; i<3*STANZE_N; i++){
+        for(i=0; i<CARD_TYPES*STANZE_N; i++){
             tavolo->stats[i/STANZE_N][i%STANZE_N] = 0;
         }
         statSave(tavolo); //Salviamo una versione azzerata se non troviamo le statistiche sul disco.
@@ -399,8 +400,8 @@ void statShow(){ // Parsing dei dati statistiche da un eventuale file sul pc. Il
     char buf[STANDARD_STRLEN];
     int statsArr[CARD_TYPES][STANZE_N], i;
     FILE* stats = fopen(STAT_DEFAULT, "rb");
-    if(!stats){ // Se non è mai stata neanche cominciata una partita, o per un errore momentaneo errore di accesso.
-        printf("Nessun file di statistiche rilevato. Hai giocato ad almeno una partita?\n");
+    if(!stats){ // Se non è mai stata neanche cominciata una partita, o per un errore momentaneo di accesso.
+        fprintf(stderr, "Nessun file di statistiche rilevato. Hai giocato ad almeno una partita?\n");
         return;
     }
     else{

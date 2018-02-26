@@ -10,12 +10,10 @@
 #include "Gameplay.h"
 #include "AI.h"
 
-Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i valori iniziali come la posizione.
-    int i; // Nella verisone umana chiede anche un nome per i giocatori.
+Giocatore* playerInit(int* num, _Bool AI) { // Alloca i giocatori e assegna i valori iniziali come la posizione.
+    int i;                                  // Nella verisone umana chiede anche un nome per i giocatori.
     Giocatore* listaGiocatori;
     char buf[SBUF], *pos;
-
-
 
     do{
         printf("inserire il numero di giocatori (da %d a %d)\n", GIOCATORI_MIN, GIOCATORI_MAX);
@@ -34,11 +32,18 @@ Giocatore* playerInit(int* num, _Bool AI) { //Alloca i giocatori e assegna i val
             printf("Inserire il nome del giocatore %d (max %d caratteri)\n", i+1, STANDARD_STRLEN - 1);
             inputWrapper(buf, &pos);
             if(!strlen(buf)){
-                printf("Errore: campo nome vuoto.\n");
+                fprintf(stderr, "Errore: campo nome vuoto.\n");
                 i--;
                 continue;
             }
+
+
             strncpy(listaGiocatori[i].nome, buf, STANDARD_STRLEN);
+            strcat(buf, ".tac");
+            if(wipeTac(buf)){
+                i--;
+                continue;
+            }
             listaGiocatori[i].ipotesiEsatta = 0;
             listaGiocatori[i].mano.numCarte = 0;
             listaGiocatori[i].mano.cima = NULL;
@@ -109,11 +114,7 @@ Tabellone* FreshStart(_Bool AI){ //Inizializza il tavolo. Crea i giocatori e dis
     if(!mainDeck->numCarte)
         printf("Carte distribuite correttamente. Tavolo pronto.\n");
 
-    for (i=0; i<numGiocatori; i++){ //inizializzazione taccuini
-        strncpy(buffer, tavolo->giocatori[i].nome, STANDARD_STRLEN);
-        strcat(buffer, ".tac");
-        wipeTac(buffer);
-    }
+
 
     for(i=0; i<CARD_TYPES; i++){ //Indicizziamo le stringhe in un ordine preciso. Usato nella formulazione dell'ipotesi.
         for (j = 0; j< (i==STANZA?STANZE_N:ARMI_N); j++){
@@ -147,7 +148,7 @@ Tabellone* LoadBoard(char* filename){
 
     FILE* save = fopen(filename, "rb");
     if (!save){
-        printf("Errore nel caricamento del file\n"
+        fprintf(stderr, "Errore nel caricamento del file\n"
         "Verificare il nome e la posizione del file di salvataggio.\n");
         return NULL;
     }
@@ -603,6 +604,7 @@ _Bool Turn_AI(Tabellone* tavolo, Giocatore* giocatore){ //Control flow più ader
 
 Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino e indirizzi delle carte caricate.
     char buf[SBUF], turnobuf[STANDARD_STRLEN], *pos;
+    FILE* test;
     Taccuino tac;
 
     strcpy(buf, "\nTURNO ");
@@ -616,8 +618,16 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
     printf("\nVuoi salvare lo stato attuale della partita? S/N\n");
     inputWrapper(buf, &pos);
     if(tolower(buf[0]) == 's'){
-        printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN-1);
-        inputWrapper(buf, &pos);
+        do {
+            printf("Inserire il nome del file in cui salvare.(max %d caratteri)\n", STANDARD_STRLEN - 1);
+            inputWrapper(buf, &pos);
+            if((test = fopen(buf, "wb")) == NULL){
+                fprintf(stderr, "Errore nella creazione del salvataggio.(Caratteri non supportati)\n");
+            }else{
+                fclose(test);
+            }
+        }while(!test);
+
         saveState(buf, tavolo);
 
         logger("Partita salvata in ");
@@ -627,6 +637,7 @@ Taccuino IntroLines(Tabellone* tavolo, _Bool AI){ //Passiamo valori di taccuino 
         printf("Vuoi uscire dalla partita? S/N\n");
         inputWrapper(buf, &pos);
         if(tolower(buf[0]) == 's'){
+            printf("\nArrivederci!\n");
             logger("Programma terminato.\n");
             exit(0);
         }

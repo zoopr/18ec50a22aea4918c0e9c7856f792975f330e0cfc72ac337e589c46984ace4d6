@@ -12,7 +12,7 @@ char* tipi(int index, char* copyArea) {
         strncpy(copyArea, tipi[index], STANDARD_STRLEN);
         return copyArea;
     }else{
-        printf("Errore nell'offset di ingresso!\n");
+        fprintf(stderr, "Errore nell'offset di ingresso!\n");
         return NULL;
     }
 }
@@ -24,7 +24,7 @@ char* stanze(int index, char* copyArea) {
         strncpy(copyArea,stanze[index], STANDARD_STRLEN);
         return copyArea;
     }else{
-        printf("Errore nell'offset di ingresso!\n");
+        fprintf(stderr, "Errore nell'offset di ingresso!\n");
         return NULL;
     }
 }
@@ -35,7 +35,7 @@ char* armi(int index, char* copyArea){
         strncpy(copyArea, armi[index], STANDARD_STRLEN);
         return copyArea;
     }else{
-        printf("Errore nell'offset di ingresso!\n");
+        fprintf(stderr, "Errore nell'offset di ingresso!\n");
         return NULL;
     }
 }
@@ -47,7 +47,7 @@ char* sospetti(int index, char* copyArea) {
         strncpy(copyArea, sospetti[index], STANDARD_STRLEN);
         return copyArea;
     }else{
-        printf("Errore nell'offset di ingresso!\n");
+        fprintf(stderr, "Errore nell'offset di ingresso!\n");
         return NULL;
     }
 }
